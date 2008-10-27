@@ -128,7 +128,7 @@ always_ff @(posedge wclk or negedge wrst_n)
     wbptr[$amsb:0] <= $awidth\'d0;
   end
   else begin
-    wbptr[$amsb:0] <= wr ? wbptr[$amsb:0] + 1\'b1 : wbptr[$amsb:0];
+    wbptr[$amsb:0] <= wr ? wbptr[$amsb:0] == $depth - 1 ? $awidth\'d0 : wbptr[$amsb:0] + 1\'b1 : wbptr[$amsb:0];
   end
 
 always_ff @(posedge wclk) begin
@@ -158,13 +158,20 @@ EOF
     &gen_gray_decoder('rbptr_at_wr', 'rgptr_at_wr', 'wclk', 'wrst_n');
 
     print << "EOF";
+logic [$awidth:0] wdiff_tmp;
+logic [$amsb:0] wdiff;
+
+
+assign wdiff_tmp[$awidth:0] = {1\'b0, rbptr_at_wr[$amsb:0]} - {1\'b0, wbptr[$amsb:0]};
+assign wdiff[$amsb:0] = wdiff_tmp[$awidth] ? wdiff_tmp[$amsb:0] - $awidth\'d$extra : wdiff_tmp[$amsb:0];
+
 always_ff @(posedge wclk or negedge wrst_n)
   if (~wrst_n) begin
     full <= 1\'b0;
   end
   else begin
-    full <= wr ? (rbptr_at_wr[$amsb:0] - wbptr[$amsb:0] - $awidth\'d$extra == $awidth\'d1 ? 1\'b1 : 1\'b0) : 
-                 (rbptr_at_wr[$amsb:0] - wbptr[$amsb:0] - $awidth\'d$extra == $awidth\'d0 ? 1\'b1 : 1\'b0);
+    full <= wr ? (wdiff[$amsb:0] == $awidth\'d1 ? 1\'b1 : 1\'b0) : 
+                 (wdiff[$amsb:0] == $awidth\'d0 ? 1\'b1 : 1\'b0);
   end
 
 EOF
@@ -177,8 +184,8 @@ always_ff @(posedge wclk or negedge wrst_n)
     almost_full <= 1\'b0;
   end
   else begin
-    almost_full <= wr ? (rbptr_at_wr[$amsb:0] - wbptr[$amsb:0] - $awidth\'d$extra <= $awidth\'d1 + $awidth\'d$th_af ? 1\'b1 : 1\'b0) : 
-                        (rbptr_at_wr[$amsb:0] - wbptr[$amsb:0] - $awidth\'d$extra <= $awidth\'d0 + $awidth\'d$th_af ? 1\'b1 : 1\'b0);
+    almost_full <= wr ? (wdiff[$amsb:0] <= $awidth\'d1 + $awidth\'d$th_af ? 1\'b1 : 1\'b0) : 
+                        (wdiff[$amsb:0] <= $awidth\'d0 + $awidth\'d$th_af ? 1\'b1 : 1\'b0);
   end
 
 EOF
@@ -199,7 +206,7 @@ always_ff @(posedge rclk or negedge rrst_n)
     rbptr[$amsb:0] <= $awidth\'d0;
   end
   else begin
-    rbptr[$amsb:0] <= rd ? rbptr[$amsb:0] + 1\'b1 : rbptr[$amsb:0];
+    rbptr[$amsb:0] <= rd ? rbptr[$amsb:0] == $depth - 1 ? $awidth\'d0 : rbptr[$amsb:0] + 1\'b1 : rbptr[$amsb:0];
   end
 
 assign dout[$dmsb:0] = data[rbptr[$amsb:0]];
@@ -228,13 +235,20 @@ EOF
     &gen_gray_decoder('wbptr_at_rd', 'wgptr_at_rd', 'rclk', 'rrst_n');
 
     print << "EOF";
+logic [$awidth:0] rdiff_tmp;
+logic [$amsb:0] rdiff;
+
+
+assign rdiff_tmp[$awidth:0] = {1\'b0, wbptr_at_rd[$amsb:0]} - {1\'b0, rbptr[$amsb:0]};
+assign rdiff[$amsb:0] = rdiff_tmp[$awidth] ? rdiff_tmp[$amsb:0] - $awidth\'d$extra : rdiff_tmp[$amsb:0];
+
 always_ff @(posedge rclk or negedge rrst_n)
   if (~rrst_n) begin
     empty <= 1\'b1;
   end
   else begin
-    empty <= rd ? (wbptr_at_rd[$amsb:0] - rbptr[$amsb:0] - $awidth\'d$extra == $awidth\'d1 ? 1\'b1 : 1\'b0) : 
-                  (wbptr_at_rd[$amsb:0] - rbptr[$amsb:0] - $awidth\'d$extra == $awidth\'d0 ? 1\'b1 : 1\'b0);
+    empty <= rd ? (rdiff[$amsb:0] == $awidth\'d1 ? 1\'b1 : 1\'b0) : 
+                  (rdiff[$amsb:0] == $awidth\'d0 ? 1\'b1 : 1\'b0);
   end
 
 EOF
@@ -244,11 +258,11 @@ EOF
 	print << "EOF"; 
 always_ff @(posedge rclk or negedge rrst_n)
   if (~rrst_n) begin
-    almost_empty <= 1\'b0;
+    almost_empty <= 1\'b1;
   end
   else begin
-    almost_empty <= rd ? (wbptr_at_rd[$amsb:0] - rbptr[$amsb:0] - $awidth\'d$extra <= $awidth\'d1 + $awidth\'d$th_ae ? 1\'b1 : 1\'b0) : 
-                         (wbptr_at_rd[$amsb:0] - rbptr[$amsb:0] - $awidth\'d$extra <= $awidth\'d0 + $awidth\'d$th_ae ? 1\'b1 : 1\'b0);
+    almost_empty <= rd ? (rdiff[$amsb:0] <= $awidth\'d1 + $awidth\'d$th_ae ? 1\'b1 : 1\'b0) : 
+                         (rdiff[$amsb:0] <= $awidth\'d0 + $awidth\'d$th_ae ? 1\'b1 : 1\'b0);
   end
 
 EOF
