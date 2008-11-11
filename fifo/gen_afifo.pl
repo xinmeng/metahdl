@@ -2,12 +2,13 @@
 
 use Getopt::Long;
 
-my ($width, $depth, $th_af, $th_ae);
+my ($width, $depth, $th_af, $th_ae, $checker);
 
 GetOptions('width=i' => \$width, 
 	   'depth=i' => \$depth, 
 	   'almost_full=i' => \$th_af,
-	   'almost_empty=i' => \$th_ae);
+	   'almost_empty=i' => \$th_ae,
+	   "checker|c!"  => \$checker);
 
 # validating arguments
 die "Depth must be an postive even number!\n" if $depth <= 0 || $depth % 2 != 0 ;
@@ -36,6 +37,7 @@ select SVFILE;
 &var_declarations();
 &write_domain();
 &read_domain();
+&sva_checker() if $checker;
 &module_end();
 
 
@@ -57,6 +59,7 @@ EOF
 
     print "//   Almost Full Threshold  : $th_af\n" if $th_af ;
     print "//   Almost Empty Threshold : $th_ae\n" if $th_ae ;
+    print "//   Assertion checker included\n" if $checker;
     print "// \n\n\n";
 
 
@@ -285,6 +288,32 @@ EOF
 
 }
 
+
+sub sva_checker {
+    print << 'EOF';
+
+`ifdef MX_AFIFO_INTERNAL_SVA_CHECKER
+// ------------------------------	    
+//    Assertions
+// ------------------------------
+property no_overflow;
+@(posedge clk )
+   disable iff ( ~rst_n )
+	   wr_en |-> ~full;
+endproperty
+
+property no_underflow;
+@(posedge clk )
+   disable iff ( ~rst_n )
+	   rd_en |-> ~empty;
+endproperty
+
+ERROR_overflow  : assert property (no_overflow) else $stop;
+ERROR_underflow : assert property (no_underflow) else $stop;
+`endif
+EOF
+;    
+}
 
 
 sub module_end {
