@@ -1,0 +1,102 @@
+Before discussing syntax details of \mhdl{}, several basic concepts
+should be introduced, including terminologies about \cfg{} (CFG) and
+philosophy of \mhdl{}. These preliminary information will help
+understand later chapters. Readers who already familiar with CFG
+and \vperl{} can skip this chapter.
+
+\section{Grammar}
+\mhdl{} is defined using CFG, which means one or more \emph{syntactic groupings} 
+are defined and constructed from their parts via rules.  For example,
+one rule for making an expression might be, ``An expression can be
+made of a minus sign and another expression''. Another would be, ``An
+expression can be an integer''.  As you can see, rules are often
+recursive, but there must be at least one rule which leads out of the
+recursion.
+
+In the formal grammatical rules for a language, each kind of syntactic
+unit or grouping is named by a \emph{symbol}. Those which are built by
+grouping smaller constructs according to grammatical rules are
+called \emph{nonterminal} symbols; those which can't be subdivided are
+called \emph{terminal symbols} or
+\emph{token types}. We call a piece of input corresponding to a single terminal
+symbol a \emph{token}, and a piece corresponding to a single
+nonterminal symbol a \emph{grouping}.
+
+We can use the \vlog{} as an example of what symbols, terminal and
+nonterminal, mean. The tokens of \vlog{} are identifiers, constants
+(numeric and string), and the various keywords, arithmetic operators
+and punctuation marks. So the terminal symbols of a grammar
+for \vlog{} include `identifier', `number', `string', plus one symbol
+for each keyword, operator or punctuation mark: `if', `return',
+`const', `static', `int', `char', `plus-sign', `open-brace',
+`close-brace', `comma' and many more. (These tokens can be subdivided
+into characters, but that is a matter of lexicography, not grammar.)
+Here is a simple \vlog{} combinational block subdivided into tokens:
+\begin{lstlisting}[caption={\vlog{} example for describing CFG}]
+always_comb begin       // keyword `always_comb', keyword `begin'
+  if ( output_gated )   // keyword `if', open-paren, identifier, close-paren
+    ctrl = 1'b0;        // identifier, equal-sign, based_number
+  else                  // keyword `else'
+    ctrl = i1 & i2;     // identifier, equal-sign, identifier, logic-AND, identifier
+end                     // keyword `end'
+\end{lstlisting}
+
+The syntactic groupings of \vlog{} include the expression, the
+statement, the declaration, and etc. These are represented in the
+grammar of \vlog{} by nonterminal symbols `expression', `statement',
+`declaration'. The full grammar uses dozens of additional language
+constructs, each with its own nonterminal symbol, in order to express
+the meanings of them. The example above is a combinational logic; it
+contains one `if-else' statement. In the statement, `i1' and `i2' are
+expressions, and so is `i1 \& i2'.
+
+Each nonterminal symbol must have grammatical rules showing how it is
+made out of simpler constructs. For example, one kind of \vlog{}
+statement is the \texttt{assign} statement; this would be described
+with a grammar rule which reads informally as follows:
+\begin{quote}
+An `assign statement' can be made of an `identifier', an `equal-sign',
+an `expressions' and a `semicolon'.
+\end{quote}
+
+
+\section{\mhdl{} Philosophy}
+RTL designs are not like other programming, there are few local
+variables.  In additional to physical resources occupation semantics,
+RTL variables also represent nets or connections. Physical elements
+are connected via variables. Normally, there is no floating net inside
+modules, which means every net has sources and sink. If a net has no
+source, it should be module input port. If it has no sink, it should
+be output port.  If it has both sources and sink, it is most probably
+an internal net. These are basic rules of port inference
+in \mhdlc{}. Designers can override these rules by adding explicit
+port declarations.
+
+Module ports is automatically inferred by compiler, but designers
+can always command compiler to perform port validation (or port
+checking) against designers' explicit declaration. In this situation,
+golden ports are declared by designers, compiler compares the ports
+inferred and ports declared by designers, any missing or newly
+emerging ports are reported via warning.
+
+
+In \mhdl{} world, there are \emph{only} four types of building block
+in synthesizable RTL designs: combinational logic, sequential logic
+(mostly Flip-Flop), module instantiation and FSM\footnote{ FSM is
+essentially a mixture of combinational and sequential logic, Because
+it is so commonly used, we promote it to basic structure.}, they are
+called \emph{code block}\index{code block} in the rest of this
+document. Any modules -- no matter how complex it is -- can be
+decomposed to these four structures. Module is only a physical
+resources wrapper with parameters to be overridden upon instantiation.
+
+\mhdl{} RTL design is a process in which designers describe functionalities 
+using code blocks; \mhdlc{} connects nets with same name and infers
+ports according to designers' declarations. Parameters are recognized
+and ports/nets are parameterized automatically.
+
+\mhdl{} also allows designers to embed script like flexible code configuration
+settings in RTL description in a reuse oriented design. Module logic
+can be fine-grained tuned before translating \mhdl{} to \sv{}. Ports
+and variable declarations are \emph{dynamically} updated according to
+logic configuration.

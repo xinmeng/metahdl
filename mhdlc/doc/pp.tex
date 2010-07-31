@@ -1,0 +1,279 @@
+Preprocessor helps designers to embed script like 
+code configuration directives into RTL code for reuse 
+oriented designs to improve code integrity. Conventionally, 
+designers are used to write one-time scripts (Perl/sed/awk/csh)
+to preprocess their RTL for similar project usage. This methodology
+is not clean enough. Verification engineers have to create additional
+steps in \texttt{Makefile} to preprocess code. 
+\mhdl{}'s preprocessor uses \vlog{} style macro syntax, introduces 
+more flow control directives that help designers perform conditional and 
+repetitive configuration on RTL. 
+
+In addition to conventional \`{}\texttt{ifdef}, \`{}\texttt{ifndef}, 
+\`{}\texttt{else}, \`{}\texttt{define} and \`{}\texttt{include} 
+macro directives, \mhdl{} introduces \`{}\texttt{for}, \`{}\texttt{if} and
+\`{}\texttt{let} to enlarge the power of preprocessor (see following examples). 
+
+\autoref{lst:arb in pp} is a simple Round Robin Arbiter FSM implemented 
+in \mhdl{} with facilitating preprocessor. This arbiter can respond to 
+a configurable number of slaves, which is controlled by macro \texttt{SLV\_NUM}. 
+Once the \mhdl{} code is finished, various arbiters can be generated in \sv{} with 
+giving different values to \texttt{SLV\_NUM} when invoke \mhdlc{}.
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={Configurable Arbiter}, label={lst:arb in pp}]
+fsm arb; 
+
+/*\`{}\textcolor{purple}{for}*/ (i=1; /*\`{}\textcolor{purple}{i}*/<=/*\`{}\textcolor{purple}{SLV\_NUM}*/; i++) /*\label{ln:default output}*/
+slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
+/*\`{}\textcolor{purple}{endfor}*/
+
+/*\`{}\textcolor{purple}{for}*/ (i=1; /*\`{}\textcolor{purple}{i}*/<=/*\`{}\textcolor{purple}{SLV\_NUM}*/; i++) /*\label{ln:body}*/
+ /*\`{}\textcolor{purple}{let}*/ j = /*\`{}\textcolor{purple}{i}*/ + 1 /*\label{ln:let}*/
+
+ /*\`{}\textcolor{purple}{if}*/ /*\`{}\textcolor{purple}{i}*/ != /*\`{}\textcolor{purple}{SLV\_NUM}*/ /*\label{ln:if}*/
+SLAVE_/*\`{}\textcolor{purple}{i}*/: begin
+   if ( slave_req_/*\`{}\textcolor{purple}{i}*/ ) begin
+      slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b1;
+      if ( slave_eof_/*\`{}\textcolor{purple}{i}*/ ) begin
+	 slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
+	 goto SLAVE_/*\`{}\textcolor{purple}{j}*/;
+      end
+      else begin
+	 goto SLAVE_/*\`{}\textcolor{purple}{i}*/;
+      end
+   end
+   else 
+     goto SLAVE_/*\`{}\textcolor{purple}{j}*/;
+end
+
+ /*\`{}\textcolor{purple}{else} \label{ln:else}*/ 
+SLAVE_/*\`{}\textcolor{purple}{i}*/: begin 
+   if ( slave_req_/*\`{}\textcolor{purple}{i}*/ ) begin
+      slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b1;
+      if ( slave_eof_/*\`{}\textcolor{purple}{i}*/ ) begin
+	 slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
+	 goto SLAVE_1;
+      end
+      else 
+	goto SLAVE_/*\`{}\textcolor{purple}{i}*/;
+   end
+   else 
+     goto SLAVE_1;
+end  
+ /*\`{}\textcolor{purple}{endif} \label{ln:endif}*/
+/*\`{}\textcolor{purple}{endfor}*/
+endfsm
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{.5\textwidth}
+\vspace{2ex}
+Line \autoref{ln:default output} starts a \`{}\texttt{for} directive to repetitively 
+``write'' code with slight difference. Default values of FSM output are set within 
+this block. 
+
+Line \autoref{ln:body} starts another \`{}\texttt{for} directive to write slave handling
+code, one state for each slave. 
+Since it is a Round Robin arbiter, every states perform same task: grant slave access if
+has request, move to next slave when current one has no request or transaction is done, 
+roll back to the first slave when a arbitration round finishes. Line \autoref{ln:if}, 
+\autoref{ln:else} and \autoref{ln:endif} compose an \`{}\texttt{if} block to check
+whether current state is for last slave. 
+
+Line \autoref{ln:let} is \`{}\texttt{let} directive used to perform arithmetic operation 
+and calculate value of \`{}\texttt{j}, which is the number of next slave.
+
+\autoref{lst:arb in sv} is the generated \sv{} with \texttt{SLV\_NUM} set to $4$. 
+\end{minipage}
+
+\begin{lstlisting}[caption={4 slave arbiter \sv{} code}, label={lst:arb in sv}]
+module arbiter (
+  clock, 
+  reset_n, 
+  slave_eof_1, 
+  slave_eof_2, 
+  slave_eof_3, 
+  slave_eof_4, 
+  slave_grnt_1, 
+  slave_grnt_2, 
+  slave_grnt_3, 
+  slave_grnt_4, 
+  slave_req_1, 
+  slave_req_2, 
+  slave_req_3, 
+  slave_req_4);
+
+
+input clock;
+input reset_n;
+input slave_eof_1;
+input slave_eof_2;
+input slave_eof_3;
+input slave_eof_4;
+output slave_grnt_1;
+output slave_grnt_2;
+output slave_grnt_3;
+output slave_grnt_4;
+input slave_req_1;
+input slave_req_2;
+input slave_req_3;
+input slave_req_4;
+
+const logic [3:0] SLAVE_1 = 4'b0001;
+const logic [3:0] SLAVE_2 = 4'b0010;
+const logic [3:0] SLAVE_3 = 4'b0100;
+const logic [3:0] SLAVE_4 = 4'b1000;
+const int _SLAVE_1_ = 0;
+const int _SLAVE_2_ = 1;
+const int _SLAVE_3_ = 2;
+const int _SLAVE_4_ = 3;
+logic [3:0] arb_cs;
+logic [3:0] arb_ns;
+logic clock;
+logic reset_n;
+logic slave_eof_1;
+logic slave_eof_2;
+logic slave_eof_3;
+logic slave_eof_4;
+logic slave_grnt_1;
+logic slave_grnt_2;
+logic slave_grnt_3;
+logic slave_grnt_4;
+logic slave_req_1;
+logic slave_req_2;
+logic slave_req_3;
+logic slave_req_4;
+
+// Sequential part of FSM /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+// /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+always_ff @(posedge clock or negedge reset_n)
+  if (~reset_n) begin
+    arb_cs <= SLAVE_1;
+  end
+  else begin
+    arb_cs <= arb_ns;
+  end
+
+// Combnational part of FSM /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+// /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+always_comb begin
+  slave_grnt_1 = 1'b0;
+  slave_grnt_2 = 1'b0;
+  slave_grnt_3 = 1'b0;
+  slave_grnt_4 = 1'b0;
+  unique case ( 1'b1 )
+    arb_cs[_SLAVE_1_] : begin
+      if ( slave_req_1 ) begin
+        slave_grnt_1 = 1'b1;
+        if ( slave_eof_1 ) begin
+          slave_grnt_1 = 1'b0;
+          arb_ns = SLAVE_2;
+        end
+        else begin
+          arb_ns = SLAVE_1;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_2;
+      end
+    end
+
+    arb_cs[_SLAVE_2_] : begin
+      if ( slave_req_2 ) begin
+        slave_grnt_2 = 1'b1;
+        if ( slave_eof_2 ) begin
+          slave_grnt_2 = 1'b0;
+          arb_ns = SLAVE_3;
+        end
+        else begin
+          arb_ns = SLAVE_2;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_3;
+      end
+    end
+
+    arb_cs[_SLAVE_3_] : begin
+      if ( slave_req_3 ) begin
+        slave_grnt_3 = 1'b1;
+        if ( slave_eof_3 ) begin
+          slave_grnt_3 = 1'b0;
+          arb_ns = SLAVE_4;
+        end
+        else begin
+          arb_ns = SLAVE_3;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_4;
+      end
+    end
+
+    arb_cs[_SLAVE_4_] : begin
+      if ( slave_req_4 ) begin
+        slave_grnt_4 = 1'b1;
+        if ( slave_eof_4 ) begin
+          slave_grnt_4 = 1'b0;
+          arb_ns = SLAVE_1;
+        end
+        else begin
+          arb_ns = SLAVE_4;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_1;
+      end
+    end
+
+    default: begin
+      arb_ns = 4'hX;
+    end
+  endcase
+end
+
+
+endmodule
+\end{lstlisting}
+
+
+
+\`{}\texttt{let} directive supports sufficient operators and a bunch of common used functions:
+\begin{itemize}
+\item Numeric operators: addition (+), subtraction ($-$),  multiplication ($*$), division ($/$), 
+modulus (\%), power ($**$).
+\item Logical operators: logical AND (\&\&), logical OR ($||$), logical NOT ($!$).
+\item Bit operators: bitwise XOR (\^{}), bitwise AND  (\&),  bitwise OR ($|$), 
+shift right ($>>$), shift left ($<<$).
+\item Functions: log 2 (LOG2()), round up (CEIL()), round down (FLOOR()), 
+round to nearest value (ROUND()),  max of two numbers (MAX()), 
+min of two numbers (MIN()), odd (ODD()), even (EVEN()), absolute value (ABS()).
+\end{itemize}
+
+\begin{lstlisting}[caption={\`{}\texttt{let} usage examples},label={lst:let example}]
+/*\`{}\textcolor{purple}{define}*/ x 2
+
+// NOTE /*\`{}\textcolor{purple}{let}*/ need "="
+/*\`{}\textcolor{purple}{let}*/ y = /*\`{}\textcolor{purple}{x}*/ ** 10 // now /*\`{}\textcolor{purple}{y}*/ is 1024
+
+/*\`{}\textcolor{purple}{let}*/ z = LOG2(/*\`{}\textcolor{purple}{y}*/) // /*\`{}\textcolor{purple}{z}*/ is 10
+/*\`{}\textcolor{purple}{let}*/ a = LOG2(/*\`{}\textcolor{purple}{z}*/) // /*\`{}\textcolor{purple}{a}*/ is 3.321928
+/*\`{}\textcolor{purple}{let}*/ c = CEIL(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{c}*/ is 4
+/*\`{}\textcolor{purple}{let}*/ f = FLOOR(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{f}*/ is 3
+/*\`{}\textcolor{purple}{let}*/ r = ROUND(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{r}*/ is 3
+
+
+// we can concatenate macro value with other strings
+// using "::" operator
+assign cat_/*\`{}\textcolor{purple}{f}*/::k = 1'b0; // expand to ``assign cat_3k = 1'b0;''
+assign cat_/*\`{}\textcolor{purple}{fk}*/ = 1'b0; // /*\textcolor{red}{Error!!}*/ macro ``fk'' is not defined 
+\end{lstlisting}
+\autoref{lst:let example} demonstrates some usages of \`{}\texttt{let} directive. 
+Operators and functions supported by \`{}\texttt{let} directive constructs macro variables
+to \emph{macro expression}, such as 
+\mbox{\texttt{\`{}a + \`{}b}}, 
+\mbox{\texttt{ODD(\`{}f)}}, 
+\mbox{\texttt{\`{}a >> 2}}, 
+\mbox{\texttt{\`{}f <= \`{}d \&\& \`{}f != 0}},
+which can further be evaluated by \`{}\texttt{if} directive for flow controlling, 
+just as shown in \autoref{lst:arb in pp} line \autoref{ln:if} . 

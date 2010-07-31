@@ -1,0 +1,54 @@
+\mhdl{} supports two Flip-Flop descriptions: 
+one is conventional \texttt{always} 
+block using keywords `posedge' and `negedge' to denote Flip-Flop
+description, the other is newly added syntax using `ff' and `endff' keywords.
+\autoref{lst:new ff} demonstrates new Flip-Flop syntax, 
+\autoref{lst:legacy ff} is the equivalence conventional syntax, both of 
+them are legal in \mhdlc{}. 
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={\mhdl{} FF syntax}, label={lst:new ff}]
+ff clk, rst_n;
+  a_ff, i1 ? c : d, 1'b0;
+  b_ff, b & c;
+endff
+
+// data path does not need reset
+ff clk; 
+  data_ff[63:0], data[63:0];
+endff
+\end{lstlisting}
+\end{minipage}
+\hspace{1ex}
+\begin{minipage}[t]{.5\textwidth}
+\begin{lstlisting}[caption={Legacy FF syntax},
+label={lst:legacy ff}]
+// OK, accepted
+always_ff @ (posedge clk or negedge rst_n )
+  if ( ~rst_n ) begin
+    a_ff <= 1'b0;
+  end
+  else begin
+    a_ff <= i1 ? c: d;
+    b_ff <= b & c;
+  end
+
+// OK, accepted
+// data path does not need reset
+always_ff @ (posedge clk)
+  data_ff[63:0] <= data[63:0];
+\end{lstlisting}
+\end{minipage}
+
+In \mhdl{} new FF syntax, keyword `ff' is followed by two optional 
+identifiers: one is clock name, the other is reset name. If reset
+name is omitted, there is no reset clause in \texttt{always\_ff} 
+block. If both of them are omitted, default name `clock' and `reset\_n' 
+are used, both reset clause and value refresh clause are generated. 
+
+`ff\_item'\footnote{Maybe you need \autoref{sec:bnf} if you don't know what I'm saying.} 
+consists of three parts: FF name, source value expression, and
+reset value. Reset value is optional, when it is omitted, corresponding reset behavior 
+is not generated in \sv{}.
+
+

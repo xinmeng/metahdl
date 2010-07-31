@@ -1,0 +1,466 @@
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+start $::=$\hspace{1ex} /* empty */
+
+\mbox{$|$ start port\_declaration}
+
+\mbox{$|$ start parameter\_declaration}
+
+\mbox{$|$ start constant\_declaration}
+
+\mbox{$|$ start variable\_declaration}
+
+\mbox{$|$ start assign\_block}
+
+\mbox{$|$ start combinational\_block}
+
+\mbox{$|$ start legacyff\_block}
+
+\mbox{$|$ start ff\_block}
+
+\mbox{$|$ start fsm\_block}
+
+\mbox{$|$ start inst\_block}
+
+\mbox{$|$ start rawcode\_block}
+
+\mbox{$|$ start metahdl\_constrol}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+constant $::=$\hspace{1ex} \textbf{\textcolor{red}{NUM}}
+
+\mbox{$|$ \textbf{\textcolor{red}{BIN\_BASED\_NUM}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{DEC\_BASED\_NUM}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{HEX\_BASED\_NUM}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+net\_name $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+net $::=$\hspace{1ex} net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}}}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}}}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}}}
+
+\mbox{$|$ net\_name}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+net\_lval $::=$\hspace{1ex} net
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\{}}}} net\_lvals \textbf{\textcolor{red}{\textbf{\textcolor{red}{\}}}}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+net\_lvals $::=$\hspace{1ex} net
+
+\mbox{$|$ net\_lvals \textbf{\textcolor{red}{,}} net}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+expression $::=$\hspace{1ex} constant
+
+\mbox{$|$ net}
+
+\mbox{$|$ concatenation}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{(}} expressions \textbf{\textcolor{red}{)}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\{}}}} expression concatenation \textbf{\textcolor{red}{\textbf{\textcolor{red}{\}}}}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{$|$}} expression}
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\&}}}} expression}
+
+\mbox{$|$ \textbf{\textcolor{red}{\^{}}} expression}
+
+\mbox{$|$ \textbf{\textcolor{red}{\~{}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$|$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{\textbf{\textcolor{red}{\&}}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{\^{}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$+$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$-$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{*}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{/}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{\textbf{\textcolor{red}{\%}}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$<$$<$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$>$$>$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{?}} expression \textbf{\textcolor{red}{:}} expression}
+
+\mbox{$|$ \textbf{\textcolor{red}{!}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$|$$|$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{\textbf{\textcolor{red}{\&}}\textbf{\textcolor{red}{\&}}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$<$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$>$}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{==}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{!=}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$>$=}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{$<$=}} expression}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+concatenation $::=$\hspace{1ex} \textbf{\textcolor{red}{\textbf{\textcolor{red}{\{}}}} expressions \textbf{\textcolor{red}{\textbf{\textcolor{red}{\}}}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+expressions $::=$\hspace{1ex} expression
+
+\mbox{$|$ expressions \textbf{\textcolor{red}{,}} expression}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+statement $::=$\hspace{1ex} balanced\_stmt
+
+\mbox{$|$ unbalanced\_stmt}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+balanced\_stmt $::=$\hspace{1ex} \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ \textbf{\textcolor{red}{for}} \textbf{\textcolor{red}{(}} net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}} expression \textbf{\textcolor{red}{;}} net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{)}} statement}
+
+\mbox{$|$ \textbf{\textcolor{red}{begin}} \textbf{\textcolor{red}{end}}}
+
+\mbox{$|$ net\_lval \textbf{\textcolor{red}{$<$=}} expression \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{begin}} statements \textbf{\textcolor{red}{end}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{begin}} \textbf{\textcolor{red}{:}} \textbf{\textcolor{red}{ID}} statements \textbf{\textcolor{red}{end}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} balanced\_stmt \textbf{\textcolor{red}{else}} balanced\_stmt}
+
+\mbox{$|$ case\_statement}
+
+\mbox{$|$ \textbf{\textcolor{red}{goto}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+unbalanced\_stmt $::=$\hspace{1ex} \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} statement
+
+\mbox{$|$ \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} balanced\_stmt \textbf{\textcolor{red}{else}} unbalanced\_stmt}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+statements $::=$\hspace{1ex} statement
+
+\mbox{$|$ statements statement}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+case\_statement $::=$\hspace{1ex} case\_type \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} case\_items \textbf{\textcolor{red}{endcase}}
+
+\mbox{$|$ case\_type \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} case\_items \textbf{\textcolor{red}{default}} \textbf{\textcolor{red}{:}} statement \textbf{\textcolor{red}{endcase}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+case\_type $::=$\hspace{1ex} \textbf{\textcolor{red}{case}}
+
+\mbox{$|$ \textbf{\textcolor{red}{casez}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{unique}} \textbf{\textcolor{red}{case}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{unique}} \textbf{\textcolor{red}{casez}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{priority}} \textbf{\textcolor{red}{case}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{priority}} \textbf{\textcolor{red}{casez}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+case\_items $::=$\hspace{1ex} case\_item
+
+\mbox{$|$ case\_items case\_item}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+case\_item $::=$\hspace{1ex} expressions \textbf{\textcolor{red}{:}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+port\_declaration $::=$\hspace{1ex} port\_direction net\_names \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ port\_direction \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+net\_names $::=$\hspace{1ex} net\_name
+
+\mbox{$|$ net\_names \textbf{\textcolor{red}{,}} net\_name}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+port\_direction $::=$\hspace{1ex} \textbf{\textcolor{red}{input}}
+
+\mbox{$|$ \textbf{\textcolor{red}{output}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{inout}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{nonport}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{parameter}} parameter\_assignments \textbf{\textcolor{red}{;}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_assignments $::=$\hspace{1ex} parameter\_assignment
+
+\mbox{$|$ parameter\_assignments \textbf{\textcolor{red}{,}} parameter\_assignment}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_assignment $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} expression
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+constant\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{const}} variable\_type net\_name \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ \textbf{\textcolor{red}{const}} variable\_type \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_name \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+variable\_declaration $::=$\hspace{1ex} variable\_type net\_names \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ variable\_type \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ variable\_type net\_names \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ variable\_type \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+variable\_type $::=$\hspace{1ex} \textbf{\textcolor{red}{reg}}
+
+\mbox{$|$ \textbf{\textcolor{red}{wire}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{logic}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{int}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{integer}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+assign\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{assign}} net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+always\_keyword $::=$\hspace{1ex} \textbf{\textcolor{red}{always}}
+
+\mbox{$|$ \textbf{\textcolor{red}{always\_ff}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+legacyff\_block $::=$\hspace{1ex} always\_keyword \textbf{\textcolor{red}{@}} \textbf{\textcolor{red}{(}} \textbf{\textcolor{red}{posedge}} net\_name \textbf{\textcolor{red}{or}} \textbf{\textcolor{red}{negedge}} net\_name \textbf{\textcolor{red}{)}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+legacyff\_block $::=$\hspace{1ex} always\_keyword \textbf{\textcolor{red}{@}} \textbf{\textcolor{red}{(}} \textbf{\textcolor{red}{posedge}} net\_name \textbf{\textcolor{red}{)}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+combinational\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{always\_comb}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+ff\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{ff}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} ff\_items \textbf{\textcolor{red}{endff}}
+
+\mbox{$|$ \textbf{\textcolor{red}{ff}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} ff\_items \textbf{\textcolor{red}{endff}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{ff}} \textbf{\textcolor{red}{;}} ff\_items \textbf{\textcolor{red}{endff}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+ff\_items $::=$\hspace{1ex} ff\_item
+
+\mbox{$|$ ff\_items ff\_item}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+ff\_item $::=$\hspace{1ex} net\_lval \textbf{\textcolor{red}{,}} expression \textbf{\textcolor{red}{,}} expression \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ net\_lval \textbf{\textcolor{red}{,}} expression \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+fsm\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{fsm}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} statements fsm\_items \textbf{\textcolor{red}{endfsm}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+fsm\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{fsm}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} statements fsm\_items \textbf{\textcolor{red}{endfsm}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+fsm\_items $::=$\hspace{1ex} fsm\_item
+
+\mbox{$|$ fsm\_items fsm\_item}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+fsm\_item $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{:}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+inst\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} parameter\_rule instance\_name connection\_spec \textbf{\textcolor{red}{;}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+instance\_name $::=$\hspace{1ex} /* empty */
+
+\mbox{$|$ \textbf{\textcolor{red}{ID}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_rule $::=$\hspace{1ex} /* empty */
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\#}}}} \textbf{\textcolor{red}{(}} parameter\_override \textbf{\textcolor{red}{)}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_override $::=$\hspace{1ex} parameter\_num\_override
+
+\mbox{$|$ parameter\_name\_override}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_num\_override $::=$\hspace{1ex} expression
+
+\mbox{$|$ parameter\_num\_override \textbf{\textcolor{red}{,}} expression}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+parameter\_name\_override $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} expression
+
+\mbox{$|$ parameter\_name\_override \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} expression}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+connection\_spec $::=$\hspace{1ex} /* empty */
+
+\mbox{$|$ \textbf{\textcolor{red}{(}} connection\_rules \textbf{\textcolor{red}{)}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+connection\_rules $::=$\hspace{1ex} connection\_rule
+
+\mbox{$|$ connection\_rules \textbf{\textcolor{red}{,}} connection\_rule}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+connection\_rule $::=$\hspace{1ex} \textbf{\textcolor{red}{.}} net\_name \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}}
+
+\mbox{$|$ \textbf{\textcolor{red}{.}} net\_name \textbf{\textcolor{red}{(}} \textbf{\textcolor{red}{)}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{STRING}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{$+$}} \textbf{\textcolor{red}{ID}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{$+$}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+rawcode\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{rawcode}} verbtims \textbf{\textcolor{red}{endrawcode}}
+
+\mbox{$|$ \textbf{\textcolor{red}{function}} verbtims \textbf{\textcolor{red}{endfunction}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+verbtims $::=$\hspace{1ex} \textbf{\textcolor{red}{VERBTIM}}
+
+\mbox{$|$ verbtims \textbf{\textcolor{red}{VERBTIM}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+metahdl\_constrol $::=$\hspace{1ex} \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{$+$}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{$-$}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} \textbf{\textcolor{red}{NUM}} \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{STRING}} \textbf{\textcolor{red}{;}}}

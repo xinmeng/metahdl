@@ -1,0 +1,19 @@
+\begin{enumerate}
+\item \texttt{\&Depend} is no longer needed since \mhdlc{} automatically 
+resolves dependency. 
+
+\item \texttt{vpmake -depend} is not needed anymore, just give \mhdlc{} top level file and search path.
+
+\item All \texttt{\&Force} should be converted to standard \vlog{} declarations, 
+including 2D array. 
+
+\item \texttt{\&ConnRule} and \texttt{\&Connect} should be converted according to 
+\mhdl{} port connect syntax. 
+
+\item \texttt{\&Instance} should be converted to \mhdl{} instantiation syntax.
+
+\item \texttt{c-sky vperl\_off} and \texttt{c-sky vperl\_on} should be converted
+to \texttt{rawcode} and \texttt{endrawcode}.
+
+\item File extension is ``\texttt{.mhdl}'', not ``\texttt{.vp}''.
+\end{enumerate}

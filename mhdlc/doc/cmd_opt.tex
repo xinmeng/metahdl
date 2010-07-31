@@ -1,0 +1,69 @@
+\mhdlc{} command line captions are case sensitive, which means \texttt{-p} and 
+\texttt{-P} are different. 
+
+\tablefirsthead{%
+  \hline
+  \multicolumn{1}{|l}{\textbf{Option}}&
+  \multicolumn{1}{|p{90mm}|}{\textbf{Description}}\\
+  \hline}
+
+\tablehead{%
+  \hline
+  \multicolumn{2}{|l|}{\textsl{...Continued from previous page}}\\
+  \hline
+  \multicolumn{1}{|l}{\textbf{Option}}&
+  \multicolumn{1}{|p{90mm}|}{\textbf{Description}}\\
+  \hline}
+\tabletail{%
+  \hline
+  \multicolumn{2}{|l|}{\textsl{Continued on next page...}}\\
+  \hline}
+\tablelasttail{\hline}
+
+\tablecaption{\mhdlc{} command line options}
+\begin{center}
+\begin{supertabular}{|l|p{90mm}|}
+\texttt{-I} & 
+Specify single search path.\\
+\hline
+
+\texttt{-P} & 
+Specify a list of search paths in a file, one path per line. 
+Line starts with ``\#'' is comment line and is ignored by compiler.\\
+\hline
+
+\texttt{-D} & 
+Define macro just as used in GCC or VCS. \\
+\hline
+
+\texttt{-C} & 
+Enable \vlog{} or \sv{} copying touched by compiler. \\
+\hline
+
+\texttt{-F} & 
+Enable fast dependency resolving mode. \\
+\hline
+
+\texttt{-o} & 
+Specify output directory. \\
+\hline
+
+\texttt{-f} & 
+Specify a list of files to be processed, one file per line.  
+Line starts with ``\#'' is comment line and is ignored by compiler.\\
+\hline
+
+\texttt{--version} &
+Display version number and copyright.\\
+\hline
+
+\texttt{-h} & 
+Display help information.\\
+\hline
+
+\end{supertabular}
+\end{center}
+
+All other text in command line and does not start with ``-'' are considered to be file names
+to be processed. 
+

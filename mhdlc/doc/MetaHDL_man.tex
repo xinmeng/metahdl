@@ -1,0 +1,42 @@
+\documentclass[10pt,oneside]{book}
+
+\usepackage[MXTheme]{workbook}
+\usepackage{mhdl}
+
+%% ------------------------------
+%%   Document Properties
+%% ------------------------------
+\renewcommand{\DocTitle}{MetaHDL Reference Manual}
+\renewcommand{\DocDescription}{A user guide to syntax and compiler usage}
+\renewcommand{\DocVersion}{0.1}
+
+
+%% ------------------------------
+%%   Document
+%% ------------------------------
+\begin{document}
+\input{MyCover.tex}
+\frontmatter
+\tableofcontents
+\listoftables
+\listoffigures
+\lstlistoflistings
+\mainmatter
+\chapter{Introduction}\label{sec:intro}\input{intro.tex}
+%\part{Language Reference}
+\chapter{Basic Concepts}\label{sec:basic concepts}\input{concepts.tex}
+\chapter{Syntax}\label{sec:syntax}\input{syntax.tex}
+\chapter{Preprocessor}\label{sec:pp}\input{pp.tex}
+\chapter{User Control}\label{sec:user control}\input{user_ctrl.tex}
+
+%\part{Compiler Usage}
+\chapter{Compilation Flow}\label{sec:flow}\input{flow.tex}
+\chapter{Command Line Options}\label{sec:command line opt}\input{cmd_opt.tex}
+\chapter{For \vperl{} Designers}\label{sec:for vperl}\input{for_vperl.tex}
+
+%\part{Appendix}
+\appendix
+\chapter{Formal Syntax}\label{sec:bnf}\input{formal_syntax.tex}
+\chapter{Change Log}\input{chg_log.tex}
+\refstepcounter{chapter}\printindex\addcontentsline{toc}{chapter}{Index} 
+\end{document}

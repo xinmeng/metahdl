@@ -1,0 +1,130 @@
+\vlog{} module instantiation syntax is extended in \mhdl{}, BNF is:
+\begin{quote}
+\mbox{inst\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} parameter\_rule instance\_name connection\_spec \textbf{\textcolor{red}{;}}}
+\end{quote}
+Where `ID' is the module name to be instantiated,
+parameter\_rule, instance\_name and connection\_spec are all optional. 
+If no instance name specified, prefix `x\_' is added to module name to create
+instance name. 
+
+parameter\_rule specifies parameter override. In addition to \vlog{}
+positioned override,
+\emph{named parameter override} is added. Designers can explicitly specify which parameter 
+should be set, rather than list all magic numbers.
+
+In addition to \vlog{} connection syntax, connection\_spec supports
+prefix, suffix and regular expression connection rules, which save a
+lot efforts in IP integration and top level integration.  Note that
+prefix, suffix and regular expression rules are cumulative and
+applicable to all module ports, rule execution sequence is the
+sequence they appear.
+
+\autoref{lst:moda in mhdl} is the module to be instantiated.
+\autoref{lst:modb in mhdl} instantiates \texttt{moda} several times, 
+pay attention to the instance at line \autoref{ln:inst 2},
+prefix and suffix rules take \emph{cumulative} effects
+on \texttt{x2\_moda}.
+\autoref{lst:modb in sv} is the generated \sv{}. 
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{minipage}[t]{\textwidth}
+\begin{lstlisting}[caption={Wrapper Module in \mhdl},label={lst:modb in mhdl}]
+// simplest instantiation
+moda;
+
+
+// prefix rule
+moda x1_moda ( x1_ +);
+
+// suffix rule
+// after prefix rule
+moda x2_moda ( x2_ + , /*\label{ln:inst 2}*/
+               + _22);
+
+
+// Perl compatible regexp
+moda x3_moda ( "s/o/out/g", 
+               "s/i/in/g" );
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}[t]{\textwidth}
+\begin{lstlisting}[caption={Module Template}, label={lst:moda in mhdl}]
+module moda (
+  i1, 
+  i2, 
+  i3, 
+  i4, 
+  i5, 
+  i6, 
+  o1, 
+  o2);
+
+
+input i1;
+input i2;
+input i3;
+input i4;
+input i5;
+input i6;
+output o1;
+output [1:0] o2;
+
+endmodule
+\end{lstlisting}
+\end{minipage}
+\end{minipage}
+\hspace{1ex}
+\begin{minipage}[t]{.5\textwidth}
+\begin{lstlisting}[caption={Wrapper module in \sv{}}, label={lst:modb in sv}]
+// declarations...
+
+// /tmp/xin_meng/mhdlc/test/modb.mhdl:2.0-4
+moda x_moda (
+                .o1 (o1),
+                .i1 (i1),
+                .i2 (i2),
+                .o2 (o2),
+                .i3 (i3),
+                .i4 (i4),
+                .i5 (i5),
+                .i6 (i6)
+            );
+
+// /tmp/xin_meng/mhdlc/test/modb.mhdl:6.0-21
+moda x1_moda (
+                 .o1 (x1_o1),
+                 .i1 (x1_i1),
+                 .i2 (x1_i2),
+                 .o2 (x1_o2),
+                 .i3 (x1_i3),
+                 .i4 (x1_i4),
+                 .i5 (x1_i5),
+                 .i6 (x1_i6)
+             );
+
+// /tmp/xin_meng/mhdlc/test/modb.mhdl:10.0-11.21
+moda x2_moda (
+                 .o1 (x2_o1_22),
+                 .i1 (x2_i1_22),
+                 .i2 (x2_i2_22),
+                 .o2 (x2_o2_22),
+                 .i3 (x2_i3_22),
+                 .i4 (x2_i4_22),
+                 .i5 (x2_i5_22),
+                 .i6 (x2_i6_22)
+             );
+
+// /tmp/xin_meng/mhdlc/test/modb.mhdl:15.0-16.27
+moda x3_moda (
+                 .o1 (out1),
+                 .i1 (in1),
+                 .i2 (in2),
+                 .o2 (out2),
+                 .i3 (in3),
+                 .i4 (in4),
+                 .i5 (in5),
+                 .i6 (in6)
+             );
+\end{lstlisting}
+\end{minipage}

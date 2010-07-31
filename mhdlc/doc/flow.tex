@@ -1,0 +1,39 @@
+\insertfigure{\mhdl{} compilation flowchart}{mflow.pdf}{fig:mflow}
+\autoref{fig:mflow} is \mhdl{} compilation flow. \mhdlc{} has a
+build-in directory based automatic dependency resolving capability,
+which means files to be processed can be supplied in any
+order\footnote{ More strictly, macro definition files should be
+  provided before macro usage files, otherwise, because compiler can
+  not expand macro without definition.  }, or only provide top level
+wrapper module, compiler can find all instantiated modules in search
+path which is specified by user through command line.
+
+Once the module is compiled, module definition is stored in module
+database maintained by compiler. When module instantiation statement is
+encountered, compiler first searches module definition in module
+database, if not found, compiler start automatic dependency resolving
+to find module definition. 
+
+Automatic dependency resolving is
+\emph{comprehensive}\index{Comprehensive dependency resolving} because compiler will
+search \mhdl{}, \vlog{} or \sv{} format module definitions in search
+path. Multiple definition is considered to be fatal error, and
+designers are responsible to fix the problem. Comprehensive dependency
+resolving requires traversing of search path three times for each
+module, this could cost very long runtime especially when search path
+list is very large. \emph{Fast dependency resolving}\index{Fast
+  dependency resolving} mode can be enabled to save time. In this
+mode, first found module definition is used, designers are in their
+own risk of multiple definition. This mode can achieve 2x-4x faster
+than comprehensive mode. 
+
+\mhdlc{} puts all generated files in centralized output directory
+(default name is ``workdir'')
+which can be specified by users. RTL are generated in \sv{} format
+with ``.sv'' as file extension. Files with ``.postpp'' extension are
+output files from preprocessor, only used for compiler
+debugging. Normally, only \sv{} files generated from \mhdl{} are put
+in output directory, \vlog{} or \sv{} parsed by compiler are
+\emph{not} copied to output directory. However, users can still ask
+compiler to put all touched \vlog{} or \sv{} files into output
+directory with command line options. 
