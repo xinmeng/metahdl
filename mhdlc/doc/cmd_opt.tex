@@ -3,59 +3,58 @@
 
 \tablefirsthead{%
   \hline
-  \multicolumn{1}{|l}{\textbf{Option}}&
-  \multicolumn{1}{|p{90mm}|}{\textbf{Description}}\\
+  \multicolumn{1}{p{.2\textwidth}}{\tableheader{Option}}&
+  \multicolumn{1}{p{.7\textwidth}}{\tableheader{Description}}\\
   \hline}
 
 \tablehead{%
+  \multicolumn{2}{l}{\scriptsize\textsl{...Continued from previous page}}\\
   \hline
-  \multicolumn{2}{|l|}{\textsl{...Continued from previous page}}\\
-  \hline
-  \multicolumn{1}{|l}{\textbf{Option}}&
-  \multicolumn{1}{|p{90mm}|}{\textbf{Description}}\\
+  \multicolumn{1}{p{.2\textwidth}}{\tableheader{Option}}&
+  \multicolumn{1}{p{.7\textwidth}}{\tableheader{Description}}\\
   \hline}
 \tabletail{%
   \hline
-  \multicolumn{2}{|l|}{\textsl{Continued on next page...}}\\
-  \hline}
+  \multicolumn{2}{l}{\scriptsize\textsl{Continued on next page...}}\\
+  }
 \tablelasttail{\hline}
 
 \tablecaption{\mhdlc{} command line options}
 \begin{center}
-\begin{supertabular}{|l|p{90mm}|}
+\begin{supertabular}{p{.2\textwidth}p{.7\textwidth}}
 \texttt{-I} & 
 Specify single search path.\\
-\hline
+%\hline
 
 \texttt{-P} & 
 Specify a list of search paths in a file, one path per line. 
 Line starts with ``\#'' is comment line and is ignored by compiler.\\
-\hline
+%\hline
 
 \texttt{-D} & 
 Define macro just as used in GCC or VCS. \\
-\hline
+%\hline
 
 \texttt{-C} & 
 Enable \vlog{} or \sv{} copying touched by compiler. \\
-\hline
+%\hline
 
 \texttt{-F} & 
 Enable fast dependency resolving mode. \\
-\hline
+%\hline
 
 \texttt{-o} & 
 Specify output directory. \\
-\hline
+%\hline
 
 \texttt{-f} & 
 Specify a list of files to be processed, one file per line.  
 Line starts with ``\#'' is comment line and is ignored by compiler.\\
-\hline
+%\hline
 
 \texttt{--version} &
 Display version number and copyright.\\
-\hline
+%\hline
 
 \texttt{-h} & 
 Display help information.\\
