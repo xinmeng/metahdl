@@ -20,7 +20,10 @@ $(top).pdf : $(tex) $(pic)
 %.pdf : %.eps
 	$(epstopdf) $<
 
-.phone : clean clean_all pic eps dust
+.phone : clean clean_all pic eps dust bnf
+
+bnf:
+	./gentex.pl ../../src/mparser.bison.output
 
 
 clean: 
