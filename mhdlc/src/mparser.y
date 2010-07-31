@@ -522,7 +522,7 @@ net : net_name "[" expression ":" expression "]"
       }
       if ( $3->Value() <= symb->lsb->Value() ) {
 	if ( !symb->UpdateLSB($3) ) {
-	  mwrapper.error(@3, "Bit index out of LSB range, check your declaration.")
+	  mwrapper.error(@3, "Bit index out of LSB range, check your declaration.");
 	}
       }
     }
