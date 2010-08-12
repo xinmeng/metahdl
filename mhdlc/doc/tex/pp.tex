@@ -24,45 +24,45 @@ giving different values to \texttt{SLV\_NUM} when invoke \mhdlc{}.
 \begin{lstlisting}[caption={Configurable Arbiter}, label={lst:arb in pp}]
 fsm arb; 
 
-/*\`{}\textcolor{purple}{for}*/ (i=1; /*\`{}\textcolor{purple}{i}*/<=/*\`{}\textcolor{purple}{SLV\_NUM}*/; i++) /*\label{ln:default output}*/
-slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
-/*\`{}\textcolor{purple}{endfor}*/
+/*-\`{}\textcolor{purple}{for}-*/ (i=1; /*-\`{}\textcolor{purple}{i}-*/<=/*-\`{}\textcolor{purple}{SLV\_NUM}-*/; i++) /*-\label{ln:default output}-*/
+slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
+/*-\`{}\textcolor{purple}{endfor}-*/
 
-/*\`{}\textcolor{purple}{for}*/ (i=1; /*\`{}\textcolor{purple}{i}*/<=/*\`{}\textcolor{purple}{SLV\_NUM}*/; i++) /*\label{ln:body}*/
- /*\`{}\textcolor{purple}{let}*/ j = /*\`{}\textcolor{purple}{i}*/ + 1 /*\label{ln:let}*/
+/*-\`{}\textcolor{purple}{for}-*/ (i=1; /*-\`{}\textcolor{purple}{i}-*/<=/*-\`{}\textcolor{purple}{SLV\_NUM}-*/; i++) /*-\label{ln:body}-*/
+ /*-\`{}\textcolor{purple}{let}-*/ j = /*-\`{}\textcolor{purple}{i}-*/ + 1 /*-\label{ln:let}-*/
 
- /*\`{}\textcolor{purple}{if}*/ /*\`{}\textcolor{purple}{i}*/ != /*\`{}\textcolor{purple}{SLV\_NUM}*/ /*\label{ln:if}*/
-SLAVE_/*\`{}\textcolor{purple}{i}*/: begin
-   if ( slave_req_/*\`{}\textcolor{purple}{i}*/ ) begin
-      slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b1;
-      if ( slave_eof_/*\`{}\textcolor{purple}{i}*/ ) begin
-	 slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
-	 goto SLAVE_/*\`{}\textcolor{purple}{j}*/;
+ /*-\`{}\textcolor{purple}{if}-*/ /*-\`{}\textcolor{purple}{i}-*/ != /*-\`{}\textcolor{purple}{SLV\_NUM}-*/ /*-\label{ln:if}-*/
+SLAVE_/*-\`{}\textcolor{purple}{i}-*/: begin
+   if ( slave_req_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+      slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b1;
+      if ( slave_eof_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+	 slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
+	 goto SLAVE_/*-\`{}\textcolor{purple}{j}-*/;
       end
       else begin
-	 goto SLAVE_/*\`{}\textcolor{purple}{i}*/;
+	 goto SLAVE_/*-\`{}\textcolor{purple}{i}-*/;
       end
    end
    else 
-     goto SLAVE_/*\`{}\textcolor{purple}{j}*/;
+     goto SLAVE_/*-\`{}\textcolor{purple}{j}-*/;
 end
 
- /*\`{}\textcolor{purple}{else} \label{ln:else}*/ 
-SLAVE_/*\`{}\textcolor{purple}{i}*/: begin 
-   if ( slave_req_/*\`{}\textcolor{purple}{i}*/ ) begin
-      slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b1;
-      if ( slave_eof_/*\`{}\textcolor{purple}{i}*/ ) begin
-	 slave_grnt_/*\`{}\textcolor{purple}{i}*/ = 1'b0;
+ /*-\`{}\textcolor{purple}{else} \label{ln:else}-*/ 
+SLAVE_/*-\`{}\textcolor{purple}{i}-*/: begin 
+   if ( slave_req_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+      slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b1;
+      if ( slave_eof_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+	 slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
 	 goto SLAVE_1;
       end
       else 
-	goto SLAVE_/*\`{}\textcolor{purple}{i}*/;
+	goto SLAVE_/*-\`{}\textcolor{purple}{i}-*/;
    end
    else 
      goto SLAVE_1;
 end  
- /*\`{}\textcolor{purple}{endif} \label{ln:endif}*/
-/*\`{}\textcolor{purple}{endfor}*/
+ /*-\`{}\textcolor{purple}{endif} \label{ln:endif}-*/
+/*-\`{}\textcolor{purple}{endfor}-*/
 endfsm
 \end{lstlisting}
 \end{minipage}
@@ -251,22 +251,22 @@ min of two numbers (MIN()), odd (ODD()), even (EVEN()), absolute value (ABS()).
 \end{itemize}
 
 \begin{lstlisting}[caption={\`{}\texttt{let} usage examples},label={lst:let example}]
-/*\`{}\textcolor{purple}{define}*/ x 2
+/*-\`{}\textcolor{purple}{define}-*/ x 2
 
-// NOTE /*\`{}\textcolor{purple}{let}*/ need "="
-/*\`{}\textcolor{purple}{let}*/ y = /*\`{}\textcolor{purple}{x}*/ ** 10 // now /*\`{}\textcolor{purple}{y}*/ is 1024
+// NOTE /*-\`{}\textcolor{purple}{let}-*/ need "="
+/*-\`{}\textcolor{purple}{let}-*/ y = /*-\`{}\textcolor{purple}{x}-*/ ** 10 // now /*-\`{}\textcolor{purple}{y}-*/ is 1024
 
-/*\`{}\textcolor{purple}{let}*/ z = LOG2(/*\`{}\textcolor{purple}{y}*/) // /*\`{}\textcolor{purple}{z}*/ is 10
-/*\`{}\textcolor{purple}{let}*/ a = LOG2(/*\`{}\textcolor{purple}{z}*/) // /*\`{}\textcolor{purple}{a}*/ is 3.321928
-/*\`{}\textcolor{purple}{let}*/ c = CEIL(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{c}*/ is 4
-/*\`{}\textcolor{purple}{let}*/ f = FLOOR(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{f}*/ is 3
-/*\`{}\textcolor{purple}{let}*/ r = ROUND(/*\`{}\textcolor{purple}{a}*/) // /*\`{}\textcolor{purple}{r}*/ is 3
+/*-\`{}\textcolor{purple}{let}-*/ z = LOG2(/*-\`{}\textcolor{purple}{y}-*/) // /*-\`{}\textcolor{purple}{z}-*/ is 10
+/*-\`{}\textcolor{purple}{let}-*/ a = LOG2(/*-\`{}\textcolor{purple}{z}-*/) // /*-\`{}\textcolor{purple}{a}-*/ is 3.321928
+/*-\`{}\textcolor{purple}{let}-*/ c = CEIL(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{c}-*/ is 4
+/*-\`{}\textcolor{purple}{let}-*/ f = FLOOR(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{f}-*/ is 3
+/*-\`{}\textcolor{purple}{let}-*/ r = ROUND(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{r}-*/ is 3
 
 
 // we can concatenate macro value with other strings
 // using "::" operator
-assign cat_/*\`{}\textcolor{purple}{f}*/::k = 1'b0; // expand to ``assign cat_3k = 1'b0;''
-assign cat_/*\`{}\textcolor{purple}{fk}*/ = 1'b0; // /*\textcolor{red}{Error!!}*/ macro ``fk'' is not defined 
+assign cat_/*-\`{}\textcolor{purple}{f}-*/::k = 1'b0; // expand to ``assign cat_3k = 1'b0;''
+assign cat_/*-\`{}\textcolor{purple}{fk}-*/ = 1'b0; // /*-\textcolor{red}{Error!!}-*/ macro ``fk'' is not defined 
 \end{lstlisting}
 \autoref{lst:let example} demonstrates some usages of \`{}\texttt{let} directive. 
 Operators and functions supported by \`{}\texttt{let} directive constructs macro variables
