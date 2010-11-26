@@ -203,10 +203,10 @@ public:
     mctrl["hierachydepth"]->num = 300;
     
     mctrl["clock"] = new CCtrlValType; // str
-    mctrl["clock"]->str = "clock";
+    mctrl["clock"]->str = "clk";
 
     mctrl["reset"] = new CCtrlValType; // str
-    mctrl["reset"]->str = "reset_n";
+    mctrl["reset"]->str = "rst_n";
 
     mctrl["multidriverchk"] = new CCtrlValType; // flag
     mctrl["multidriverchk"]->flag = true;

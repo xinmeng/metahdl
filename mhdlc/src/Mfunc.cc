@@ -36,6 +36,8 @@ int DebugSVParser = 0;
 bool FastDependParse = false;
 bool CopyVerilogCode = false;
 bool LEGACY_VERILOG_MODE = false;
+bool OutputCodeLocation = false;
+
 
 vector<string> files;
 list<string>   paths;
@@ -343,6 +345,10 @@ GetOpt(int argc, char *argv[])
       {
 	/* Enable C style preprocessing of ifdef and friends. */
 	output_ifdef_directive = 1;
+      }
+    else if (!strcmp(argv[i], "-CL")) 
+      {
+	OutputCodeLocation = true;
       }
     else if (!strcmp(argv[i], "-L"))
       {

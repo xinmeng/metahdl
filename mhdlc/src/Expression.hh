@@ -266,6 +266,8 @@ public:
 
 
   inline void PrintPort(ostream &os=cout) {
+    os.width(8);
+    os << left;
     if ( direction == NONPORT ) {
       return ;
     }
@@ -279,6 +281,7 @@ public:
       PrintWidth(os, msb, lsb);
       os << name << ";" << endl;
     }
+    os.width(0);
   }
 
   inline void PrintDeclare(ostream &os=cout) {
@@ -289,6 +292,8 @@ public:
 	os << ";" << endl;
       }
       else {
+	os.width(8);
+	os << left;		
 	switch (type) {
 	case REG:     os << "reg "; PrintWidth(os, msb, lsb); break;
 	case WIRE:    os << "wire "; PrintWidth(os, msb, lsb); break;
@@ -296,7 +301,8 @@ public:
 	case INT:     os << "int "; break;
 	case INTEGER: os << "integer "; break; 
 	}
-    
+	os.width(0);
+
 	os << name;
 
 	if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
@@ -307,6 +313,8 @@ public:
     else {
       if ( is_const ) os << "const "; 
 
+      os.width(8);
+      os << left;
       switch (type) {
       case REG:     os << "reg "; PrintWidth(os, msb, lsb); break;
       case WIRE:    os << "wire "; PrintWidth(os, msb, lsb); break;
@@ -314,7 +322,8 @@ public:
       case INT:     os << "int "; break;
       case INTEGER: os << "integer "; break; 
       }
-    
+      os.width(0);
+
       os << name;
 
       if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
@@ -415,31 +424,39 @@ public:
 
 private:
   inline void PrintWidth(ostream &os, CExpression* msb_, CExpression* lsb_) {
-    os << "[";
+    // avoid declaring 1-bit signal in [0:0] style
+    if ( msb_->Value() == 0 && !msb_->HasParam() ) {
+      os << "          ";
+    }
+    else {
+      os << "[";
 
-    if (msb_->HasParam()) {
-      msb_->Print(os);
-    }
-    else if ( msb_->Value() != 0 ) {
-      msb_->Reduce()->Print(os);
-    }
-    else /* if ( msb_ != CONST_NUM_0 ) */ {
-       os << "0";
-    }
+      os.width(4);
+      if (msb_->HasParam()) {
+	msb_->Print(os);
+      }
+      else if ( msb_->Value() != 0 ) {
+	msb_->Reduce()->Print(os);
+      }
+      else /* if ( msb_ != CONST_NUM_0 ) */ {
+	os << "0";
+      }
 
-    os << ":";
+      os.width(0);
+      os << ":";
     
-    if (lsb_->HasParam()) {
-      lsb_->Print(os);
-    }
-    else if ( lsb_->Value() != 0 ) {
-      lsb_->Reduce()->Print(os);
-    }
-    else /* if ( lsb_ != CONST_NUM_0 )*/ {
-       os << "0";
-    }
+      if (lsb_->HasParam()) {
+	lsb_->Print(os);
+      }
+      else if ( lsb_->Value() != 0 ) {
+	lsb_->Reduce()->Print(os);
+      }
+      else /* if ( lsb_ != CONST_NUM_0 )*/ {
+	os << "0";
+      }
 
-    os << "]";
+      os << "]  ";
+    }
   }
     
 };
@@ -1191,7 +1208,7 @@ public :
 class CUnaryExpOR : public CUnaryExp
 {
 public : 
-  inline CUnaryExpOR(CExpression* exp) : CUnaryExp("&", exp) {}
+  inline CUnaryExpOR(CExpression* exp) : CUnaryExp("|", exp) {}
   
   inline ulonglong Width() {return 1;}
   inline ulonglong Value() {
@@ -1208,7 +1225,7 @@ public :
 class CUnaryExpXOR : public CUnaryExp
 {
 public : 
-  inline CUnaryExpXOR(CExpression* exp) : CUnaryExp("&", exp) {}
+  inline CUnaryExpXOR(CExpression* exp) : CUnaryExp("^", exp) {}
   
   inline ulonglong Width() {return 1;}
   inline ulonglong Value() {

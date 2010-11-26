@@ -5,6 +5,8 @@
 #include "Statement.hh"
 #include "location.hh"
 
+extern bool OutputCodeLocation;
+
 class CCodeBlock
 {
 protected:
@@ -17,7 +19,11 @@ public:
   inline CCodeBlock(const yy::location &loc, int step) : _loc (loc), _step (step) {}
 
   inline yy::location Loc() {return _loc;}
-  inline void PrintLoc(ostream&os) {os << "// " << _loc << endl;}
+  inline void PrintLoc(ostream&os) { 
+    if ( OutputCodeLocation ) {
+      os << "// " << _loc << endl;
+    }
+  }
   virtual void Print(ostream&os=cout) =0;
 
   virtual void GetSymbol() =0;
@@ -471,8 +477,10 @@ public:
 
     CSymbol *state_reg = SymbolTabel->Exist( _name + "_cs" );
     state_reg->Update(st_msb);
+    state_reg->io_fixed = true;
     state_reg = SymbolTabel->Exist( _name + "_ns");
     state_reg->Update(st_msb);
+    state_reg->io_fixed = true;
 
     for ( int i=0; i<state_count; ++i){
       ostringstream tmp;
