@@ -1908,24 +1908,25 @@ parameter_num_override : expression
 }
 ;
 
-parameter_name_override : ID "=" expression 
+parameter_name_override : "." ID "(" expression ")"
 {
-  if ( ! $3->IsConst()) {
-    mwrapper.error(@3, "non-constant expression as parameter.");
+  if ( ! $4->IsConst()) {
+    mwrapper.error(@4, "non-constant expression as parameter.");
   }
-  else if ( !mwrapper.mod_template->param_table->SetParam(*$1, $3) ) {
-    mwrapper.error(@1, mwrapper.mod_template_name + " has no parameter: " + *$1);
+  else if ( !mwrapper.mod_template->param_table->SetParam(*$2, $4) ) {
+    mwrapper.error(@2, mwrapper.mod_template_name + " has no parameter: " + *$2);
   }
 }
-| parameter_name_override "," ID "=" expression
+| parameter_name_override "," "." ID "(" expression ")"
 {
-  if ( ! $5->IsConst()) {
-    mwrapper.error(@5, "non-constant expression as parameter.");
+  if ( ! $6->IsConst()) {
+    mwrapper.error(@6, "non-constant expression as parameter.");
   }
-  else if ( !mwrapper.mod_template->param_table->SetParam(*$3, $5) ) {
-    mwrapper.error(@5, mwrapper.mod_template_name + " has no parameter: " + *$3);
+  else if ( !mwrapper.mod_template->param_table->SetParam(*$4, $6) ) {
+    mwrapper.error(@4, mwrapper.mod_template_name + " has no parameter: " + *$4);
   }
 }
+
 ;
 
 connection_spec :
