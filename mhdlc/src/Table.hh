@@ -263,6 +263,12 @@ public:
 	  (*msg) = (*msg) + "  new output \"" + iter->first + "\"\n";
 	  IOTable->Insert( (*iter).second );
 	}
+
+      case INOUT:
+	if ( !IOTable->Exist(iter->first) ) {
+	  (*msg) = (*msg) + "  new inout \"" + iter->first + "\"\n";
+	  IOTable->Insert( (*iter).second );
+	}
       }
     }
     IOTable->Reset();

@@ -26,6 +26,7 @@
 class CMHDLwrapper;
 #include "MetaHDL.hh"
 extern bool FastDependParse;
+extern int DebugMHDLParser;
 %}
 
 %union {
@@ -867,7 +868,8 @@ statement : balanced_stmt
 balanced_stmt : ";" 
 {
    $$ = new CStmtSimple ();
-   mwrapper.warning(@$, "Why do you write empty statment? You stupid asshole think it's funny?? I'll tell you, it's totally SHIT!!");
+   if (DebugMHDLParser) 
+     mwrapper.warning(@$, "Why do you write empty statment? You stupid asshole think it's funny?? I'll tell you, it's totally SHIT!!");
 }
 
 //  1    2     3      4      5       6       7      8     9      10     11     12     13
