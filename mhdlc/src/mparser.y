@@ -516,12 +516,12 @@ net : net_name "[" expression ":" expression "]"
   else {
     CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
     if ( $3->IsConst() ) {
-      if ( $3->Value() >= symb->msb->Value() ) {
+      if ( $3->Value() > symb->msb->Value() ) {
 	if ( !symb->Update($3) ) {
 	  mwrapper.error(@3, "Bit index out of MSB range, check your declaration.");
 	}
       }
-      if ( $3->Value() <= symb->lsb->Value() ) {
+      if ( $3->Value() < symb->lsb->Value() ) {
 	if ( !symb->UpdateLSB($3) ) {
 	  mwrapper.error(@3, "Bit index out of LSB range, check your declaration.");
 	}
