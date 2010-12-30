@@ -1242,7 +1242,8 @@ undef_macro(char *def_text)
     char macro_name[MAXSTR];
     int hashval;
 
-    txt_ptr = (char *) (((int)strstr(def_text, "undef")) + ((int)strlen("undef")));
+    // txt_ptr = (char *) (((int)strstr(def_text, "undef")) + ((int)strlen("undef")));
+    txt_ptr = (char *) (strstr(def_text, "undef") + strlen("undef"));
     sscanf(txt_ptr, "%s", macro_name);
 
     hashval = hash(macro_name);

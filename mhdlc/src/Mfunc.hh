@@ -2,6 +2,7 @@
 #define __MFUNC_HH__
 
 #include <stdio.h>
+#include <assert.h>
 
 #include <typeinfo>
 #include <vector>
