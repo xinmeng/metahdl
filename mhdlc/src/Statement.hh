@@ -298,28 +298,34 @@ public:
 
   inline void Print(ostream &os=cout, int indent=0) {
     PUT_SPACE(indent);
-    if ( LEGACY_VERILOG_MODE ) {
-      os << "case";
-      if ( _z ) os << "z";
+//     if ( LEGACY_VERILOG_MODE ) {
+//       os << "case";
+//       if ( _z ) os << "z";
       
-      os << " ( " ; 
-      _exp->Print(os);
-      os << " ) " ;
+//       os << " ( " ; 
+//       _exp->Print(os);
+//       os << " ) " ;
       
-      if ( _type[0] == 'u' ) {
-	os << " // synthesis parallel_case" << endl;
-      }
-      else {
-	os << endl;
-      }
-    }
-    else {
-      os << _type << " case"; 
-      if ( _z ) os << "z"; 
-      os << " ( ";
-      _exp->Print(os);
-      os << " )" << endl;
-    }
+//       if ( _type[0] == 'u' ) {
+// 	os << " // synthesis parallel_case" << endl;
+//       }
+//       else {
+// 	os << endl;
+//       }
+//     }
+//     else {
+//       os << _type << " case"; 
+//       if ( _z ) os << "z"; 
+//       os << " ( ";
+//       _exp->Print(os);
+//       os << " )" << endl;
+//     }
+
+    os << _type << " case"; 
+    if ( _z ) os << "z"; 
+    os << " ( ";
+    _exp->Print(os);
+    os << " )" << endl;
 
     for (vector<CCaseItem*>::iterator iter = _items->begin(); 
 	 iter != _items->end(); ++iter) {
