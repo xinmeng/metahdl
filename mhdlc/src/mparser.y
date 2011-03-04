@@ -27,6 +27,9 @@ class CMHDLwrapper;
 #include "MetaHDL.hh"
 extern bool FastDependParse;
 extern int DebugMHDLParser;
+extern string command;
+extern list<string> paths;
+extern string workdir;
 %}
 
 %union {
@@ -301,7 +304,7 @@ extern int DebugMHDLParser;
 %token K_GOTO          "goto" 
 %token K_RAWCODE       "rawcode"
 %token K_ENDRAWCODE    "endrawcode" 
-
+%token K_PARSE         "parse"
 
 
 
@@ -2068,6 +2071,21 @@ metahdl_constrol : "metahdl" ID ";"
 }
 
 | "metahdl" STRING ";" {cerr << "\033[00;32m[M-MSG: " << *$2 << "]" << @$ << "\033[00m" << endl;}
+
+| "metahdl" "parse" verbtims ";"
+{
+  string cmd_line = command;
+  for (list<string>::iterator iter = paths.begin(); 
+       iter!=paths.end(); ++iter)
+    cmd_line = cmd_line + " -I " + *iter ;
+
+  cmd_line = cmd_line + " -o " + workdir + *$3 ;
+
+  cerr << endl << "\tParsing on demand: " << cmd_line << endl << endl;
+
+  if ( system(cmd_line.c_str()) ) mwrapper.error(@$, "Parsing on demand failed.");
+
+}
 ;
 
 

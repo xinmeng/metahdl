@@ -27,6 +27,7 @@
 %x sc_string sc_use_string
 %x sc_line_cmt sc_blk_cmt sc_ctrl_line
 %x sc_rawcode sc_function
+%x sc_parse
 
  /* SystemVerilog keywords */
 K_ALIAS                    "alias"                 
@@ -260,6 +261,7 @@ K_ENDFSM               "endfsm"
 K_GOTO         "goto"
 K_RAWCODE       "rawcode"
 K_ENDRAWCODE    "endrawcode" 
+K_PARSE         "parse"
 
 
  /* operators */
@@ -547,6 +549,15 @@ WS [ \t]+
 {K_GOTO} return K_GOTO;
 {K_FSM} return K_FSM;
 {K_ENDFSM} return K_ENDFSM;
+
+ /* sc_parse */ 
+{K_PARSE} yylloc->step(); yy_push_state(sc_parse); return K_PARSE;
+<sc_parse>{
+  {PUNC_SEMICOLON} yy_pop_state(); return PUNC_SEMICOLON;
+  \n mwrapper.error(yylloc->end, "Unexpected new line inside parse statement.");
+  <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside parse statement.");
+  . yylval->str = new string (mhdltext); return VERBTIM;
+}
 
 
 

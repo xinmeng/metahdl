@@ -60,17 +60,13 @@ TOP_OBJ = $(addsuffix .o,$(basename $(TOP_CC_SRC)))
 TOP_EXE = mhdlc
 TOP_LIB = libmhdlc.a
 
-# for DoublePeak 
-PUB_DIR = $(PROJECT_SRC)/scripts/bin
-
-
 
 OBJS = $(M_OBJ) $(SV_OBJ) $(PP_OBJ) $(UTIL_OBJ) $(TOP_OBJ)
 CC_SRC = $(M_ALL_CC_SRC) $(SV_ALL_CC_SRC) $(PP_ALL_CC_SRC) $(UTIL_ALL_CC_SRC) $(TOP_ALL_CC_SRC)
 
 
 
-.phony: lib clean obj tar publish
+.phony: lib clean obj tar
 
 
 $(TOP_EXE): $(OBJS)
@@ -117,11 +113,6 @@ tar:
 
 clean: 
 	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend mhdlc src.tar*
-
-publish : $(PUB_DIR)/$(TOP_EXE)
-
-$(PUB_DIR)/$(TOP_EXE) : $(TOP_EXE)
-	cp $< $@
 
 
 

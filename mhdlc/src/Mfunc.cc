@@ -38,7 +38,7 @@ bool CopyVerilogCode = false;
 bool LEGACY_VERILOG_MODE = false;
 bool OutputCodeLocation = false;
 
-
+string command = "";
 vector<string> files;
 list<string>   paths;
 string workdir = "workdir";
@@ -136,6 +136,7 @@ GetOpt(int argc, char *argv[])
 
 
   /* process command line arguments */
+  command = argv[0];
   for (i = 1; i < argc; ++i) {
     arglen = strlen(argv[i]);
     if ( !strcmp(argv[i], "-I") ) {
@@ -442,6 +443,8 @@ GetOpt(int argc, char *argv[])
     workdir = workdir.substr(0, workdir.length()-1);
   }
 
+  paths.push_back(workdir);
+
 }
 
 void
@@ -453,6 +456,7 @@ RptOpt(ostream &o)
     << "==============================" << endl
     << " Summary of working settings" << endl
     << "==============================" << endl
+    << "Command: " << command << endl
     << "output_line_directive: " << output_line_directive << endl
     << "output_ifdef_directive: " << output_ifdef_directive << endl
     << "DebugMHDLLexer: " << DebugMHDLLexer << endl
