@@ -112,7 +112,7 @@ tar:
 	bzip2 src.tar
 
 clean: 
-	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend mhdlc src.tar*
+	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend mhdlc src.tar* *~
 
 
 

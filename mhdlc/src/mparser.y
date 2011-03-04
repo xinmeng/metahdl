@@ -304,6 +304,7 @@ extern string workdir;
 %token K_GOTO          "goto" 
 %token K_RAWCODE       "rawcode"
 %token K_ENDRAWCODE    "endrawcode" 
+%token K_MESSAGE       "message"
 %token K_PARSE         "parse"
 
 
@@ -2070,7 +2071,7 @@ metahdl_constrol : "metahdl" ID ";"
   }
 }
 
-| "metahdl" STRING ";" {cerr << "\033[00;32m[M-MSG: " << *$2 << "]" << @$ << "\033[00m" << endl;}
+| "metahdl" "message" verbtims ";" {cerr << "\033[00;32m[M-MSG: " << *$3 << "]" << @$ << "\033[00m" << endl;}
 
 | "metahdl" "parse" verbtims ";"
 {
