@@ -22,9 +22,6 @@ vpp so that you can know how you may redistribute it all.
 It should be in a file named COPYING.  Among other things, the
 copyright notice and this notice must be preserved on all copies.  */
 
-/*
- * $Header: /cvsroot/mhdlc/src/vpp.l,v 1.7 2008-07-07 01:49:40 xin_meng Exp $
- */
 
 #include <string>
 #include <iostream>
