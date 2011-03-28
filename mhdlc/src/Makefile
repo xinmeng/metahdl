@@ -1,15 +1,24 @@
-CXX  = g++
+release =
+
+FLEX = /home/xin_meng/tools/bin/flex
+BISON= /home/xin_meng/tools/bin/bison
+
+ifeq ($(HOST),Hippo)
+CXX = /home/xin_meng/tools/bin/g++
+else 
+CXX = g++
+endif	
+
+ifeq ($(release),)
 PROFLAGS = -pg
-#PROFLAGS = 
 CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS)
 LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
+else 
+CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` 
+LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
+endif
 
 
-# CC = g++
-# CFLAGS = -g
-
-FLEX = flex
-BISON= bison
 
 BISON_AUX_INC = location.hh position.hh stack.hh
 
