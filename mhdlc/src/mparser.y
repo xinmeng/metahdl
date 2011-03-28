@@ -1554,6 +1554,8 @@ fsm_block : "fsm" ID "," ID "," ID ";"
   else {
     symb->Update(LOGIC);
   }
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
 
   symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
   if ( LEGACY_VERILOG_MODE ) {
@@ -1562,6 +1564,8 @@ fsm_block : "fsm" ID "," ID "," ID ";"
   else {
     symb->Update(LOGIC);
   }
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
 } // 8
 // 9         10        11
 statements fsm_items "endfsm" 
@@ -1609,6 +1613,8 @@ statements fsm_items "endfsm"
   else {
     symb->Update(LOGIC);
   }
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
 
   symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
   if ( LEGACY_VERILOG_MODE ) {
@@ -1617,7 +1623,8 @@ statements fsm_items "endfsm"
   else {
     symb->Update(LOGIC);
   }
-
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
 } // 4
 // 5         6        7
 statements fsm_items "endfsm" 
