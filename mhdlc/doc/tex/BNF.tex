@@ -287,9 +287,9 @@ variable\_declaration $::=$\hspace{1ex} variable\_type net\_names \textbf{\textc
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-variable\_type $::=$\hspace{1ex} \textbf{\textcolor{red}{reg}}
+variable\_type $::=$\hspace{1ex} \textbf{\textcolor{red}{wire}}
 
-\mbox{$|$ \textbf{\textcolor{red}{wire}}}
+\mbox{$|$ \textbf{\textcolor{red}{reg}}}
 
 \mbox{$|$ \textbf{\textcolor{red}{logic}}}
 
@@ -405,9 +405,9 @@ parameter\_num\_override $::=$\hspace{1ex} expression
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-parameter\_name\_override $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} expression
+parameter\_name\_override $::=$\hspace{1ex} \textbf{\textcolor{red}{.}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}}
 
-\mbox{$|$ parameter\_name\_override \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} expression}
+\mbox{$|$ parameter\_name\_override \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{.}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}}}
 
 \vspace{1em}
 \noindent
@@ -463,4 +463,6 @@ metahdl\_constrol $::=$\hspace{1ex} \textbf{\textcolor{red}{metahdl}} \textbf{\t
 
 \mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{=}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
 
-\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{STRING}} \textbf{\textcolor{red}{;}}}
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{message}} verbtims \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{metahdl}} \textbf{\textcolor{red}{parse}} verbtims \textbf{\textcolor{red}{;}}}
