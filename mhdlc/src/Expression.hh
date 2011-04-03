@@ -490,6 +490,67 @@ public:
 
 };
 
+
+class CParameter : public CNet
+{
+private:
+  string _name;
+  CExpression* _value;
+  CExpression* _override;
+
+public: 
+  inline CParameter(const string &name, CExpression* value) : 
+    _name (name), _value (value), _override (NULL) {}
+
+public: 
+  inline bool IsConst() {return true;}
+
+  inline ulonglong Width() {
+    if ( _override ) 
+      return _override->Width();
+    else 
+      return _value->Width();
+  }
+
+  inline ulonglong Value() {
+    if ( _override ) 
+      return _override->Value();
+    else 
+      return _value->Value();
+  }
+
+  inline CExpression* ValueExp() {
+    if ( _override ) {
+      return _override;
+    }
+    else {
+      return _value->ValueExp();
+    }
+  }
+
+  inline CExpression* Reduce()  {
+    if ( _override ) {
+      return new CNumber (_override->Width(), _override->Value());
+    }
+    else {
+      return new CNumber (_value->Width(), _value->Value());
+    }
+  }
+
+  inline void Print(ostream&os=cout) {os << _name;}
+  inline bool Update(tDirection direction) {return true;}
+  inline bool Update(CExpression*msb) {return true;}
+  inline bool Update(tType new_type) {return false;}
+
+  inline string Name() {return _name;}
+
+  inline void SetValue(CExpression* override) {_override = override;}
+  
+  inline bool HasParam() {return true;}
+
+};
+
+
 class CVariable : public CNet 
 {
 private:
@@ -568,33 +629,62 @@ public:
   inline void Print(ostream& os=cout) {
     os << _symbol->name;
 
-    if ( _is_2D ) {
-       os << "[";
-       _addr->Print(os);
-       os << "]";
-       os << "[";
-       _msb->Print(os);
-       if ( _lsb ) {
-	  os << ":";
-	  _lsb->Print(os);
-       }
-       os << "]";
+    if (_is_2D) {
+      os << "[";
+      _addr->Print(os);
+      os << "]";
     }
-    else {
-       if (_msb) {
-	  os << "[";
-	  _msb->Print(os);
+    
+    
+    if ( !_symbol->is_const 
+	 && !_msb && FORCE_WIDTH_OUTPUT && (_symbol->msb->Value() > 0 || _symbol->msb->HasParam()) ) {
+      os << "[";
+      _symbol->msb->Print(os);
+      os << ":";
+      _symbol->lsb->Print(os);
+      os << "]";
+    }
+    else if ( _msb ) {
+      os << "[";
+      _msb->Print(os);
+      
+      if (_lsb) {
+	os << ":";
+	_lsb->Print(os);
+	os << "]";
+      }
+      else {
+	os << "]";
+      }
+    }
 
-	  if ( _lsb ) {
-	     os << ":"; 
-	     _lsb->Print(os);
-	     os << "]";
-	  }
-	  else {
-	     os << "]";
-	  }
-       }
-    }
+//     if ( _is_2D ) {
+//        os << "[";
+//        _addr->Print(os);
+//        os << "]";
+//        os << "[";
+//        _msb->Print(os);
+//        if ( _lsb ) {
+// 	  os << ":";
+// 	  _lsb->Print(os);
+//        }
+//        os << "]";
+//     }
+//     else {
+//        if (_msb) {
+// 	  os << "[";
+// 	  _msb->Print(os);
+
+// 	  if ( _lsb ) {
+// 	     os << ":"; 
+// 	     _lsb->Print(os);
+// 	     os << "]";
+// 	  }
+// 	  else {
+// 	     os << "]";
+// 	  }
+//        }
+//     }
   }
 
   inline bool HasParam() {return false;}
@@ -617,65 +707,6 @@ public:
 
 };
 
-
-class CParameter : public CNet
-{
-private:
-  string _name;
-  CExpression* _value;
-  CExpression* _override;
-
-public: 
-  inline CParameter(const string &name, CExpression* value) : 
-    _name (name), _value (value), _override (NULL) {}
-
-public: 
-  inline bool IsConst() {return true;}
-
-  inline ulonglong Width() {
-    if ( _override ) 
-      return _override->Width();
-    else 
-      return _value->Width();
-  }
-
-  inline ulonglong Value() {
-    if ( _override ) 
-      return _override->Value();
-    else 
-      return _value->Value();
-  }
-
-  inline CExpression* ValueExp() {
-    if ( _override ) {
-      return _override;
-    }
-    else {
-      return _value->ValueExp();
-    }
-  }
-
-  inline CExpression* Reduce()  {
-    if ( _override ) {
-      return new CNumber (_override->Width(), _override->Value());
-    }
-    else {
-      return new CNumber (_value->Width(), _value->Value());
-    }
-  }
-
-  inline void Print(ostream&os=cout) {os << _name;}
-  inline bool Update(tDirection direction) {return true;}
-  inline bool Update(CExpression*msb) {return true;}
-  inline bool Update(tType new_type) {return false;}
-
-  inline string Name() {return _name;}
-
-  inline void SetValue(CExpression* override) {_override = override;}
-  
-  inline bool HasParam() {return true;}
-
-};
 
 
 // ------------------------------

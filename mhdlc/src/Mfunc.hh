@@ -40,6 +40,7 @@ extern int DebugSVLexer;
 extern int DebugSVParser;
 
 extern bool LEGACY_VERILOG_MODE;
+extern bool FORCE_WIDTH_OUTPUT;
 extern enum e_case_modify_style_t {PROPAGATE, MACRO, ELIMINATE}  CASE_MODIFY_STYLE;
 
 extern vector<string> FILES;

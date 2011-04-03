@@ -36,6 +36,7 @@ int DebugSVParser = 0;
 bool FastDependParse = false;
 bool CopyVerilogCode = false;
 bool LEGACY_VERILOG_MODE = false;
+bool FORCE_WIDTH_OUTPUT = false;
 bool OutputCodeLocation = false;
 enum e_case_modify_style_t CASE_MODIFY_STYLE = PROPAGATE;
 
@@ -404,6 +405,10 @@ GetOpt(int argc, char *argv[])
 	     << "  -f         Specify a list of files to be processed." << endl
 	     << "  -o         Specify output directory." << endl
 	     << endl
+	     << "  --force-width-output" << endl
+	     << "             This option forces width attached to every signal in generated codes, even when " << endl
+	     << "             designers deliberately ommit width on a bus variable." << endl
+	     << endl
 	     << "  -verilog   Generate Verilog 2001 standard code. 'case' statement has three different outputs" << endl
 	     << "             controlled by following three options:" << endl
 	     << endl
@@ -456,6 +461,9 @@ GetOpt(int argc, char *argv[])
 		s.c_str(), i);
 	exit(1);
       }
+    }
+    else if ( !strcmp(argv[i], "--force-width-output" ) ) {
+      FORCE_WIDTH_OUTPUT = true;
     }
     else if ( !strcmp(argv[i], "-verilog") ) {
       LEGACY_VERILOG_MODE = true;
