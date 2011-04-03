@@ -43,20 +43,20 @@ int main(int argc, char *argv[])
 
 
   // process files
-  ulonglong file_cnt = files.size();
+  ulonglong file_cnt = FILES.size();
   for (ulonglong i = 0; i < file_cnt; ++i ) {
-    tFileName f = DecomposeName( files[i] );
+    tFileName f = DecomposeName( FILES[i] );
 
     CMHDLwrapper *mwrapper;
     CSVwrapper *svwrapper;
     if (f.ext == ".mhdl") {
-      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing MHDL file:" << files[i] << endl;
-      mwrapper = new CMHDLwrapper (files[i]);
+      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing MHDL file:" << FILES[i] << endl;
+      mwrapper = new CMHDLwrapper (FILES[i]);
       mwrapper->Parse();
     }
     else {
-      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing SV file:" << files[i] << endl;
-      svwrapper = new CSVwrapper (files[i]);
+      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing SV file:" << FILES[i] << endl;
+      svwrapper = new CSVwrapper (FILES[i]);
       svwrapper->Parse();
     }
   }
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	 << "    CPU Time: " << (double) time_used.tms_utime / CLK_PER_SEC << " sec" << endl
 	 << " System Time: " << (double) time_used.tms_stime / CLK_PER_SEC << " sec" << endl
 	 << "   User Time: " << end.tv_sec - start.tv_sec << " sec" << endl
-	 << "     workdir: " << workdir << endl
+	 << "     workdir: " << WORKDIR << endl
 	 << endl
 	 << "*********************************************************" << endl;
   }

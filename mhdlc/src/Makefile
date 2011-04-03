@@ -1,7 +1,12 @@
 release =
 
+ifeq ($(HOST),ubuntu606)
+FLEX = flex
+BISON= bison
+else
 FLEX = /home/xin_meng/tools/bin/flex
 BISON= /home/xin_meng/tools/bin/bison
+endif
 
 ifeq ($(HOST),Hippo)
 CXX = /home/xin_meng/tools/bin/g++

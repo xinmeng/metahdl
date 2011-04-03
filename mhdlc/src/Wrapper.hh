@@ -108,15 +108,15 @@ public:
 
   inline void SetPostPPFile() 
   {
-    post_pp_file = workdir + "/" + module_name + extension + ".postpp";
+    post_pp_file = WORKDIR + "/" + module_name + extension + ".postpp";
   }
 
   virtual inline string GetGenFileName() 
   {
     if ( extension == ".mhdl" ) 
-      return workdir + "/" + gen_file + ".sv";
+      return WORKDIR + "/" + gen_file + ".sv";
     else 
-      return workdir + "/" + gen_file + extension;
+      return WORKDIR + "/" + gen_file + extension;
   }
 
   inline void error(const int lineno, const string &msg) const {
@@ -251,10 +251,10 @@ public:
 
   inline string GetGenFileName() {
     if ( LEGACY_VERILOG_MODE ) {
-      return workdir + "/" + mctrl["outfile"]->str + ".v";
+      return WORKDIR + "/" + mctrl["outfile"]->str + ".v";
     }
     else {
-      return workdir + "/" + mctrl["outfile"]->str + ".sv";
+      return WORKDIR + "/" + mctrl["outfile"]->str + ".sv";
     }
   }
 

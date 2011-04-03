@@ -28,8 +28,8 @@ class CMHDLwrapper;
 extern bool FastDependParse;
 extern int DebugMHDLParser;
 extern string command;
-extern list<string> paths;
-extern string workdir;
+extern list<string> PATHS;
+extern string WORKDIR;
 %}
 
 %union {
@@ -2083,11 +2083,11 @@ metahdl_constrol : "metahdl" ID ";"
 | "metahdl" "parse" verbtims ";"
 {
   string cmd_line = command;
-  for (list<string>::iterator iter = paths.begin(); 
-       iter!=paths.end(); ++iter)
+  for (list<string>::iterator iter = PATHS.begin(); 
+       iter!=PATHS.end(); ++iter)
     cmd_line = cmd_line + " -I " + *iter ;
 
-  cmd_line = cmd_line + " -o " + workdir + *$3 ;
+  cmd_line = cmd_line + " -o " + WORKDIR + *$3 ;
 
   cerr << endl << "\tParsing on demand: " << cmd_line << endl << endl;
 

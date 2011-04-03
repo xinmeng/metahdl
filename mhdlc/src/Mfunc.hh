@@ -40,11 +40,11 @@ extern int DebugSVLexer;
 extern int DebugSVParser;
 
 extern bool LEGACY_VERILOG_MODE;
+extern enum e_case_modify_style_t {PROPAGATE, MACRO, ELIMINATE}  CASE_MODIFY_STYLE;
 
-
-extern vector<string> files;
-extern list<string>   paths;
-extern string workdir;
+extern vector<string> FILES;
+extern list<string>   PATHS;
+extern string WORKDIR;
 
 
 void GetOpt(int, char**);
