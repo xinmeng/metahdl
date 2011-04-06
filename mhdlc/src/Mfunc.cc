@@ -120,6 +120,24 @@ SearchFile(const char *name)
 }
 
 
+void UseOutputPathFromENV()
+{
+  char *s = getenv("METAHDL_OUTPUT_PATH");
+  
+  if ( !s ) 
+    return;
+  else {
+    string path = s;
+    
+    size_t pos = path.find_first_of(' ');
+    
+    if ( pos != string::npos ) 
+      path = path.substr(0, pos-1);
+
+    WORKDIR = path;
+  }
+}
+
 void 
 AddSearchPathFromENV()
 {
@@ -194,8 +212,10 @@ GetOpt(int argc, char *argv[])
   /* initialization  */
   PATHS.push_back(getenv("PWD"));
 
-  /* load METAHDL_SEARCH_PATH */
+  /* load environment vairables */
   AddSearchPathFromENV();
+  UseOutputPathFromENV();
+
 
   /* process command line arguments */
   command = argv[0];
@@ -403,7 +423,8 @@ GetOpt(int argc, char *argv[])
 	     << "  -L         NOT output `line directive from preprocessor" << endl
 	     << "  -P         Specify a list of search paths in a file." << endl
 	     << "  -f         Specify a list of files to be processed." << endl
-	     << "  -o         Specify output directory." << endl
+	     << "  -o         Specify output directory. Output directory can also be sepcified in" << endl
+	     << "             METAHDL_OUTPUT_PATH environment variable." << endl
 	     << endl
 	     << "  --force-width-output" << endl
 	     << "             This option forces width attached to every signal in generated codes, even when " << endl
@@ -426,6 +447,7 @@ GetOpt(int argc, char *argv[])
 	     << endl
 	     << endl
 	     << "  --version  Display version information." << endl
+	     << "  -env       Display values of METAHDL_SEARCH_PATH and METAHDL_OUTPUT_PATH." << endl
 	     << "  -h         Print this message." << endl;
 	exit( 0 );
       }
@@ -435,6 +457,23 @@ GetOpt(int argc, char *argv[])
 	      << "Copyright (C) 2010 MENG Xin, mengxin@vlsi.zju.edu.cn" << endl << endl;
 	 exit(0);
       }
+    else if (!strcmp(argv[i], "-env")) {
+      cout << "METAHDL_SEARCH_PATH: " << endl;
+      if ( getenv("METAHDL_SEARCH_PATH") ) 
+	cout << getenv("METAHDL_SEARCH_PATH") << endl;
+      else 
+	cout << "";
+
+      cout << endl;
+
+      cout << "METAHDL_OUTPUT_PATH:" << endl;
+      if ( getenv("METAHDL_OUTPUT_PATH") ) 
+	cout << getenv("METAHDL_OUTPUT_PATH") << endl;
+      else 
+	cout << "";
+
+      exit(0);
+    }
     else if (!strncmp(argv[i], "-d", 2) ) {
       s = argv[i];
       s = s.substr(2);
