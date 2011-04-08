@@ -13,6 +13,8 @@ using namespace std;
 CModTab G_ModuleTable;
 CNumber* CONST_NUM_0 = new CNumber(32, 0);
 
+extern string LOGFILE;
+
 PerlInterpreter *my_perl;
 
 int main(int argc, char *argv[])
@@ -21,15 +23,9 @@ int main(int argc, char *argv[])
   gettimeofday( &start, NULL);
 
 
-  ofstream LogFile;
-  LogFile.open("mhdlc.log", ios_base::out);
-  if ( ! LogFile.is_open() ) {
-    cerr << "** Error: Cannot open log file: mhdlc.log." << endl;
-  }
-
   GetOpt(argc, argv);
-  RptOpt(LogFile);
   CreateWorkdir();
+  RptOpt(); // report option if "-log" is presented
   
 
   // for embeded perl
@@ -61,16 +57,21 @@ int main(int argc, char *argv[])
     }
   }
 
-  LogFile << endl
-	  << endl
-	  << "==================================" << endl
-	  << " " << G_ModuleTable.Size() << " modules got during this run  " << endl
-	  << "==================================" << endl;
   
-  G_ModuleTable.Print(LogFile);
+  if (LOGFILE != "") {
+    ofstream os;
+    os.open(LOGFILE.c_str(), ios_base::app);
 
-  LogFile.close();
+      os << endl
+         << endl
+         << "==================================" << endl
+         << " " << G_ModuleTable.Size() << " modules got during this run  " << endl
+         << "==================================" << endl;
+  
+      G_ModuleTable.Print(os);
 
+      os.close();
+  }
 
   // free perl
   PL_perl_destruct_level = 1;

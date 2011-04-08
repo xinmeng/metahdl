@@ -1282,9 +1282,41 @@ set_to_last_mode()
 
 /**************************************************************************
  *
- * Function Name :
+ * Function Name : ReportDefines
  * Parameters :
  * Return Value :
  * Purpose :
  *
  **************************************************************************/
+void 
+ReportDefines(ostream &o)
+{
+  o << endl
+    << "===============================================" << endl
+    << "   Defines Table" << endl
+    << "===============================================" << endl;
+  names *macro_entries;
+  macro_parms *parameters;
+  for (int i=0; i<BASE; i++) {
+    if (macro_entries = Defines_Table[i]) {
+      do { 
+	o << "Macro Name: " << Defines_Table[i]->macro_name << endl
+	  << "Macro Body: " << Defines_Table[i]->macro << endl
+	  << " Is Number: " << Defines_Table[i]->is_number << endl
+	  << "     Value: " << Defines_Table[i]->value << endl;
+
+	if ( parameters = Defines_Table[i]->parms ) {
+	  do {
+	    o << "Parameters: " 
+	      << parameters->name 
+	      << " = "  
+	      << parameters->value << endl;
+	  }
+	  while (parameters = parameters->next);
+	}
+	o << endl;
+      }
+      while (macro_entries = macro_entries->next);
+    }
+  }
+}

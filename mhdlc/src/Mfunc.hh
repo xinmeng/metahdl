@@ -18,7 +18,6 @@
 #include <iomanip>
 using namespace std;
 
-
 typedef struct {
   string path;
   string name;
@@ -49,7 +48,7 @@ extern string WORKDIR;
 
 
 void GetOpt(int, char**);
-void RptOpt(ostream &o);
+void RptOpt();
 void CreateWorkdir();
 char* SearchFile(const char *);
 char* SearchFile(const string &);

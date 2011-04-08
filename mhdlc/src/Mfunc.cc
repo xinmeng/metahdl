@@ -25,6 +25,7 @@ extern int sv_flex_debug;
 
 // proto.h
 void store_define(char *def_text);
+void ReportDefines(ostream &o);
 
 
 // global option variables
@@ -41,11 +42,15 @@ bool OutputCodeLocation = false;
 enum e_case_modify_style_t CASE_MODIFY_STYLE = PROPAGATE;
 
 
+// global variables
+// extern class CModTab;
+// extern CModTab G_ModuleTable;
 
 string command = "";
 vector<string> FILES;
 list<string>   PATHS;
 string WORKDIR = "workdir";
+string LOGFILE = "";
 string mhdlversion = "2.1";
 
 
@@ -261,6 +266,17 @@ GetOpt(int argc, char *argv[])
 	}
       }
     }
+    else if ( !strncmp(argv[i], "-l", 2) ) {
+      s = argv[i];
+      s = s.substr(2);
+      if ( s == "" ) {
+	fprintf(stderr, "**mhdlc error: No log file name provided to %s in arguments %d.\n", argv[i], i);
+	exit(1);
+      }
+      else {
+	LOGFILE = s;
+      }
+    }
     else if ( !strcmp(argv[i], "-f")) 
       {
 	if ( (i+1) >= argc || !strncmp(argv[i+1], "-", 1))
@@ -425,6 +441,7 @@ GetOpt(int argc, char *argv[])
 	     << "  -f         Specify a list of files to be processed." << endl
 	     << "  -o         Specify output directory. Output directory can also be sepcified in" << endl
 	     << "             METAHDL_OUTPUT_PATH environment variable." << endl
+	     << "  -lXXX      Output summary of current compilation into log file XXX." << endl
 	     << endl
 	     << "  --force-width-output" << endl
 	     << "             This option forces width attached to every signal in generated codes, even when " << endl
@@ -543,46 +560,61 @@ GetOpt(int argc, char *argv[])
 }
 
 void
-RptOpt(ostream &o)
+RptOpt()
 {
-  o << "MetaHDL version " << mhdlversion << endl
-    << "Copyright (C), MENG Xin, mengxin@vlsi.zju.edu.cn" << endl
-    << endl
-    << "==============================" << endl
-    << " Summary of working settings" << endl
-    << "==============================" << endl
-    << "Command: " << command << endl
-    << "output_line_directive: " << output_line_directive << endl
-    << "output_ifdef_directive: " << output_ifdef_directive << endl
-    << "DebugMHDLLexer: " << DebugMHDLLexer << endl
-    << "DebugMHDLParser: " << DebugMHDLParser << endl
-    << "DebugSVLexer: " << DebugSVLexer << endl
-    << "DebugSVParser: " << DebugSVParser << endl
-    << "workdir: " << WORKDIR << endl
-    << endl;
+  if (LOGFILE == "" ) return;
 
-  o << endl
-    << "===============================================" << endl
-    << " " << PATHS.size() << " search paths specified with -I/-P option" << endl
-    << "  or METAHDL_SEARCH_PATH environment variable" << endl
-    << "===============================================" << endl;
+  ofstream os;
+  os.open(LOGFILE.c_str(), ios_base::out);
+  if ( ! os.is_open() ) {
+    cerr << "** Error: Cannot open log file \"" << LOGFILE << "\" for write." << endl;
+    exit(1);
+  }
+
+  os << "MetaHDL version " << mhdlversion << endl
+     << "Copyright (C), MENG Xin, mengxin@vlsi.zju.edu.cn" << endl
+     << endl
+     << "==============================" << endl
+     << " Summary of working settings" << endl
+     << "==============================" << endl
+     << "Command: " << command << endl
+     << "output_line_directive: " << output_line_directive << endl
+     << "output_ifdef_directive: " << output_ifdef_directive << endl
+     << "DebugMHDLLexer: " << DebugMHDLLexer << endl
+     << "DebugMHDLParser: " << DebugMHDLParser << endl
+     << "DebugSVLexer: " << DebugSVLexer << endl
+     << "DebugSVParser: " << DebugSVParser << endl
+     << "workdir: " << WORKDIR << endl
+     << endl;
+
+  ReportDefines(os);
+
+  os << endl
+     << "===============================================" << endl
+     << " " << PATHS.size() << " search paths specified with -I/-P option" << endl
+     << "  or METAHDL_SEARCH_PATH environment variable" << endl
+     << "===============================================" << endl;
   for ( list<string>::iterator iter=PATHS.begin(); 
 	iter != PATHS.end(); ++iter) {
-    o << *iter << endl;
+    os << *iter << endl;
   }
-  o << endl;
+  os << endl;
 
-  o << "===================================" << endl
-    << " " << FILES.size() << " files processed" << endl
-    << "===================================" << endl;
+  os << "===================================" << endl
+     << " " << FILES.size() << " files processed" << endl
+     << "===================================" << endl;
   if ( FILES.empty() ) {
-    o << "\t" << "(None)" << endl;
+    os << "\t" << "(None)" << endl;
   }
   else {
     for ( vector<string>::iterator iter=FILES.begin(); iter != FILES.end(); ++iter) {
-      o << (*iter) << endl;
+      os << (*iter) << endl;
     }
   }
+
+
+  os.close();
+
 }
 
 void

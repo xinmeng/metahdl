@@ -8,10 +8,12 @@ FLEX = /home/xin_meng/tools/bin/flex
 BISON= /home/xin_meng/tools/bin/bison
 endif
 
-ifeq ($(HOST),Hippo)
-CXX = /home/xin_meng/tools/bin/g++
-else 
+ifeq ($(MACHTYPE),x86_64)
 CXX = g++
+TOP_EXE = mhdlc64
+else 
+CXX = /home/xin_meng/tools/bin/g++
+TOP_EXE = mhdlc32
 endif	
 
 ifeq ($(release),)
@@ -71,7 +73,6 @@ UTIL_OBJ = $(addsuffix .o,$(basename $(UTIL_CC_SRC)))
 TOP_CC_SRC = mhdlc.cc
 TOP_ALL_CC_SRC  = $(TOP_CC_SRC)
 TOP_OBJ = $(addsuffix .o,$(basename $(TOP_CC_SRC)))
-TOP_EXE = mhdlc
 TOP_LIB = libmhdlc.a
 
 
