@@ -299,11 +299,13 @@ public:
   inline void Print(ostream &os=cout, int indent=0) {
     PUT_SPACE(indent);
     if ( LEGACY_VERILOG_MODE ) {
-      if ( CASE_MODIFY_STYLE == PROPAGATE )
-	os << _type << " ";
-      else if (CASE_MODIFY_STYLE == MACRO )
-	os << "`" << _type << " ";
-
+      if (_type != "") {
+	if ( CASE_MODIFY_STYLE == PROPAGATE )
+	  os << _type << " ";
+	else if (CASE_MODIFY_STYLE == MACRO )
+	  os << "`" << _type << " ";
+      }
+      
       os << "case";
       if ( _z ) os << "z";
       

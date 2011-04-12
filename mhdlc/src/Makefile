@@ -16,15 +16,9 @@ CXX = /home/xin_meng/tools/bin/g++
 TOP_EXE = mhdlc32
 endif	
 
-ifeq ($(release),)
 PROFLAGS = -pg
 CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS)
 LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
-else 
-CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` 
-LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
-endif
-
 
 
 BISON_AUX_INC = location.hh position.hh stack.hh
@@ -81,11 +75,16 @@ CC_SRC = $(M_ALL_CC_SRC) $(SV_ALL_CC_SRC) $(PP_ALL_CC_SRC) $(UTIL_ALL_CC_SRC) $(
 
 
 
-.phony: lib clean obj tar
+.phony: lib clean obj tar release
 
 
 $(TOP_EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(LIBFLAGS)
+
+release : CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` 
+release : LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
+release : $(TOP_EXE)
+
 
 .depend : $(CC_SRC)
 	$(CXX) -MM $(CPPFLAGS) $^ > .depend
@@ -127,7 +126,7 @@ tar:
 	bzip2 src.tar
 
 clean: 
-	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend mhdlc src.tar* *~
+	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend $(TOP_EXE) src.tar* *~
 
 
 
