@@ -297,30 +297,41 @@ public:
 
 
   inline void Print(ostream &os=cout, int indent=0) {
-    PUT_SPACE(indent);
-    if ( LEGACY_VERILOG_MODE ) {
-      if (_type != "") {
-	if ( CASE_MODIFY_STYLE == PROPAGATE )
-	  os << _type << " ";
-	else if (CASE_MODIFY_STYLE == MACRO )
-	  os << "`" << _type << " ";
+    // PUT_SPACE(indent);
+    if ( LEGACY_VERILOG_MODE && (_type != "") ) {
+      if ( CASE_MODIFY_STYLE == PROPAGATE ) {
+	PUT_SPACE(indent);
+	os << _type << " ";
       }
+      else if (CASE_MODIFY_STYLE == MACRO ) {
+	os << "`ifndef NO_UNIQUE" << endl;
+	PUT_SPACE(indent);
+	os << _type << " " << "case";
+	if ( _z ) os << "z";
+	os << " (";
+	_exp->Print(os);
+	os << " ) " << endl;
+	os << "`else" << endl;
+	PUT_SPACE(indent);
+	os << "case";
+	if (_z) os << "z";
+	os << " (";
+	_exp->Print(os);
+	os << " ) " << endl;
+	os << "`endif" << endl;
+      }
+      else { // Eliminate
+	PUT_SPACE(indent);
+	os << "case";
+	if ( _z ) os << "z";
       
-      os << "case";
-      if ( _z ) os << "z";
-      
-      os << " ( " ; 
-      _exp->Print(os);
-      os << " ) " << endl;
-      
-//       if ( _type[0] == 'u' ) {
-// 	os << " // synthesis parallel_case" << endl;
-//       }
-//       else {
-// 	os << endl;
-//       }
+	os << " ( " ; 
+	_exp->Print(os);
+	os << " ) " << endl;
+      }
     }
     else {
+      PUT_SPACE(indent);
       os << _type << " case"; 
       if ( _z ) os << "z"; 
       os << " ( ";
@@ -328,19 +339,15 @@ public:
       os << " )" << endl;
     }
 
-//     os << _type << " case"; 
-//     if ( _z ) os << "z"; 
-//     os << " ( ";
-//     _exp->Print(os);
-//     os << " )" << endl;
-
     for (vector<CCaseItem*>::iterator iter = _items->begin(); 
 	 iter != _items->end(); ++iter) {
       (*iter)->Print(os, indent+step);
-      os << endl;
+      if (iter + 1 != _items->end())
+	os << endl;
     }
     
     if ( _default_stmt ) {
+      os << endl;
       PUT_SPACE(indent+step);
       os << "default: begin" << endl;
       _default_stmt->Print(os, indent+step*2);
@@ -349,7 +356,8 @@ public:
     }
 
     PUT_SPACE(indent);
-    os << "endcase" << endl;
+    os << "endcase" << endl
+       << endl;
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {

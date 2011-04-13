@@ -455,7 +455,7 @@ GetOpt(int argc, char *argv[])
 	     << "             This is the default behavior." << endl
 	     << endl
 	     << "    --macro-case-modifier" << endl
-	     << "             'unique' and 'priority' case modifiers are converted to `unique and `priority macro in " << endl
+	     << "             'unique' and 'priority' case modifiers are enclosed in `NO_UNIQUE' macro in " << endl
 	     << "             generated verilog source code, which lets simulation or synthesis process to decide" << endl
 	     << "             the usage of the modifiers." << endl
 	     << endl
