@@ -301,7 +301,11 @@ public:
     if ( LEGACY_VERILOG_MODE && (_type != "") ) {
       if ( CASE_MODIFY_STYLE == PROPAGATE ) {
 	PUT_SPACE(indent);
-	os << _type << " ";
+	os << _type << " case";
+	if ( _z ) os << "z";
+	os << " (";
+	_exp->Print(os);
+	os << " ) " << endl;
       }
       else if (CASE_MODIFY_STYLE == MACRO ) {
 	os << "`ifndef NO_UNIQUE" << endl;
