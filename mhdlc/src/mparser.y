@@ -520,14 +520,26 @@ net : net_name "[" expression ":" expression "]"
   else {
     CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
     if ( $3->IsConst() ) {
-      if ( $3->Value() > symb->msb->Value() ) {
-	if ( !symb->Update($3) ) {
-	  mwrapper.error(@3, "Bit index out of MSB range, check your declaration.");
+      if ( symb->is_2D ) {
+	if ( $3->Value() > symb->length_msb->Value() ) {
+	  ostringstream msg;
+	  msg << symb->name << " "
+	      << "First index of 2D array out of range, "
+	      << $3->Value() << ">" << symb->length_msb->Value() << ", "
+	      << "check your declaration." << endl;
+	  mwrapper.error(@3, msg.str());
 	}
       }
-      if ( $3->Value() < symb->lsb->Value() ) {
-	if ( !symb->UpdateLSB($3) ) {
-	  mwrapper.error(@3, "Bit index out of LSB range, check your declaration.");
+      else {
+	if ( $3->Value() > symb->msb->Value() ) {
+	  if ( !symb->Update($3) ) {
+	    mwrapper.error(@3, "Bit index out of MSB range, check your declaration.");
+	  }
+	}
+	if ( $3->Value() < symb->lsb->Value() ) {
+	  if ( !symb->UpdateLSB($3) ) {
+	    mwrapper.error(@3, "Bit index out of LSB range, check your declaration.");
+	  }
 	}
       }
     }
@@ -537,9 +549,21 @@ net : net_name "[" expression ":" expression "]"
 
       ulonglong width = $3->Width();
       CNumber *num = new CNumber(Power(2, width)-1);
-      if ( num->Value() >= symb->msb->Value() ) {
-	if ( !symb->Update(num) ) {
-	  mwrapper.warning(@3, "Bit index could be out of range, confirm with your declaration.");
+      if ( symb->is_2D ) {
+	if ( num->Value() > symb->length_msb->Value() ) {
+	  ostringstream msg;
+	  msg << symb->name << " "
+	      << "Non-constant first index of 2D array could be out of range, "
+	      << num->Value() << ">" << symb->length_msb->Value() << ", "
+	      << "check your declaration." << endl;
+	  mwrapper.warning(@3, msg.str());
+	}
+      }
+      else {
+	if ( num->Value() >= symb->msb->Value() ) {
+	  if ( !symb->Update(num) ) {
+	    mwrapper.warning(@3, "Bit index could be out of range, confirm with your declaration.");
+	  }
 	}
       }
     }
@@ -563,7 +587,16 @@ net : net_name "[" expression ":" expression "]"
       $6->AddRoccure(@6);
 
       if ( ! $3->IsConst() ) {
-	 mwrapper.warning( @3, "Non constant for 1st index in 2-D arrary, could be out of range." );
+	ulonglong width = $3->Width();
+	CNumber *num = new CNumber(Power(2, width)-1);
+	if ( num->Value() > symb->length_msb->Value()) {
+	  ostringstream msg;
+	  msg << symb->name
+	      << ", Non constant for 1st index in 2-D arrary, could be out of range, " 
+	      << num->Value() << " > " << symb->length_msb->Value();
+	  
+	  mwrapper.warning( @3, msg.str() );
+	}
       }
       else {
 	 if ( $3->Value() > symb->length_msb->Value() ) {
@@ -602,7 +635,17 @@ net : net_name "[" expression ":" expression "]"
       $8->AddRoccure(@8);
 
       if ( ! $3->IsConst() ) {
-	 mwrapper.warning( @3, "Non constant for 1st index in 2-D arrary, could be out of range." );
+	ulonglong width = $3->Width();
+	CNumber *num = new CNumber(Power(2, width)-1);
+
+	if ( num->Value() > symb->length_msb->Value()) {
+	  ostringstream msg;
+	  msg << symb->name
+	      << ", Non constant for 1st index in 2-D arrary, could be out of range, " 
+	      << num->Value() << " > " << symb->length_msb->Value();
+	  
+	  mwrapper.warning( @3, msg.str() );
+	}
       }
       else {
 	 if ( $3->Value() > symb->length_msb->Value() ) {
