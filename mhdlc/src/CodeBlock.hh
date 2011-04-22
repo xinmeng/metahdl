@@ -505,11 +505,18 @@ public:
       case_items->push_back( (*_states)[i]->CaseItem() );
     }
 
-    ostringstream sstr;
-    sstr << state_count << "'hX";
-    CBasedNum *xx_value = new CBasedNum(sstr.str(), 16);
+    // default assignment
+//     ostringstream sstr;
+//     sstr << state_count << "'hX";
+//     CBasedNum *xx_value = new CBasedNum(sstr.str(), 16);
+//     CVariable *xx_net = new CVariable ( SymbolTabel->Exist( _name + "_ns" ) );
+//     CStmtSimple *xx_stmt = new CStmtSimple ( xx_net, xx_value );
+    CVariable *xx_value = new CVariable ( SymbolTabel->Exist( (*_states)[0]->Name() ));
     CVariable *xx_net = new CVariable ( SymbolTabel->Exist( _name + "_ns" ) );
     CStmtSimple *xx_stmt = new CStmtSimple ( xx_net, xx_value );
+
+
+
 
     CBasedNum *case_exp = new CBasedNum("1'b1", 2);
     CStmtCASE *fsm_case = new CStmtCASE(new CCaseType("unique", false), case_exp, case_items, xx_stmt);
