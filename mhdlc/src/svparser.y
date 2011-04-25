@@ -843,8 +843,10 @@ port_direction: "input" {$$ = INPUT;}
 /*******************************
      parameter_declaration
  ******************************/ 
-parameter_declaration : "parameter" parameter_assignments ";" 
-| "parameter" "[" expression ":" expression "]" parameter_assignments ";" 
+parameter_keywords : "parameter" | "localparam";
+
+parameter_declaration : parameter_keywords parameter_assignments ";" 
+| parameter_keywords "[" expression ":" expression "]" parameter_assignments ";" 
 ;
 
 parameter_assignments : parameter_assignment
