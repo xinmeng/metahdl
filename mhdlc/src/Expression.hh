@@ -334,6 +334,16 @@ public:
       }
       os << ";" << endl;
     }
+
+    if (is_2D) {
+      os << "// synopsys translate_off" << endl
+	 << "`FSDB_DUMP_BEGIN" << endl
+	 << "  $fsdbDumpMDA(" << name << ");" << endl
+	 << "`FSDB_DUMP_END" << endl
+	 << "// synopsys translate_on" << endl
+	 << endl;
+    }
+
   }
 
 

@@ -308,7 +308,7 @@ public:
 	os << " ) " << endl;
       }
       else if (CASE_MODIFY_STYLE == MACRO ) {
-	os << "`ifndef NO_UNIQUE" << endl;
+	os << "`ifdef USE_UNIQUE" << endl;
 	PUT_SPACE(indent);
 	os << _type << " " << "case";
 	if ( _z ) os << "z";

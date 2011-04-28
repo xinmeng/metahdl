@@ -518,6 +518,9 @@ GetOpt(int argc, char *argv[])
 	exit(1);
       }
     }
+    else if ( !strncmp(argv[i], "+dump2D+", 8) ) {
+      
+    }
     else if ( !strcmp(argv[i], "--force-width-output" ) ) {
       FORCE_WIDTH_OUTPUT = true;
     }
