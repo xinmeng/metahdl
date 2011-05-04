@@ -166,6 +166,8 @@ MEM		\[[^;\n\]]*\]
 <COPY>`unconnected_drive	{store_it(yytext,FALSE,FALSE);}
 <COPY>`nounconnected_drive	{store_it(yytext,FALSE,FALSE);}
 <COPY>`uselib			{store_it(yytext,FALSE,FALSE);}
+<COPY>`FSDB_DUMP_BEGIN		{store_it(yytext,FALSE,FALSE);}
+<COPY>`FSDB_DUMP_END            {store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>`accelerate		{fprintf(yyout, "%s",yytext);}
 <INITIAL>`noaccelerate		{fprintf(yyout, "%s",yytext);}
@@ -200,6 +202,9 @@ MEM		\[[^;\n\]]*\]
 <INITIAL>`unconnected_drive	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`nounconnected_drive	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`uselib		{fprintf(yyout, "%s",yytext);}
+<INITIAL>`FSDB_DUMP_BEGIN	{store_it(yytext,FALSE,FALSE);}
+<INITIAL>`FSDB_DUMP_END         {store_it(yytext,FALSE,FALSE);}
+
 
 <INITIAL,DEFINE,MACRO,CMNT,CCMNT,MPP,COPY,INCL,SKIP_TO_EOL>`line.*\n {
   fprintf(stderr, 

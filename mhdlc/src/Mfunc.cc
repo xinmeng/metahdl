@@ -46,7 +46,7 @@ enum e_case_modify_style_t CASE_MODIFY_STYLE = PROPAGATE;
 // extern class CModTab;
 // extern CModTab G_ModuleTable;
 
-string command = "";
+string COMMAND = "";
 vector<string> FILES;
 list<string>   PATHS;
 string WORKDIR = "workdir";
@@ -223,7 +223,7 @@ GetOpt(int argc, char *argv[])
 
 
   /* process command line arguments */
-  command = argv[0];
+  COMMAND = argv[0];
   for (i = 1; i < argc; ++i) {
     arglen = strlen(argv[i]);
     if ( !strcmp(argv[i], "-I") ) {
@@ -580,7 +580,7 @@ RptOpt()
      << "==============================" << endl
      << " Summary of working settings" << endl
      << "==============================" << endl
-     << "Command: " << command << endl
+     << "Command: " << COMMAND << endl
      << "output_line_directive: " << output_line_directive << endl
      << "output_ifdef_directive: " << output_ifdef_directive << endl
      << "DebugMHDLLexer: " << DebugMHDLLexer << endl

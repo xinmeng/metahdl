@@ -27,7 +27,7 @@ class CMHDLwrapper;
 #include "MetaHDL.hh"
 extern bool FastDependParse;
 extern int DebugMHDLParser;
-extern string command;
+extern string COMMAND;
 extern list<string> PATHS;
 extern string WORKDIR;
 %}
@@ -2125,12 +2125,16 @@ metahdl_constrol : "metahdl" ID ";"
 
 | "metahdl" "parse" verbtims ";"
 {
-  string cmd_line = command;
+  string cmd_line = COMMAND;
+  if ( LEGACY_VERILOG_MODE )
+    cmd_line = cmd_line + " -verilog ";
+
   for (list<string>::iterator iter = PATHS.begin(); 
        iter!=PATHS.end(); ++iter)
     cmd_line = cmd_line + " -I " + *iter ;
 
   cmd_line = cmd_line + " -o " + WORKDIR + *$3 ;
+
 
   cerr << endl << "\tParsing on demand: " << cmd_line << endl << endl;
 
