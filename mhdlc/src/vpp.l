@@ -202,8 +202,8 @@ MEM		\[[^;\n\]]*\]
 <INITIAL>`unconnected_drive	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`nounconnected_drive	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`uselib		{fprintf(yyout, "%s",yytext);}
-<INITIAL>`FSDB_DUMP_BEGIN	{store_it(yytext,FALSE,FALSE);}
-<INITIAL>`FSDB_DUMP_END         {store_it(yytext,FALSE,FALSE);}
+<INITIAL>`FSDB_DUMP_BEGIN	{fprintf(yyout, "%s",yytext);}
+<INITIAL>`FSDB_DUMP_END         {fprintf(yyout, "%s",yytext);}
 
 
 <INITIAL,DEFINE,MACRO,CMNT,CCMNT,MPP,COPY,INCL,SKIP_TO_EOL>`line.*\n {
