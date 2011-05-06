@@ -168,6 +168,7 @@ MEM		\[[^;\n\]]*\]
 <COPY>`uselib			{store_it(yytext,FALSE,FALSE);}
 <COPY>`FSDB_DUMP_BEGIN		{store_it(yytext,FALSE,FALSE);}
 <COPY>`FSDB_DUMP_END            {store_it(yytext,FALSE,FALSE);}
+<COPY>`fsdbDumpMDA              {store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>`accelerate		{fprintf(yyout, "%s",yytext);}
 <INITIAL>`noaccelerate		{fprintf(yyout, "%s",yytext);}
@@ -204,6 +205,7 @@ MEM		\[[^;\n\]]*\]
 <INITIAL>`uselib		{fprintf(yyout, "%s",yytext);}
 <INITIAL>`FSDB_DUMP_BEGIN	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`FSDB_DUMP_END         {fprintf(yyout, "%s",yytext);}
+<INITIAL>`fsdbDumpMDA           {fprintf(yyout, "%s",yytext);}
 
 
 <INITIAL,DEFINE,MACRO,CMNT,CCMNT,MPP,COPY,INCL,SKIP_TO_EOL>`line.*\n {
