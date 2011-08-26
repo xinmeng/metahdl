@@ -1,6 +1,7 @@
 #ifndef __CODEBLOCK_HH__
 #define __CODEBLOCK_HH__
 
+#include <algorithm>
 #include "Expression.hh"
 #include "Statement.hh"
 #include "location.hh"
@@ -240,7 +241,7 @@ class CBlkInst : public CCodeBlock
 private:
   string _mod_name, _inst_name;
   vector<pair<string, CExpression*> > *_param;
-  map<CSymbol*, CExpression*> *_connection;
+  map<CSymbol*, CExpression*, CCompareConnection> *_connection;
 
 public:
 //   inline CBlkInst(yy::location &loc, 
@@ -255,7 +256,7 @@ public:
 		  const string &mod_name, 
 		  vector<pair<string, CExpression*> > *param,
 		  const string &inst_name, 
-		  map<CSymbol*, CExpression*> *connection ) : 
+		  map<CSymbol*, CExpression*, CCompareConnection> *connection ) : 
     CCodeBlock (loc),
     _mod_name (mod_name), _inst_name (inst_name),
     _connection (connection), _param (param) {}
@@ -309,7 +310,7 @@ public:
   }
 
   inline void PrintConncetion(ostream&os=cout) {
-    for (map<CSymbol*, CExpression*>::iterator iter = _connection->begin(); 
+    for (map<CSymbol*, CExpression*, CCompareConnection>::iterator iter = _connection->begin(); 
 	 iter != _connection->end(); ++iter) {
       PUT_SPACE(_mod_name.length() + _inst_name.length() + 6);
       if ( iter->second ) {
@@ -332,7 +333,7 @@ public:
   }
 
   inline void GetSymbol() {
-    for (map<CSymbol*, CExpression*>::iterator iter = _connection->begin(); 
+    for (map<CSymbol*, CExpression*, CCompareConnection>::iterator iter = _connection->begin(); 
 	 iter != _connection->end(); ++iter) {
        if ( iter->second ) {
 	  if ( iter->first->direction == INPUT ) {

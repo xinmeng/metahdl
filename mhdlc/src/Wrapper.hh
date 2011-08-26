@@ -14,6 +14,21 @@ using namespace std;
 #include "Table.hh"
 #include "Mfunc.hh"
 
+class CWarningLocMessage
+{
+private:
+  yy::location loc;
+  string msg;
+
+public:
+  inline CWarningLocMessage (const yy::location &loc_, const string &msg_)  : 
+    loc (loc_), msg (msg_) {};
+
+  inline ostream& Print(ostream &os=cerr) {
+    os << "\033[00;35m\n**WARNING:" << loc << ":" << msg << "\033[00m" << endl;
+    return os;
+  }
+};
 
 // ------------------------------
 //   Wrapper base class
@@ -36,6 +51,10 @@ public:
 private:
   string _my_name;
 
+protected:
+  vector<CWarningLocMessage*> _warning_msg;
+  vector<string> _lint_warning_msg;
+  set<string> _lint_warning_flag;
 
 
 public:
@@ -135,7 +154,9 @@ public:
   }
   
   virtual inline void warning(const yy::location &loc, const string &msg)  {
-    cerr << "\033[00;35m\n**" << _my_name << " Parser WARNING:" << loc << ":" << msg << "\033[00m" << endl;
+    CWarningLocMessage *warningmsg = new CWarningLocMessage(loc, msg);
+    _warning_msg.push_back(warningmsg);
+    // cerr << "\033[00;35m\n**" << _my_name << " Parser WARNING:" << loc << ":" << msg << "\033[00m" << endl;
   }
 };
 
@@ -217,24 +238,32 @@ public:
     mctrl["exitonwarning"] = new CCtrlValType; // flag
     mctrl["exitonlintwarning"] = new CCtrlValType; // flag
 
+    mctrl["exitonportchk"] = new CCtrlValType; // flag
+    mctrl["exitonportchk"]->flag = true;
+
+    mctrl["exitonmultidriver"] = new CCtrlValType; // flag
+
   }
 
-  inline void warning(const yy::location &loc, const string &msg)  {
-    CWrapper::warning(loc, msg);
+//   inline void warning(const yy::location &loc, const string &msg)  {
+//     CWrapper::warning(loc, msg);
 
-    if ( mctrl["exitonwarning"]->flag ) {
-       cerr << "\033[00;31mExit-On-Warning set for module " << mctrl["modname"]->str << ", fix warning or remove this option to continue." << "\033[00m" << endl;
-      exit(1);
-    }
-  }
+//     if ( mctrl["exitonwarning"]->flag ) {
+//        cerr << "\033[00;31mExit-On-Warning set for module " << mctrl["modname"]->str << ", fix warning or remove this option to continue." << "\033[00m" << endl;
+//       exit(1);
+//     }
+//   }
 
-  inline void LintWarning(const string &msg)  {
-    cerr << "\033[00;35m**Lint Warning on Module \"" + mctrl["modname"]->str + "\":" + msg << "\033[00m" << endl;
+  inline void LintWarning(const string &msg, const string &exit_switch="exitonlintwarning")  {
+    _lint_warning_msg.push_back(msg);
+    _lint_warning_flag.insert(exit_switch);
+    
+//     cerr << "\033[00;35m**Lint Warning on Module \"" + mctrl["modname"]->str + "\":" + msg << "\033[00m" << endl;
 
-    if ( mctrl["exitonlintwarning"]->flag ) {
-      cerr << "\033[00;31mExit-On-LintWarning set for module " << mctrl["modname"]->str << ", fix warning or remove this option to continue." << "\033[00m" << endl;
-      exit(1);
-    }
+//     if ( mctrl[exit_switch]->flag ) {
+//       cerr << "\033[00;31m\"" << exit_switch << "\" set for module " << mctrl["modname"]->str << ", fix warning or remove this option to continue." << "\033[00m" << endl;
+//       exit(1);
+//     }
   }
 
 
@@ -272,9 +301,8 @@ public:
       string msg = symbol_table->ExtractIO(io_table);
       if ( mctrl["portchk"]->flag ) {
 	msg  += io_table->ChkMissingPort();
-
 	if ( msg != "" ) {
-	  LintWarning("Port checking:\n" + msg + "\n");
+	  LintWarning("Port checking:\n" + msg + "\n", "exitonportchk");
 	}
       }
 
@@ -284,7 +312,7 @@ public:
 	msg = "";
 	msg = symbol_table->ChkMultiDriver();
 	if ( msg != "" ) {
-	  LintWarning("Multiple Driver Report:\n" + msg);
+	  LintWarning("Multiple Driver Report:\n" + msg, "exitonmultidriver");
 	}
       }
 
@@ -302,6 +330,50 @@ public:
       }
       else {
 	cerr << "**MWrapper Error: Cannot open file " << GetGenFileName() << endl;
+	exit(1);
+      }
+
+      for (vector<CWarningLocMessage*>::iterator iter = _warning_msg.begin();
+	   iter != _warning_msg.end(); iter++) {
+	(*iter)->Print(cerr);
+      }
+      if ( mctrl["exitonwarning"]->flag ) {
+	exit(1);
+      }
+      
+      if (_lint_warning_msg.size()) {
+	cerr << endl
+	     << "\033[00;35m**Lint Warning on Module \"" 
+	     << mctrl["modname"]->str << "\":" 
+	     << "\033[00m" 
+	     << endl;	
+      }
+      for (vector<string>::iterator iter = _lint_warning_msg.begin();
+	   iter != _lint_warning_msg.end(); iter++) {
+	cerr << "\033[00;35m"
+	     << (*iter) 
+	     << "\033[00m" 
+	     << endl;	
+      }
+      if (mctrl["exitonlintwarning"]->flag && _lint_warning_msg.size() > 0) {
+	cerr << "\033[00;31m\"exitonlintwarning\" set for module " 
+	     << mctrl["modname"]->str 
+	     << ", fix warning or remove this option to continue." 
+	     << "\033[00m" << endl;
+	exit(1);
+      }
+      else if (mctrl["exitonportchk"]->flag && _lint_warning_flag.count("exitonportchk") > 0) {
+	cerr << "\033[00;31m\"exitonportchk\" set for module " 
+	     << mctrl["modname"]->str 
+	     << ", fix warning or remove this option to continue." 
+	     << "\033[00m" << endl;
+	exit(1);
+      }
+      else if (mctrl["exitonmultidriver"]->flag && _lint_warning_flag.count("exitonmultidriver") > 0) {
+	cerr << "\033[00;31m\"exitonmultidriver\" set for module " 
+	     << mctrl["modname"]->str 
+	     << ", fix warning or remove this option to continue." 
+	     << "\033[00m" << endl;
 	exit(1);
       }
     }

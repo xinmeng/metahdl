@@ -1826,10 +1826,10 @@ inst_block :  ID // 1
 // 3             4               5
 parameter_rule instance_name connection_spec ";"  
 { 
-  map<CSymbol*, CExpression*> *connect_map_got = mwrapper.mod_template->io_table->GetIO();
-  map<CSymbol*, CExpression*> *connect_map = new map<CSymbol*, CExpression*>;
+  map<CSymbol*, CExpression*, CCompareConnection> *connect_map_got = mwrapper.mod_template->io_table->GetIO();
+  map<CSymbol*, CExpression*, CCompareConnection> *connect_map = new map<CSymbol*, CExpression*, CCompareConnection>;
 
-  for (map<CSymbol*, CExpression*>::iterator iter = connect_map_got->begin(); 
+  for (map<CSymbol*, CExpression*, CCompareConnection>::iterator iter = connect_map_got->begin(); 
        iter != connect_map_got->end(); ++iter) {
     if ( iter->second && typeid( *(iter->second) ) == typeid( CVariable ) ) {
       CVariable *var = dynamic_cast<CVariable*> (iter->second);
@@ -2084,7 +2084,7 @@ verbtims : VERBTIM {$$ = new string (*$1); }
 metahdl_constrol : "metahdl" ID ";" 
 {
   if ( *$2 == "exit") {
-    cerr << "[M-Exit]" << @$ << endl;
+    cerr << "\033[00;31m[M-Exit]" << @$ << "\033[00m" << endl;
     exit(1);
   }
   else {

@@ -336,11 +336,13 @@ public:
     }
 
     if (is_2D) {
-      os << "// synopsys translate_off" << endl
+      os << "`ifdef FSDB_MDA_ENABLE" << endl
+	 << "// synopsys translate_off" << endl
 	 << "`FSDB_DUMP_BEGIN" << endl
 	 << "  `fsdbDumpMDA(" << name << ");" << endl
 	 << "`FSDB_DUMP_END" << endl
 	 << "// synopsys translate_on" << endl
+	 << "`endif" << endl
 	 << endl;
     }
 
@@ -470,6 +472,19 @@ private:
   }
     
 };
+
+struct CCompareConnection 
+{
+  inline bool operator() (CSymbol* i, CSymbol* j) {
+    if ( strcmp(i->name.c_str(), j->name.c_str()) < 0 ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+};
+
 
 
 // ------------------------------

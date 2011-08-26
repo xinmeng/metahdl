@@ -66,8 +66,8 @@ public:
     }
   }
 
-  inline map<CSymbol*, CExpression*> * GetIO() {
-    map<CSymbol*, CExpression*> *io = new map<CSymbol*, CExpression*>;
+  inline map<CSymbol*, CExpression*, CCompareConnection> * GetIO() {
+    map<CSymbol*, CExpression*, CCompareConnection> *io = new map<CSymbol*, CExpression*, CCompareConnection>;
     for (map<string, CExpression*>::iterator iter = _connect_map.begin();
 	 iter != _connect_map.end(); ++iter) {
        CSymbol *symbol;
