@@ -14,7 +14,7 @@ module one_hot_mux (
    output [WIDTH-1:0] 	  dout;
    output 		  err;
 
-   wire [WIDTH-1:0] 	  data_2d [0:CNT-1];
+   wire [WIDTH-1:0] 	  data_2d   [0:CNT-1];
    wire [CNT-1:0] 	  data_2d_t [0:WIDTH-1];
    wire [WIDTH-1:0] 	  dout;
    wire 		  err;
