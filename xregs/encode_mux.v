@@ -1,30 +1,29 @@
-module one_hot_mux (
+module encode_mux (
 		    din,
 		    sel,
-		    dout,
-		    err
+		    dout
 		    );
 
-   parameter WIDTH         = 32;
-   parameter CNT           = 5;
-   parameter ONE_HOT_CHECK = 1;
+   parameter WIDTH     = 32;
+   parameter CNT       = 5;
+   parameter CNT_WIDTH = 3;
 
    input  [WIDTH*CNT-1:0] din;
-   input  [CNT-1:0] 	  sel;
+   input  [CNT_WIDTH-1:0] sel;
    output [WIDTH-1:0] 	  dout;
-   output 		  err;
+
 
    wire [WIDTH-1:0] 	  data_2d   [0:CNT-1];
    wire [CNT-1:0] 	  data_2d_t [0:WIDTH-1];
    wire [WIDTH-1:0] 	  dout;
-   wire 		  err;
+
    
 
    genvar 		  cnt, w;
 
    generate 
       for (cnt=0; cnt<CNT; cnt=cnt+1) begin: create_2d
-	 assign data_2d[cnt] = sel[cnt] ? din[(cnt+1)*WIDTH-1:cnt] : {WIDTH{1'b0}};
+	 assign data_2d[cnt] = (sel == cnt) ? din[(cnt+1)*WIDTH-1:cnt] : {WIDTH{1'b0}};
       end
    endgenerate
 
@@ -42,17 +41,4 @@ module one_hot_mux (
       end
    endgenerate
 
-   generate
-      if (ONE_HOT_CHECK) begin
-	 wire [WIDTH-1:0] sel_m1, sel_msk;
-	 
-	 assign sel_m1  = sel - 1'b1;
-	 assign sel_msk = ~(sel_m1 ^ sel);
-	 assign err     = |(sel_msk & sel);
-      end
-      else begin
-	 assign err = 1'b0;
-      end
-   endgenerate
-      
 endmodule
