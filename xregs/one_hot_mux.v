@@ -7,15 +7,15 @@ module one_hot_mux (
 
    parameter WIDTH         = 32;
    parameter CNT           = 5;
-   parameter ONE_HOT_CHECK = 1;
+   parameter ONE_HOT_CHECK = 0;
 
    input  [WIDTH*CNT-1:0] din;
    input  [CNT-1:0] 	  sel;
    output [WIDTH-1:0] 	  dout;
    output 		  err;
 
-   wire [WIDTH-1:0] 	  data_2d   [0:CNT-1];
-   wire [CNT-1:0] 	  data_2d_t [0:WIDTH-1];
+   wire [WIDTH-1:0] 	  data_2d   [CNT-1:0];
+   wire [CNT-1:0] 	  data_2d_t [WIDTH-1:0];
    wire [WIDTH-1:0] 	  dout;
    wire 		  err;
    
@@ -24,7 +24,7 @@ module one_hot_mux (
 
    generate 
       for (cnt=0; cnt<CNT; cnt=cnt+1) begin: create_2d
-	 assign data_2d[cnt] = sel[cnt] ? din[(cnt+1)*WIDTH-1:cnt] : {WIDTH{1'b0}};
+	 assign data_2d[cnt] = sel[cnt] ? din[(cnt+1)*WIDTH-1:cnt*WIDTH] : {WIDTH{1'b0}};
       end
    endgenerate
 
