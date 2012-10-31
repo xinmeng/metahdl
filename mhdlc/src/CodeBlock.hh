@@ -4,7 +4,6 @@
 #include <algorithm>
 #include "Expression.hh"
 #include "Statement.hh"
-#include "location.hh"
 
 extern bool OutputCodeLocation;
 

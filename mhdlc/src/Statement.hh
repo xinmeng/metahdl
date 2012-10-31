@@ -2,7 +2,6 @@
 #define __STATEMENT_HH__
 
 #include "Expression.hh"
-#include "location.hh"
 
 #define PUT_SPACE(indent) for (int i=0; i<indent; ++i) os << " "
 

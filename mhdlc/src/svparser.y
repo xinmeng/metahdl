@@ -1,3 +1,4 @@
+%require "2.5"
 %skeleton "lalr1.cc"
 %glr-parser
 %verbose
@@ -11,20 +12,17 @@
 };
 %defines
 %define "parser_class_name" "svParser"
-%name-prefix="sv"
+ // %name-prefix="sv"
 %output="svparser.bison.cc"
 
 
-%{
+%code requires {
 #include <string>
 #include <iostream>
-%}
 
-
-%{
 class CSVwrapper;
 #include "MetaHDL.hh"
-%}
+}
 
 %union {
   string *str;
@@ -59,8 +57,9 @@ class CSVwrapper;
 %lex-param {CSVwrapper &svwrapper}
 
 %{
-  svtokentype svlex(YYSTYPE *yylval, yy::location* yylloc, CSVwrapper &svwrapper);
+  extern  yy::svParser::token::yytokentype svlex(yy::svParser::semantic_type *yylval, yy::svParser::location_type *yylloc, CSVwrapper &svwrapper);
 
+#define yylex svlex
 #define ECHO_LOC(var, s) cerr << "[" << s << "]" << var << endl;
 
 %}
@@ -451,7 +450,7 @@ constant: NUM
 
 
 
-net_name : ID {$$ = $1}
+net_name : ID {$$ = $1;}
 ;
 
 

@@ -1,3 +1,4 @@
+%require "2.5"
 %skeleton "lalr1.cc"
 %glr-parser
 %verbose
@@ -12,17 +13,14 @@
 };
 %defines
 %define "parser_class_name" "mParser"
-%name-prefix="mhdl"
+ // %name-prefix="mhdl"
 %output="mparser.bison.cc"
 
 
-%{
+%code requires{
 #include <string>
 #include <iostream>
-%}
 
-
-%{
 class CMHDLwrapper;
 #include "MetaHDL.hh"
 extern bool FastDependParse;
@@ -30,7 +28,7 @@ extern int DebugMHDLParser;
 extern string COMMAND;
 extern list<string> PATHS;
 extern string WORKDIR;
-%}
+}
 
 %union {
   string *str;
@@ -66,7 +64,9 @@ extern string WORKDIR;
 %lex-param {CMHDLwrapper &mwrapper}
 
 %{
-  mhdltokentype mhdllex(YYSTYPE *yylval, yy::location* yylloc, CMHDLwrapper &mwrapper);
+  extern  yy::mParser::token::yytokentype mhdllex(yy::mParser::semantic_type *yylval, yy::mParser::location_type *yylloc, CMHDLwrapper &mwrapper);
+
+  #define yylex mhdllex
 
 #define ECHO_LOC(var, s) cerr << "[" << s << "]" << var << endl;
 

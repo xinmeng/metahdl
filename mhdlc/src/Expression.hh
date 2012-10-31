@@ -2,6 +2,7 @@
 #define __EXPRESSION_HH__
 
 #include "Mfunc.hh"
+#include "string.h"
 #include "location.hh"
 
 enum tDirection {INPUT, OUTPUT, INOUT, NONPORT};

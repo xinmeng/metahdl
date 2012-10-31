@@ -1,23 +1,14 @@
 release =
 
-ifeq ($(HOST),ubuntu606)
 FLEX = flex
 BISON= bison
-else
-FLEX = /home/xin_meng/tools/bin/flex
-BISON= /home/xin_meng/tools/bin/bison
-endif
-
-ifeq ($(MACHTYPE),x86_64)
 CXX = g++
-TOP_EXE = mhdlc64
-else 
-CXX = /home/xin_meng/tools/bin/g++
-TOP_EXE = mhdlc32
-endif	
+TOP_EXE = mhdlc
 
+
+SUPPRESS_ERR = -Wno-write-strings -Wno-format-security
 PROFLAGS = -pg
-CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS)
+CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
 LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
 
 
@@ -94,7 +85,7 @@ $(M_FLEX_CC_SRC) : $(M_FLEX_SRC)
 
 $(M_BISON_CC_SRC) : $(M_BISON_SRC)
 	$(BISON) $^
-	@perl -pi -e 's/enum yytokentype/enum mhdltokentype/' mparser.bison.hh
+#	perl -pi -e 's/enum yytokentype/enum mhdltokentype/' mparser.bison.hh
 
 
 $(SV_FLEX_CC_SRC) : $(SV_FLEX_SRC)
@@ -102,7 +93,7 @@ $(SV_FLEX_CC_SRC) : $(SV_FLEX_SRC)
 
 $(SV_BISON_CC_SRC) : $(SV_BISON_SRC)
 	$(BISON) $^
-	@perl -pi -e 's/enum yytokentype/enum svtokentype/' svparser.bison.hh
+#	perl -pi -e 's/enum yytokentype/enum svtokentype/' svparser.bison.hh
 
 
 $(PP_FLEX_CC_SRC) : $(PP_FLEX_SRC)

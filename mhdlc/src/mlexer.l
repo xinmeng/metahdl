@@ -17,8 +17,9 @@
 
    std::stack<YY_BUFFER_STATE> MHDLBufStk;
 
+   typedef yy::mParser::token mhdl_token;
 #define YY_DECL \
-  mhdltokentype mhdllex(YYSTYPE *yylval, yy::location* yylloc, CMHDLwrapper &mwrapper)
+   yy::mParser::token::yytokentype mhdllex(yy::mParser::semantic_type *yylval, yy::mParser::location_type *yylloc, CMHDLwrapper &mwrapper)
 
 #define YY_USER_ACTION yylloc->columns(mhdlleng);
 
@@ -321,324 +322,324 @@ WS [ \t]+
 %%
   static string buf;
 
-{K_ALIAS} return K_ALIAS;
-{K_ALWAYS} return K_ALWAYS;
-{K_ALWAYS_COMB} return K_ALWAYS_COMB;
-{K_ALWAYS_FF} return K_ALWAYS_FF;
-{K_ALWAYS_LATCH} return K_ALWAYS_LATCH;
-{K_AND} return K_AND;
-{K_ASSERT} return K_ASSERT;
-{K_ASSIGN} return K_ASSIGN;
-{K_ASSUME} return K_ASSUME;
-{K_AUTOMATIC} return K_AUTOMATIC;
-{K_BEFORE} return K_BEFORE;
-{K_BEGIN} return K_BEGIN;
-{K_BIND} return K_BIND;
-{K_BINS} return K_BINS;
-{K_BINSOF} return K_BINSOF;
-{K_BIT} return K_BIT;
-{K_BREAK} return K_BREAK;
-{K_BUF} return K_BUF;
-{K_BUFIF0} return K_BUFIF0;
-{K_BUFIF1} return K_BUFIF1;
-{K_BYTE} return K_BYTE;
-{K_CASE} return K_CASE;
-{K_CASEX} return K_CASEX;
-{K_CASEZ} return K_CASEZ;
-{K_CELL} return K_CELL;
-{K_CHANDLE} return K_CHANDLE;
-{K_CLASS} return K_CLASS;
-{K_CLOCKING} return K_CLOCKING;
-{K_CMOS} return K_CMOS;
-{K_CONFIG} return K_CONFIG;
-{K_CONST} return K_CONST;
-{K_CONSTRAINT} return K_CONSTRAINT;
-{K_CONTEXT} return K_CONTEXT;
-{K_CONTINUE} return K_CONTINUE;
-{K_COVER} return K_COVER;
-{K_COVERGROUP} return K_COVERGROUP;
-{K_COVERPOINT} return K_COVERPOINT;
-{K_CROSS} return K_CROSS;
-{K_DEASSIGN} return K_DEASSIGN;
-{K_DEFAULT} return K_DEFAULT;
-{K_DEFPARAM} return K_DEFPARAM;
-{K_DESIGN} return K_DESIGN;
-{K_DISABLE} return K_DISABLE;
-{K_DIST} return K_DIST;
-{K_DO} return K_DO;
-{K_EDGE} return K_EDGE;
-{K_ELSE} return K_ELSE;
-{K_END} return K_END;
-{K_ENDCASE} return K_ENDCASE;
-{K_ENDCLASS} return K_ENDCLASS;
-{K_ENDCLOCKING} return K_ENDCLOCKING;
-{K_ENDCONFIG} return K_ENDCONFIG;  
-{K_ENDFUNCTION} return K_ENDFUNCTION; 
-{K_ENDGENERATE} return K_ENDGENERATE;
-{K_ENDGROUP} return K_ENDGROUP;
-{K_ENDINTERFACE} return K_ENDINTERFACE;
-{K_ENDMODULE} return K_ENDMODULE;
-{K_ENDPACKAGE} return K_ENDPACKAGE;
-{K_ENDPRIMITIVE} return K_ENDPRIMITIVE;
-{K_ENDPROGRAM} return K_ENDPROGRAM;
-{K_ENDPROPERTY} return K_ENDPROPERTY;
-{K_ENDSPECIFY} return K_ENDSPECIFY;
-{K_ENDSEQUENCE} return K_ENDSEQUENCE;
-{K_ENDTABLE} return K_ENDTABLE;
-{K_ENDTASK} return K_ENDTASK;
-{K_ENUM} return K_ENUM;
-{K_EVENT} return K_EVENT;
-{K_EXPECT} return K_EXPECT;
-{K_EXPORT} return K_EXPORT;
-{K_EXTENDS} return K_EXTENDS;
-{K_EXTERN} return K_EXTERN;
-{K_FINAL} return K_FINAL;
-{K_FIRST_MATCH} return K_FIRST_MATCH;
-{K_FOR} return K_FOR;
-{K_FORCE} return K_FORCE;
-{K_FOREACH} return K_FOREACH;
-{K_FOREVER} return K_FOREVER;
-{K_FORK} return K_FORK;
-{K_FORKJOIN} return K_FORKJOIN;
-{K_FUNCTION} yylloc->step(); yy_push_state(sc_function); return K_FUNCTION;
-{K_GENERATE} return K_GENERATE;
-{K_GENVAR} return K_GENVAR;
-{K_HIGHZ0} return K_HIGHZ0;
-{K_HIGHZ1} return K_HIGHZ1;
-{K_IF} return K_IF;
-{K_IFF} return K_IFF;
-{K_IFNONE} return K_IFNONE;
-{K_IGNORE_BINS} return K_IGNORE_BINS;
-{K_ILLEGAL_BINS} return K_ILLEGAL_BINS;
-{K_IMPORT} return K_IMPORT;
-{K_INCDIR} return K_INCDIR;
-{K_INCLUDE} return K_INCLUDE;
-{K_INITIAL} return K_INITIAL;
-{K_INOUT} return K_INOUT;
-{K_INPUT} return K_INPUT;
-{K_INSIDE} return K_INSIDE;
-{K_INSTANCE} return K_INSTANCE;
-{K_INT} return K_INT;
-{K_INTEGER} return K_INTEGER;
-{K_INTERFACE} return K_INTERFACE;
-{K_INTERSECT} return K_INTERSECT;
-{K_JOIN} return K_JOIN;
-{K_JOIN_ANY} return K_JOIN_ANY;
-{K_JOIN_NONE} return K_JOIN_NONE;
-{K_LARGE} return K_LARGE;
-{K_LIBLIST} return K_LIBLIST;
-{K_LIBRARY} return K_LIBRARY;
-{K_LOCAL} return K_LOCAL;
-{K_LOCALPARAM} return K_LOCALPARAM;
-{K_LOGIC} return K_LOGIC;
-{K_LONGINT} return K_LONGINT;
-{K_MACROMODULE} return K_MACROMODULE;
-{K_MATCHES} return K_MATCHES;
-{K_MEDIUM} return K_MEDIUM;
-{K_MODPORT} return K_MODPORT;
-{K_MODULE} return K_MODULE;
-{K_NAND} return K_NAND;
-{K_NEGEDGE} return K_NEGEDGE;
-{K_NEW} return K_NEW;
-{K_NMOS} return K_NMOS;
-{K_NOR} return K_NOR;
-{K_NOSHOWCANCELLED} return K_NOSHOWCANCELLED;
-{K_NOT} return K_NOT;
-{K_NOTIF0} return K_NOTIF0;
-{K_NOTIF1} return K_NOTIF1;
-{K_NULL} return K_NULL;
-{K_OR} return K_OR;
-{K_OUTPUT} return K_OUTPUT;
-{K_PACKAGE} return K_PACKAGE;
-{K_PACKED} return K_PACKED;
-{K_PARAMETER} return K_PARAMETER;
-{K_PMOS} return K_PMOS;
-{K_POSEDGE} return K_POSEDGE;
-{K_PRIMITIVE} return K_PRIMITIVE;
-{K_PRIORITY} return K_PRIORITY;
-{K_PROGRAM} return K_PROGRAM;
-{K_PROPERTY} return K_PROPERTY;
-{K_PROTECTED} return K_PROTECTED;
-{K_PULL0} return K_PULL0;
-{K_PULL1} return K_PULL1;
-{K_PULLDOWN} return K_PULLDOWN;
-{K_PULLUP} return K_PULLUP;
-{K_PULSESTYLE_ONEVENT} return K_PULSESTYLE_ONEVENT;
-{K_PULSESTYLE_ONDETECT} return K_PULSESTYLE_ONDETECT;
-{K_PURE} return K_PURE;
-{K_RAND} return K_RAND;
-{K_RANDC} return K_RANDC;
-{K_RANDCASE} return K_RANDCASE;
-{K_RANDSEQUENCE} return K_RANDSEQUENCE;
-{K_RCMOS} return K_RCMOS;
-{K_REAL} return K_REAL;
-{K_REALTIME} return K_REALTIME;
-{K_REF} return K_REF;
-{K_REG} return K_REG;
-{K_RELEASE} return K_RELEASE;
-{K_REPEAT} return K_REPEAT;
-{K_RETURN} return K_RETURN;
-{K_RNMOS} return K_RNMOS;
-{K_RPMOS} return K_RPMOS;
-{K_RTRAN} return K_RTRAN;
-{K_RTRANIF0} return K_RTRANIF0;
-{K_RTRANIF1} return K_RTRANIF1;
-{K_SCALARED} return K_SCALARED;
-{K_SEQUENCE} return K_SEQUENCE;
-{K_SHORTINT} return K_SHORTINT;
-{K_SHORTREAL} return K_SHORTREAL;
-{K_SHOWCANCELLED} return K_SHOWCANCELLED;
-{K_SIGNED} return K_SIGNED;
-{K_SMALL} return K_SMALL;
-{K_SOLVE} return K_SOLVE;
-{K_SPECIFY} return K_SPECIFY;
-{K_SPECPARAM} return K_SPECPARAM;
-{K_STATIC} return K_STATIC;
-{K_STRING} return K_STRING;
-{K_STRONG0} return K_STRONG0;
-{K_STRONG1} return K_STRONG1;
-{K_STRUCT} return K_STRUCT;
-{K_SUPER} return K_SUPER;
-{K_SUPPLY0} return K_SUPPLY0;
-{K_SUPPLY1} return K_SUPPLY1;
-{K_TABLE} return K_TABLE;
-{K_TAGGED} return K_TAGGED;
-{K_TASK} return K_TASK;
-{K_THIS} return K_THIS;
-{K_THROUGHOUT} return K_THROUGHOUT;
-{K_TIME} return K_TIME;
-{K_TIMEPRECISION} return K_TIMEPRECISION;
-{K_TIMEUNIT} return K_TIMEUNIT;
-{K_TRAN} return K_TRAN;
-{K_TRANIF0} return K_TRANIF0;
-{K_TRANIF1} return K_TRANIF1;
-{K_TRI} return K_TRI;
-{K_TRI0} return K_TRI0;
-{K_TRI1} return K_TRI1;
-{K_TRIAND} return K_TRIAND;
-{K_TRIOR} return K_TRIOR;
-{K_TRIREG} return K_TRIREG;
-{K_TYPE} return K_TYPE;
-{K_TYPEDEF} return K_TYPEDEF;
-{K_UNION} return K_UNION;
-{K_UNIQUE} return K_UNIQUE;
-{K_UNSIGNED} return K_UNSIGNED;
-{K_USE} return K_USE;
-{K_VAR} return K_VAR;
-{K_VECTORED} return K_VECTORED;
-{K_VIRTUAL} return K_VIRTUAL;
-{K_VOID} return K_VOID;
-{K_WAIT} return K_WAIT;
-{K_WAIT_ORDER} return K_WAIT_ORDER;
-{K_WAND} return K_WAND;
-{K_WEAK0} return K_WEAK0;
-{K_WEAK1} return K_WEAK1;
-{K_WHILE} return K_WHILE;
-{K_WILDCARD} return K_WILDCARD;
-{K_WIRE} return K_WIRE;
-{K_WITH} return K_WITH;
-{K_WITHIN} return K_WITHIN;
-{K_WOR} return K_WOR;
-{K_XNOR} return K_XNOR;
-{K_XOR} return K_XOR;
+{K_ALIAS} return mhdl_token::K_ALIAS;
+{K_ALWAYS} return mhdl_token::K_ALWAYS;
+{K_ALWAYS_COMB} return mhdl_token::K_ALWAYS_COMB;
+{K_ALWAYS_FF} return mhdl_token::K_ALWAYS_FF;
+{K_ALWAYS_LATCH} return mhdl_token::K_ALWAYS_LATCH;
+{K_AND} return mhdl_token::K_AND;
+{K_ASSERT} return mhdl_token::K_ASSERT;
+{K_ASSIGN} return mhdl_token::K_ASSIGN;
+{K_ASSUME} return mhdl_token::K_ASSUME;
+{K_AUTOMATIC} return mhdl_token::K_AUTOMATIC;
+{K_BEFORE} return mhdl_token::K_BEFORE;
+{K_BEGIN} return mhdl_token::K_BEGIN;
+{K_BIND} return mhdl_token::K_BIND;
+{K_BINS} return mhdl_token::K_BINS;
+{K_BINSOF} return mhdl_token::K_BINSOF;
+{K_BIT} return mhdl_token::K_BIT;
+{K_BREAK} return mhdl_token::K_BREAK;
+{K_BUF} return mhdl_token::K_BUF;
+{K_BUFIF0} return mhdl_token::K_BUFIF0;
+{K_BUFIF1} return mhdl_token::K_BUFIF1;
+{K_BYTE} return mhdl_token::K_BYTE;
+{K_CASE} return mhdl_token::K_CASE;
+{K_CASEX} return mhdl_token::K_CASEX;
+{K_CASEZ} return mhdl_token::K_CASEZ;
+{K_CELL} return mhdl_token::K_CELL;
+{K_CHANDLE} return mhdl_token::K_CHANDLE;
+{K_CLASS} return mhdl_token::K_CLASS;
+{K_CLOCKING} return mhdl_token::K_CLOCKING;
+{K_CMOS} return mhdl_token::K_CMOS;
+{K_CONFIG} return mhdl_token::K_CONFIG;
+{K_CONST} return mhdl_token::K_CONST;
+{K_CONSTRAINT} return mhdl_token::K_CONSTRAINT;
+{K_CONTEXT} return mhdl_token::K_CONTEXT;
+{K_CONTINUE} return mhdl_token::K_CONTINUE;
+{K_COVER} return mhdl_token::K_COVER;
+{K_COVERGROUP} return mhdl_token::K_COVERGROUP;
+{K_COVERPOINT} return mhdl_token::K_COVERPOINT;
+{K_CROSS} return mhdl_token::K_CROSS;
+{K_DEASSIGN} return mhdl_token::K_DEASSIGN;
+{K_DEFAULT} return mhdl_token::K_DEFAULT;
+{K_DEFPARAM} return mhdl_token::K_DEFPARAM;
+{K_DESIGN} return mhdl_token::K_DESIGN;
+{K_DISABLE} return mhdl_token::K_DISABLE;
+{K_DIST} return mhdl_token::K_DIST;
+{K_DO} return mhdl_token::K_DO;
+{K_EDGE} return mhdl_token::K_EDGE;
+{K_ELSE} return mhdl_token::K_ELSE;
+{K_END} return mhdl_token::K_END;
+{K_ENDCASE} return mhdl_token::K_ENDCASE;
+{K_ENDCLASS} return mhdl_token::K_ENDCLASS;
+{K_ENDCLOCKING} return mhdl_token::K_ENDCLOCKING;
+{K_ENDCONFIG} return mhdl_token::K_ENDCONFIG;  
+{K_ENDFUNCTION} return mhdl_token::K_ENDFUNCTION; 
+{K_ENDGENERATE} return mhdl_token::K_ENDGENERATE;
+{K_ENDGROUP} return mhdl_token::K_ENDGROUP;
+{K_ENDINTERFACE} return mhdl_token::K_ENDINTERFACE;
+{K_ENDMODULE} return mhdl_token::K_ENDMODULE;
+{K_ENDPACKAGE} return mhdl_token::K_ENDPACKAGE;
+{K_ENDPRIMITIVE} return mhdl_token::K_ENDPRIMITIVE;
+{K_ENDPROGRAM} return mhdl_token::K_ENDPROGRAM;
+{K_ENDPROPERTY} return mhdl_token::K_ENDPROPERTY;
+{K_ENDSPECIFY} return mhdl_token::K_ENDSPECIFY;
+{K_ENDSEQUENCE} return mhdl_token::K_ENDSEQUENCE;
+{K_ENDTABLE} return mhdl_token::K_ENDTABLE;
+{K_ENDTASK} return mhdl_token::K_ENDTASK;
+{K_ENUM} return mhdl_token::K_ENUM;
+{K_EVENT} return mhdl_token::K_EVENT;
+{K_EXPECT} return mhdl_token::K_EXPECT;
+{K_EXPORT} return mhdl_token::K_EXPORT;
+{K_EXTENDS} return mhdl_token::K_EXTENDS;
+{K_EXTERN} return mhdl_token::K_EXTERN;
+{K_FINAL} return mhdl_token::K_FINAL;
+{K_FIRST_MATCH} return mhdl_token::K_FIRST_MATCH;
+{K_FOR} return mhdl_token::K_FOR;
+{K_FORCE} return mhdl_token::K_FORCE;
+{K_FOREACH} return mhdl_token::K_FOREACH;
+{K_FOREVER} return mhdl_token::K_FOREVER;
+{K_FORK} return mhdl_token::K_FORK;
+{K_FORKJOIN} return mhdl_token::K_FORKJOIN;
+{K_FUNCTION} yylloc->step(); yy_push_state(sc_function); return mhdl_token::K_FUNCTION;
+{K_GENERATE} return mhdl_token::K_GENERATE;
+{K_GENVAR} return mhdl_token::K_GENVAR;
+{K_HIGHZ0} return mhdl_token::K_HIGHZ0;
+{K_HIGHZ1} return mhdl_token::K_HIGHZ1;
+{K_IF} return mhdl_token::K_IF;
+{K_IFF} return mhdl_token::K_IFF;
+{K_IFNONE} return mhdl_token::K_IFNONE;
+{K_IGNORE_BINS} return mhdl_token::K_IGNORE_BINS;
+{K_ILLEGAL_BINS} return mhdl_token::K_ILLEGAL_BINS;
+{K_IMPORT} return mhdl_token::K_IMPORT;
+{K_INCDIR} return mhdl_token::K_INCDIR;
+{K_INCLUDE} return mhdl_token::K_INCLUDE;
+{K_INITIAL} return mhdl_token::K_INITIAL;
+{K_INOUT} return mhdl_token::K_INOUT;
+{K_INPUT} return mhdl_token::K_INPUT;
+{K_INSIDE} return mhdl_token::K_INSIDE;
+{K_INSTANCE} return mhdl_token::K_INSTANCE;
+{K_INT} return mhdl_token::K_INT;
+{K_INTEGER} return mhdl_token::K_INTEGER;
+{K_INTERFACE} return mhdl_token::K_INTERFACE;
+{K_INTERSECT} return mhdl_token::K_INTERSECT;
+{K_JOIN} return mhdl_token::K_JOIN;
+{K_JOIN_ANY} return mhdl_token::K_JOIN_ANY;
+{K_JOIN_NONE} return mhdl_token::K_JOIN_NONE;
+{K_LARGE} return mhdl_token::K_LARGE;
+{K_LIBLIST} return mhdl_token::K_LIBLIST;
+{K_LIBRARY} return mhdl_token::K_LIBRARY;
+{K_LOCAL} return mhdl_token::K_LOCAL;
+{K_LOCALPARAM} return mhdl_token::K_LOCALPARAM;
+{K_LOGIC} return mhdl_token::K_LOGIC;
+{K_LONGINT} return mhdl_token::K_LONGINT;
+{K_MACROMODULE} return mhdl_token::K_MACROMODULE;
+{K_MATCHES} return mhdl_token::K_MATCHES;
+{K_MEDIUM} return mhdl_token::K_MEDIUM;
+{K_MODPORT} return mhdl_token::K_MODPORT;
+{K_MODULE} return mhdl_token::K_MODULE;
+{K_NAND} return mhdl_token::K_NAND;
+{K_NEGEDGE} return mhdl_token::K_NEGEDGE;
+{K_NEW} return mhdl_token::K_NEW;
+{K_NMOS} return mhdl_token::K_NMOS;
+{K_NOR} return mhdl_token::K_NOR;
+{K_NOSHOWCANCELLED} return mhdl_token::K_NOSHOWCANCELLED;
+{K_NOT} return mhdl_token::K_NOT;
+{K_NOTIF0} return mhdl_token::K_NOTIF0;
+{K_NOTIF1} return mhdl_token::K_NOTIF1;
+{K_NULL} return mhdl_token::K_NULL;
+{K_OR} return mhdl_token::K_OR;
+{K_OUTPUT} return mhdl_token::K_OUTPUT;
+{K_PACKAGE} return mhdl_token::K_PACKAGE;
+{K_PACKED} return mhdl_token::K_PACKED;
+{K_PARAMETER} return mhdl_token::K_PARAMETER;
+{K_PMOS} return mhdl_token::K_PMOS;
+{K_POSEDGE} return mhdl_token::K_POSEDGE;
+{K_PRIMITIVE} return mhdl_token::K_PRIMITIVE;
+{K_PRIORITY} return mhdl_token::K_PRIORITY;
+{K_PROGRAM} return mhdl_token::K_PROGRAM;
+{K_PROPERTY} return mhdl_token::K_PROPERTY;
+{K_PROTECTED} return mhdl_token::K_PROTECTED;
+{K_PULL0} return mhdl_token::K_PULL0;
+{K_PULL1} return mhdl_token::K_PULL1;
+{K_PULLDOWN} return mhdl_token::K_PULLDOWN;
+{K_PULLUP} return mhdl_token::K_PULLUP;
+{K_PULSESTYLE_ONEVENT} return mhdl_token::K_PULSESTYLE_ONEVENT;
+{K_PULSESTYLE_ONDETECT} return mhdl_token::K_PULSESTYLE_ONDETECT;
+{K_PURE} return mhdl_token::K_PURE;
+{K_RAND} return mhdl_token::K_RAND;
+{K_RANDC} return mhdl_token::K_RANDC;
+{K_RANDCASE} return mhdl_token::K_RANDCASE;
+{K_RANDSEQUENCE} return mhdl_token::K_RANDSEQUENCE;
+{K_RCMOS} return mhdl_token::K_RCMOS;
+{K_REAL} return mhdl_token::K_REAL;
+{K_REALTIME} return mhdl_token::K_REALTIME;
+{K_REF} return mhdl_token::K_REF;
+{K_REG} return mhdl_token::K_REG;
+{K_RELEASE} return mhdl_token::K_RELEASE;
+{K_REPEAT} return mhdl_token::K_REPEAT;
+{K_RETURN} return mhdl_token::K_RETURN;
+{K_RNMOS} return mhdl_token::K_RNMOS;
+{K_RPMOS} return mhdl_token::K_RPMOS;
+{K_RTRAN} return mhdl_token::K_RTRAN;
+{K_RTRANIF0} return mhdl_token::K_RTRANIF0;
+{K_RTRANIF1} return mhdl_token::K_RTRANIF1;
+{K_SCALARED} return mhdl_token::K_SCALARED;
+{K_SEQUENCE} return mhdl_token::K_SEQUENCE;
+{K_SHORTINT} return mhdl_token::K_SHORTINT;
+{K_SHORTREAL} return mhdl_token::K_SHORTREAL;
+{K_SHOWCANCELLED} return mhdl_token::K_SHOWCANCELLED;
+{K_SIGNED} return mhdl_token::K_SIGNED;
+{K_SMALL} return mhdl_token::K_SMALL;
+{K_SOLVE} return mhdl_token::K_SOLVE;
+{K_SPECIFY} return mhdl_token::K_SPECIFY;
+{K_SPECPARAM} return mhdl_token::K_SPECPARAM;
+{K_STATIC} return mhdl_token::K_STATIC;
+{K_STRING} return mhdl_token::K_STRING;
+{K_STRONG0} return mhdl_token::K_STRONG0;
+{K_STRONG1} return mhdl_token::K_STRONG1;
+{K_STRUCT} return mhdl_token::K_STRUCT;
+{K_SUPER} return mhdl_token::K_SUPER;
+{K_SUPPLY0} return mhdl_token::K_SUPPLY0;
+{K_SUPPLY1} return mhdl_token::K_SUPPLY1;
+{K_TABLE} return mhdl_token::K_TABLE;
+{K_TAGGED} return mhdl_token::K_TAGGED;
+{K_TASK} return mhdl_token::K_TASK;
+{K_THIS} return mhdl_token::K_THIS;
+{K_THROUGHOUT} return mhdl_token::K_THROUGHOUT;
+{K_TIME} return mhdl_token::K_TIME;
+{K_TIMEPRECISION} return mhdl_token::K_TIMEPRECISION;
+{K_TIMEUNIT} return mhdl_token::K_TIMEUNIT;
+{K_TRAN} return mhdl_token::K_TRAN;
+{K_TRANIF0} return mhdl_token::K_TRANIF0;
+{K_TRANIF1} return mhdl_token::K_TRANIF1;
+{K_TRI} return mhdl_token::K_TRI;
+{K_TRI0} return mhdl_token::K_TRI0;
+{K_TRI1} return mhdl_token::K_TRI1;
+{K_TRIAND} return mhdl_token::K_TRIAND;
+{K_TRIOR} return mhdl_token::K_TRIOR;
+{K_TRIREG} return mhdl_token::K_TRIREG;
+{K_TYPE} return mhdl_token::K_TYPE;
+{K_TYPEDEF} return mhdl_token::K_TYPEDEF;
+{K_UNION} return mhdl_token::K_UNION;
+{K_UNIQUE} return mhdl_token::K_UNIQUE;
+{K_UNSIGNED} return mhdl_token::K_UNSIGNED;
+{K_USE} return mhdl_token::K_USE;
+{K_VAR} return mhdl_token::K_VAR;
+{K_VECTORED} return mhdl_token::K_VECTORED;
+{K_VIRTUAL} return mhdl_token::K_VIRTUAL;
+{K_VOID} return mhdl_token::K_VOID;
+{K_WAIT} return mhdl_token::K_WAIT;
+{K_WAIT_ORDER} return mhdl_token::K_WAIT_ORDER;
+{K_WAND} return mhdl_token::K_WAND;
+{K_WEAK0} return mhdl_token::K_WEAK0;
+{K_WEAK1} return mhdl_token::K_WEAK1;
+{K_WHILE} return mhdl_token::K_WHILE;
+{K_WILDCARD} return mhdl_token::K_WILDCARD;
+{K_WIRE} return mhdl_token::K_WIRE;
+{K_WITH} return mhdl_token::K_WITH;
+{K_WITHIN} return mhdl_token::K_WITHIN;
+{K_WOR} return mhdl_token::K_WOR;
+{K_XNOR} return mhdl_token::K_XNOR;
+{K_XOR} return mhdl_token::K_XOR;
 
  /* MetaHDL keywords */
-{K_METAHDL} return K_METAHDL;
-{K_NONPORT} return K_NONPORT;
-{K_FF} return K_FF;
-{K_ENDFF} return K_ENDFF;
-{K_GOTO} return K_GOTO;
-{K_FSM} return K_FSM;
-{K_ENDFSM} return K_ENDFSM;
+{K_METAHDL} return mhdl_token::K_METAHDL;
+{K_NONPORT} return mhdl_token::K_NONPORT;
+{K_FF} return mhdl_token::K_FF;
+{K_ENDFF} return mhdl_token::K_ENDFF;
+{K_GOTO} return mhdl_token::K_GOTO;
+{K_FSM} return mhdl_token::K_FSM;
+{K_ENDFSM} return mhdl_token::K_ENDFSM;
 
  /* sc_message */
-{K_MESSAGE} yylloc->step(); yy_push_state(sc_message); return K_MESSAGE;
+{K_MESSAGE} yylloc->step(); yy_push_state(sc_message); return mhdl_token::K_MESSAGE;
 <sc_message>{
-  {PUNC_SEMICOLON} yy_pop_state(); return PUNC_SEMICOLON;
+  {PUNC_SEMICOLON} yy_pop_state(); return mhdl_token::PUNC_SEMICOLON;
   \n mwrapper.error(yylloc->end, "Unexpected new line inside parse statement.");
   <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside parse statement.");
-  . yylval->str = new string (mhdltext); return VERBTIM;
+  . yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
 }
 
  /* sc_parse */ 
-{K_PARSE} yylloc->step(); yy_push_state(sc_parse); return K_PARSE;
+{K_PARSE} yylloc->step(); yy_push_state(sc_parse); return mhdl_token::K_PARSE;
 <sc_parse>{
-  {PUNC_SEMICOLON} yy_pop_state(); return PUNC_SEMICOLON;
+  {PUNC_SEMICOLON} yy_pop_state(); return mhdl_token::PUNC_SEMICOLON;
   \n mwrapper.error(yylloc->end, "Unexpected new line inside parse statement.");
   <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside parse statement.");
-  . yylval->str = new string (mhdltext); return VERBTIM;
+  . yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
 }
 
 
 
  /* operators */
-{OR} return OR;
-{AND} return AND;
-{XOR} return XOR;
+{OR} return mhdl_token::OR;
+{AND} return mhdl_token::AND;
+{XOR} return mhdl_token::XOR;
 
-{UNARY_NOT} return UNARY_NOT;
+{UNARY_NOT} return mhdl_token::UNARY_NOT;
 
-{BINARY_PLUS} return BINARY_PLUS;
-{BINARY_MINUS} return BINARY_MINUS;
-{BINARY_MULT} return BINARY_MULT;
-{BINARY_DIV} return BINARY_DIV;
-{BINARY_MOD} return BINARY_MOD;
-{BINARY_LSH} return BINARY_LSH;
-{BINARY_RSH} return BINARY_RSH;
+{BINARY_PLUS} return mhdl_token::BINARY_PLUS;
+{BINARY_MINUS} return mhdl_token::BINARY_MINUS;
+{BINARY_MULT} return mhdl_token::BINARY_MULT;
+{BINARY_DIV} return mhdl_token::BINARY_DIV;
+{BINARY_MOD} return mhdl_token::BINARY_MOD;
+{BINARY_LSH} return mhdl_token::BINARY_LSH;
+{BINARY_RSH} return mhdl_token::BINARY_RSH;
 
-{COND_NOT} return COND_NOT;
-{COND_AND} return COND_AND;
-{COND_OR} return COND_OR;
-{COND_LT} return COND_LT;
-{COND_GT} return COND_GT;
-{COND_EQ} return COND_EQ;
-{COND_NE} return COND_NE;
-{COND_LE} return COND_LE;
-{COND_GE} return COND_GE;
+{COND_NOT} return mhdl_token::COND_NOT;
+{COND_AND} return mhdl_token::COND_AND;
+{COND_OR} return mhdl_token::COND_OR;
+{COND_LT} return mhdl_token::COND_LT;
+{COND_GT} return mhdl_token::COND_GT;
+{COND_EQ} return mhdl_token::COND_EQ;
+{COND_NE} return mhdl_token::COND_NE;
+{COND_LE} return mhdl_token::COND_LE;
+{COND_GE} return mhdl_token::COND_GE;
 
 
-{TRI_QUESTION} return TRI_QUESTION;
-{TRI_COLON} return TRI_COLON;
+{TRI_QUESTION} return mhdl_token::TRI_QUESTION;
+{TRI_COLON} return mhdl_token::TRI_COLON;
 
 
  /* punctuations */
-{PUNC_EQUAL} return PUNC_EQUAL;
-{PUNC_COMMA} return PUNC_COMMA;
-{PUNC_DOT} return PUNC_DOT;
-{PUNC_SEMICOLON} return PUNC_SEMICOLON;
-{PUNC_LBRACE} return PUNC_LBRACE;
-{PUNC_RBRACE} return PUNC_RBRACE;
-{PUNC_LPAREN} return PUNC_LPAREN;
-{PUNC_RPAREN} return PUNC_RPAREN;
-{PUNC_LBRECT} return PUNC_LBRECT;
-{PUNC_RBRECT} return PUNC_RBRECT;
-{PUNC_CHARP} return PUNC_CHARP;
-{PUNC_AT} return PUNC_AT;
+{PUNC_EQUAL} return mhdl_token::PUNC_EQUAL;
+{PUNC_COMMA} return mhdl_token::PUNC_COMMA;
+{PUNC_DOT} return mhdl_token::PUNC_DOT;
+{PUNC_SEMICOLON} return mhdl_token::PUNC_SEMICOLON;
+{PUNC_LBRACE} return mhdl_token::PUNC_LBRACE;
+{PUNC_RBRACE} return mhdl_token::PUNC_RBRACE;
+{PUNC_LPAREN} return mhdl_token::PUNC_LPAREN;
+{PUNC_RPAREN} return mhdl_token::PUNC_RPAREN;
+{PUNC_LBRECT} return mhdl_token::PUNC_LBRECT;
+{PUNC_RBRECT} return mhdl_token::PUNC_RBRECT;
+{PUNC_CHARP} return mhdl_token::PUNC_CHARP;
+{PUNC_AT} return mhdl_token::PUNC_AT;
 
 
  /* sc_rawcode */ 
-{K_RAWCODE} yylloc->step(); yy_push_state(sc_rawcode); return K_RAWCODE;
+{K_RAWCODE} yylloc->step(); yy_push_state(sc_rawcode); return mhdl_token::K_RAWCODE;
 <sc_rawcode>{
-  {K_ENDRAWCODE}  yy_pop_state(); return K_ENDRAWCODE;
-  \n yylloc->lines(1); yylval->str = new string (mhdltext); return VERBTIM;
+  {K_ENDRAWCODE}  yy_pop_state(); return mhdl_token::K_ENDRAWCODE;
+  \n yylloc->lines(1); yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
   <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside rawcode.");
-  . yylval->str = new string (mhdltext); return VERBTIM;
+  . yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
 }
 
  /* sc_function */
 <sc_function>{
-  {K_ENDFUNCTION} yy_pop_state(); return K_ENDFUNCTION;
-  \n yylloc->lines(1); yylval->str = new string (mhdltext); return VERBTIM;
+  {K_ENDFUNCTION} yy_pop_state(); return mhdl_token::K_ENDFUNCTION;
+  \n yylloc->lines(1); yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
   <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside function definition.");
-  . yylval->str = new string (mhdltext); return VERBTIM;
+  . yylval->str = new string (mhdltext); return mhdl_token::VERBTIM;
 }
 
 
  /* other tokens */
-{ID} yylval->str = new string (mhdltext); return ID;
+{ID} yylval->str = new string (mhdltext); return mhdl_token::ID;
 {NUM} {
   yylval->str = new string (mhdltext);
-  return NUM;
+  return mhdl_token::NUM;
 }
 
 {WS} yylloc->step();
@@ -669,7 +670,7 @@ WS [ \t]+
     yylval->str = new string (buf); 
     buf.erase();
     yy_pop_state(); 
-    return STRING; 
+    return mhdl_token::STRING; 
   }
   <<EOF>> mwrapper.error(yylloc->end, "Unexpected End-of-file inside string.");
   . buf += mhdltext; 
@@ -711,7 +712,7 @@ WS [ \t]+
   size_t found = str.find_first_not_of("01_?xXzZ", q_pos + 2);
   if ( found == string::npos ) {
     yylval->str = new string (mhdltext);
-    return BIN_BASED_NUM;
+    return mhdl_token::BIN_BASED_NUM;
   }
   else {
     mwrapper.error(yylloc->end.line, "Bad char in BIN number:"+ str.substr(found, 1));
@@ -724,7 +725,7 @@ WS [ \t]+
   size_t found = str.find_first_not_of("0123456789_?xXzZ", q_pos + 2);
   if ( found == string::npos ) {
     yylval->str = new string (mhdltext);
-    return DEC_BASED_NUM;
+    return mhdl_token::DEC_BASED_NUM;
   }
   else {
     mwrapper.error(yylloc->end.line, "Bad char in DEC number:"+ str.substr(found, 1));
@@ -737,7 +738,7 @@ WS [ \t]+
   size_t found = str.find_first_not_of("0123456789abcdefABCDEF_?xXzZ", q_pos + 2);
   if ( found == string::npos ) {
     yylval->str = new string (mhdltext);
-    return HEX_BASED_NUM;
+    return mhdl_token::HEX_BASED_NUM;
   }
   else {
     mwrapper.error(yylloc->end.line, "Bad char in HEX number:"+ str.substr(found, 1));
@@ -746,7 +747,7 @@ WS [ \t]+
 
 
 
-<<EOF>>	return END;
+<<EOF>>	return mhdl_token::END;
 
 . {
   string msg = "unexpected char:"; 
