@@ -351,7 +351,7 @@ class CSVwrapper;
 %type <concat_exp_ptr> concatenation
 %type <exp_vct>   expressions
 %type <constant_ptr> constant
-%type <net_ptr> net
+%type <expression_ptr> net
 %type <port_type> port_direction
 
 

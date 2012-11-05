@@ -517,7 +517,7 @@ public:
 };
 
 
-class CParameter : public CNet
+class CParameter : public CExpression
 {
 private:
   string _name;
@@ -529,6 +529,9 @@ public:
     _name (name), _value (value), _override (NULL) {}
 
 public: 
+  virtual inline void AddLoccure(yy::location loc) {};
+  virtual inline void AddRoccure(yy::location loc) {};
+
   inline bool IsConst() {return true;}
 
   inline ulonglong Width() {
@@ -577,7 +580,7 @@ public:
 };
 
 
-class CVariable : public CNet 
+class CVariable : public CExpression
 {
 private:
   bool _is_2D;

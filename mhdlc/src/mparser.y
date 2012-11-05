@@ -377,7 +377,7 @@ extern string WORKDIR;
 %type <constant_ptr> constant
 %type <stmt_ptr> statement balanced_stmt unbalanced_stmt case_statement
 %type <stmt_vct> statements
-%type <net_ptr> net
+%type <expression_ptr> net
 %type <case_type_ptr> case_type
 %type <case_item_vct> case_items
 %type <case_item_ptr> case_item
