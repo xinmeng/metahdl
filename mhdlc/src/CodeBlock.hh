@@ -12,7 +12,10 @@ class CCodeBlock
 protected:
   yy::location _loc;
   int _step;
+
+#if 0
   set<CSymbol*> lsymbols, rsymbols;
+#endif
   
 public:
   inline CCodeBlock(const yy::location &loc) : _loc (loc), _step (2) {}
@@ -28,10 +31,12 @@ public:
 
   virtual void GetSymbol() =0;
   virtual inline void SetDriver() {
+#if 0
     for (set<CSymbol*>::iterator iter = lsymbols.begin(); 
 	 iter != lsymbols.end(); ++iter) {
       (*iter)->driver.push_back(this);
     }
+#endif
   }
 
 };
@@ -46,7 +51,11 @@ public:
   inline CBlkAssign(const yy::location &loc, CStmtSimple* stmt) : CCodeBlock(loc), _stmt (stmt) {}
   inline void Print(ostream&os=cout) {PrintLoc(os); os << "assign "; _stmt->Print(os);}
 
-  inline void GetSymbol() { _stmt->GetSymbol(&lsymbols, &rsymbols); }
+  inline void GetSymbol() { 
+#if 0
+    _stmt->GetSymbol(&lsymbols, &rsymbols); 
+#endif
+  }
 };
 
 
@@ -75,7 +84,11 @@ public:
     os << "end" << endl;
   }
   
-  inline void GetSymbol() {_stmt->GetSymbol(&lsymbols, &rsymbols);}
+  inline void GetSymbol() {
+#if 0    
+    _stmt->GetSymbol(&lsymbols, &rsymbols);
+#endif
+  }
     
   
 };
@@ -111,8 +124,10 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     _dst->GetSymbol(lsymb);
     _src->GetSymbol(rsymb);
+#endif
   }
 };
 
@@ -179,6 +194,7 @@ public:
   }
 
   inline void GetSymbol() {
+#if 0
     rsymbols.insert(_clk); 
     if ( _rst ) rsymbols.insert(_rst);
 
@@ -186,6 +202,7 @@ public:
 	 iter != _ff_items->end(); ++iter) {
       (*iter)->GetSymbol(&lsymbols, &rsymbols);
     }
+#endif
   }
 
 
@@ -227,10 +244,12 @@ class CBlkLegacyFF : public CCodeBlock
       }
 
       inline void GetSymbol() {
+#if 0
 	 rsymbols.insert(_clk); 
 	 if ( _rst ) rsymbols.insert(_rst);
 	 
 	 _stmt->GetSymbol(&lsymbols, &rsymbols);
+#endif
       }
 };
 
@@ -332,6 +351,7 @@ public:
   }
 
   inline void GetSymbol() {
+#if 0
     for (map<CSymbol*, CExpression*, CCompareConnection>::iterator iter = _connection->begin(); 
 	 iter != _connection->end(); ++iter) {
        if ( iter->second ) {
@@ -352,6 +372,7 @@ public:
 	  }
        }
     }
+#endif
   }
 
 };
@@ -374,7 +395,11 @@ public:
 
   inline CCaseItem* CaseItem() { return _stmt;}
 
-  inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {_stmt->GetSymbol(lsymb, rsymb);}
+  inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
+    _stmt->GetSymbol(lsymb, rsymb);
+#endif
+  }
 
 private:
   inline void PrintLoc(ostream&os, int indent) {PUT_SPACE(indent), os << "// " << _loc << endl;}
@@ -546,13 +571,17 @@ public:
   }
 
   inline void GetSymbol() {
+#if 0
     _ff->GetSymbol();
     _body->GetSymbol();
+#endif
   }
 
   inline void SetDriver() {
+#if 0
     _ff->SetDriver();
     _body->SetDriver();
+#endif
   }
 
 };

@@ -307,6 +307,7 @@ public:
       }
 
 
+#if 0
       // multi-driver checking
       if ( mctrl["multidriverchk"]->flag ) {
 	msg = "";
@@ -315,6 +316,7 @@ public:
 	  LintWarning("Multiple Driver Report:\n" + msg, "exitonmultidriver");
 	}
       }
+#endif
 
       mod = new CModMHDL (module_location, mctrl["modname"]->str, 
 			  io_table, param_table, code_blocks, symbol_table);

@@ -282,6 +282,7 @@ public:
     }
   }
 
+#if 0
   inline string& ChkMultiDriver() {
     ostringstream buf;
     string *msg = new string;
@@ -301,6 +302,7 @@ public:
     (*msg) = (*msg) + buf.str();
     return (*msg);
   }
+#endif
 
 };
 

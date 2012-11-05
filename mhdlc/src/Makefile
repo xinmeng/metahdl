@@ -72,7 +72,7 @@ CC_SRC = $(M_ALL_CC_SRC) $(SV_ALL_CC_SRC) $(PP_ALL_CC_SRC) $(UTIL_ALL_CC_SRC) $(
 $(TOP_EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(LIBFLAGS)
 
-release : CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` 
+release : CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` $(SUPPRESS_ERR)
 release : LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
 release : $(TOP_EXE)
 
@@ -85,7 +85,6 @@ $(M_FLEX_CC_SRC) : $(M_FLEX_SRC)
 
 $(M_BISON_CC_SRC) : $(M_BISON_SRC)
 	$(BISON) $^
-#	perl -pi -e 's/enum yytokentype/enum mhdltokentype/' mparser.bison.hh
 
 
 $(SV_FLEX_CC_SRC) : $(SV_FLEX_SRC)
@@ -93,7 +92,6 @@ $(SV_FLEX_CC_SRC) : $(SV_FLEX_SRC)
 
 $(SV_BISON_CC_SRC) : $(SV_BISON_SRC)
 	$(BISON) $^
-#	perl -pi -e 's/enum yytokentype/enum svtokentype/' svparser.bison.hh
 
 
 $(PP_FLEX_CC_SRC) : $(PP_FLEX_SRC)

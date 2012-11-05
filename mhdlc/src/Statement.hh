@@ -58,10 +58,12 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     if ( _lval ) {
       _lval->GetSymbol(lsymb);
       _rval->GetSymbol(rsymb);
     }
+#endif    
   }
 };
 
@@ -164,9 +166,11 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     _cond->GetSymbol(rsymb);
     _if_stmt->GetSymbol(lsymb, rsymb);
     if (_else_stmt ) _else_stmt->GetSymbol(lsymb, rsymb);
+#endif
   }
   
 };
@@ -196,10 +200,12 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     for ( vector<CStatement*>::iterator iter = _stmt_list->begin(); 
 	  iter != _stmt_list->end(); ++iter) {
       (*iter)->GetSymbol(lsymb, rsymb);
     }
+#endif
   }
     
 };
@@ -249,11 +255,13 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     for (vector<CExpression*>::iterator iter = _cond->begin(); 
          iter != _cond->end(); ++iter ) {
       (*iter)->GetSymbol(rsymb);
     }
     _stmt->GetSymbol(lsymb, rsymb);
+#endif
   }
 
 };
@@ -364,6 +372,7 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
+#if 0
     _exp->GetSymbol(rsymb);
     for (vector<CCaseItem*>::iterator iter = _items->begin(); 
 	 iter != _items->end(); ++iter) {
@@ -372,6 +381,7 @@ public:
     if ( _default_stmt ) {
       _default_stmt->GetSymbol(lsymb, rsymb);
     }
+#endif
   }
 
 

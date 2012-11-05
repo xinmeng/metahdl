@@ -220,7 +220,11 @@ public:
   CExpression* length_msb;
   bool is_const;
   CExpression* value;
+
+#if 0
   vector<CCodeBlock*> driver;
+#endif
+
   vector<yy::location> loccur, roccur;
   CSymbol *reference;
   
@@ -726,13 +730,24 @@ public:
   inline CExpression* Msb() {return _msb;}
   inline CExpression* Lsb() {return _lsb;}
   inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
      st->insert(_symbol);
      if (_msb) _msb->GetSymbol( st );
      if (_lsb )_lsb->GetSymbol( st );
+#endif
   }
 
-  inline void AddLoccure(yy::location loc) {_symbol->loccur.push_back(loc);}
-  inline void AddRoccure(yy::location loc) {_symbol->roccur.push_back(loc);}
+  inline void AddLoccure(yy::location loc) {
+#if 0
+_symbol->loccur.push_back(loc);
+#endif 
+  }
+
+  inline void AddRoccure(yy::location loc) {
+#if 0
+    _symbol->roccur.push_back(loc);
+#endif
+  }
 
 };
 
@@ -790,9 +805,11 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
     _cond->GetSymbol(st);
     _t_opt->GetSymbol(st);
     _f_opt->GetSymbol(st);
+#endif
   }
 
   inline bool HasParam() {
@@ -814,15 +831,19 @@ public:
   inline bool Update(tType new_type) {return false;}
 
   inline virtual void AddRoccure(yy::location loc) {
+#if 0
     _cond->AddRoccure(loc);
     _t_opt->AddRoccure(loc);
     _f_opt->AddRoccure(loc);
+#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
+#if 0
     _cond->AddLoccure(loc);
     _t_opt->AddLoccure(loc);
     _f_opt->AddLoccure(loc);
+#endif
   }
 
 };
@@ -867,10 +888,12 @@ class CFuncCallExp : public CExpression
       }
 
       inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
 	 for ( vector<CExpression*>::iterator iter = _args->begin(); 
 	       iter != _args->end(); ++iter) {
 	    (*iter)->GetSymbol(st);
 	 }
+#endif
       }
 
       inline bool HasParam() {
@@ -893,16 +916,20 @@ class CFuncCallExp : public CExpression
   inline bool Update(tType new_type) {return false;}
 
   inline virtual void AddRoccure(yy::location loc) {
+#if 0
     for (vector<CExpression*>::iterator iter = _args->begin();
 	 iter != _args->end(); ++iter) {
       (*iter)->AddRoccure(loc);
     }
+#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
+#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set arguments of function call to LHS variable." << endl;
     exit(1);
+#endif    
   }
 };
 
@@ -924,13 +951,26 @@ public:
   inline CParenthExp* ValueExp() {return new CParenthExp (_exp->ValueExp());}
   inline CExpression* Reduce() {return IsConst() ? _exp->Reduce() : NULL;}
   inline void         Print(ostream& os=cout) {os << "(";_exp->Print(os);os<<")";}
-  inline void         GetSymbol(set<CSymbol*> *st) {_exp->GetSymbol(st);}
+  inline void         GetSymbol(set<CSymbol*> *st) {
+#if 0
+    _exp->GetSymbol(st);
+#endif
+  }
   inline bool         HasParam() {return _exp->HasParam();}
 
   inline virtual bool Update(tDirection direction) {return _exp->Update(direction);}
   inline bool Update(tType new_type) {return false;}
-  inline virtual void AddRoccure(yy::location loc) {_exp->AddRoccure(loc);}
-  inline virtual void AddLoccure(yy::location loc) {_exp->AddLoccure(loc);}      
+  inline virtual void AddRoccure(yy::location loc) {
+#if 0
+    _exp->AddRoccure(loc);
+#endif
+  }
+
+  inline virtual void AddLoccure(yy::location loc) {
+#if 0
+    _exp->AddLoccure(loc);
+#endif    
+  }
 };
 
 
@@ -1003,10 +1043,12 @@ public:
   }
   
   inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
     for (vector<CExpression*>::iterator iter = _exp_list->begin(); 
 	 iter != _exp_list->end(); ++iter) {
       (*iter)->GetSymbol(st);
     }
+#endif
   }
 
   inline bool HasParam() {
@@ -1040,17 +1082,21 @@ public:
   }
 
   inline virtual void AddRoccure(yy::location loc) {
+#if 0
     for (vector<CExpression*>::iterator iter = _exp_list->begin();
 	 iter != _exp_list->end(); ++iter) {
       (*iter)->AddRoccure(loc);
     }
+#endif
   }
     
   inline virtual void AddLoccure(yy::location loc) {
+#if 0
     for (vector<CExpression*>::iterator iter = _exp_list->begin();
 	 iter != _exp_list->end(); ++iter) {
       (*iter)->AddLoccure(loc);
     }
+#endif
   }
 
   inline vector<CExpression*> *List() {return _exp_list;}
@@ -1121,8 +1167,10 @@ public:
   }
 
   inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
     _times->GetSymbol(st);
     _exp_concat->GetSymbol(st);
+#endif
   }
   
   inline bool HasParam() {
@@ -1149,14 +1197,18 @@ public:
 
 
   inline virtual void AddRoccure(yy::location loc) {
+#if 0
     _times->AddRoccure(loc);
     _exp_concat->AddRoccure(loc);
+#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
+#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__ 
 	 << ":try to set DupConcat expression to LHS." << endl;
     exit(1);
+#endif
   }
 
 };
@@ -1191,7 +1243,9 @@ public:
   }
 
   virtual inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
     _exp->GetSymbol(st);
+#endif
   }
 
   virtual inline bool HasParam() {
@@ -1203,12 +1257,16 @@ public:
   }
 
   virtual inline void AddRoccure(yy::location loc) {
+#if 0
     _exp->AddRoccure(loc);
+#endif
   }
 
   virtual inline void AddLoccure(yy::location loc) {
+#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set unary expression to LHS." << endl;
+#endif
   }
 
   virtual inline bool Update(tType new_type) {return true;}
@@ -1346,8 +1404,10 @@ public:
   }
 
   virtual inline void GetSymbol(set<CSymbol*> *st) {
+#if 0
     _exp_a->GetSymbol(st);
     _exp_b->GetSymbol(st);
+#endif
   }
 
   virtual inline bool HasParam() {
@@ -1366,13 +1426,17 @@ public:
   }
 
   virtual inline void AddRoccure(yy::location loc) {
+#if 0
     _exp_a->AddRoccure(loc);
     _exp_b->AddRoccure(loc);
+#endif
   }
 
   virtual inline void AddLoccure(yy::location loc) {
+#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set binary expression to LHS." << endl;
+#endif
   }
 
   virtual inline bool Update(tType new_type) {return true;}
