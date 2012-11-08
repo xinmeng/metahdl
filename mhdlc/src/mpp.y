@@ -57,6 +57,20 @@
 %token K_ENDSWITCH    "`endswitch"
 %token K_MPP_LOOP_END "`__mpp_loop_end__"
 
+ /* arithematic function name*/
+%token K_LOG2  "`log2"
+%token K_FLOOR "`floor"
+%token K_CEIL  "`ceil"
+%token K_HEX   "`hex"
+%token K_BIN   "`bin"
+%token K_DEC   "`dec"
+%token K_MAX   "`max"
+%token K_MIN   "`min"
+%token K_ABS   "`abs"
+%token K_EVEN  "`even"
+%token K_ODD   "`odd"
+
+
 
  /* MPP operators*/
 %token OR  "|"
@@ -103,11 +117,9 @@
 %token CTRL_LINE "`line"
 
  /* other tokens */
-%token       NL
+%token       NL "\n"
 %token <str> ID
-%token <str> ID_OPEN_PARANTHES
 %token <str> PURE_ID
-%token <str> PURE_ID_DOTS
 %token <str> PURE_ID_OPEN_PARANTHES
 %token <str> STRING
 %token <str> NUM
@@ -115,10 +127,8 @@
 %token <str> DEC_BASED_NUM
 %token <str> HEX_BASED_NUM
 %token <str> VERBATIM
-%token       LITERAL
-%token       FUNC_MACRO_BODY
 
-%token       OPT_COMMA_CONCAT ",[ \t]*``"
+%token       OPT_COMMA ",[ \t]*``"
 
 
 %token       END 0 "end of file"
@@ -155,34 +165,32 @@ balanced_block :
 line_block : "`line" NUM STRING 
 ;
 
-for_block : "`for" "(" expression ";" expression ";" post_ops ")" balanced_block "`endfor"
+for_block : "`for" "(" statements ";" expression ";" statements ")" balanced_block "`endfor"
 ;
 
-post_ops :
-| post_ops "," statement
+statements : 
+| statements "," statement
 ;
 
-foreach_block : "`foreach" ID "(" literal_list ")" balanced_block "`endfor"
+foreach_block : "`foreach" ID "(" foreach_val_list ")" balanced_block "`endfor"
 ;
 
-literal_list : LITERAL
-| literal_list "," LITERAL
-;
-
+foreach_val_list : expression	// only accept verbatims
+| foreach_val_list "," expression
 
 mpp_loop_block : "`__mpp_loop_end__"
 ;
 
 if_block : "`ifdef" PURE_ID balanced_block "`endif" 
-| "`ifdef"  PURE_ID balanced_block "`else" balanced_block "`endif"
-| "`ifndef" PURE_ID balanced_block "`endif"
-| "`ifndef" PURE_ID balanced_block "`else" balanced_block "`endif"
-| "`if" expression NL balanced_block else_lists "`endif"
-| "`if" expression NL balanced_block else_lists "`else" balanced_block "`endif"
+| "`ifdef"  PURE_ID balanced_block "`else"  balanced_block "`endif" 
+| "`ifndef" PURE_ID balanced_block "`endif" 
+| "`ifndef" PURE_ID balanced_block "`else"  balanced_block "`endif" 
+| "`if" expression "\n" balanced_block else_lists "`endif" 
+| "`if" expression "\n" balanced_block else_lists "`else" balanced_block "`endif" 
 ;
 
 else_lists : 
-| else_lists "`elsif" expression NL balanced_block
+| else_lists "`elsif" expression "\n" balanced_block
 ;
 
 verbatims : VERBATIM
@@ -190,27 +198,32 @@ verbatims : VERBATIM
 ;
 
 
-define_block : "`define" PURE_ID verbatims NL
-| "`define" PURE_ID_OPEN_PARANTHES arg_list ")" mix_pure_id_verbatim NL
-| "`define" PURE_ID_OPEN_PARANTHES arg_list opt_arg ")" mix_pure_id_verbatim NL
+define_block : "`define" PURE_ID verbatims "\n"
+| "`define" PURE_ID_OPEN_PARANTHES arg_name_list ")" mix_pure_id_verbatim "\n"
+| "`define" PURE_ID_OPEN_PARANTHES arg_name_list opt_arg ")" mix_pure_id_verbatim "\n"
 ;
 
-arg_list :
-| PURE_ID
-| arg_list "," PURE_ID
+arg_name_list : PURE_ID
+| arg_name_list "," PURE_ID
 ;
+
 
 opt_arg : "..."
-| PURE_ID_DOTS
+| PURE_ID "..."
 ;
 
 mix_pure_id_verbatim : 
-| mix_pure_id_verbatim PURE_ID
-| mix_pure_id_verbatim VERBATIM
-| mix_pure_id_verbatim OPT_COMMA_CONCAT
+| mix_pure_id_verbatim PURE_ID	// mark argument replace point
+| mix_pure_id_verbatim VERBATIM	      // save macro definition literally
+| mix_pure_id_verbatim opt_arg_concat // remove ',' if optional arg is nil
+| mix_pure_id_verbatim ID	// stringfication
 ;
 
-let_statement : "`let" statement NL
+opt_arg_concat : OPT_COMMA PURE_ID // PURE_ID must be existing arg or '__VA_ARGS__'
+;
+
+
+let_statement : "`let" statement "\n"
 ;
 
 constant : NUM
@@ -219,14 +232,60 @@ constant : NUM
 | HEX_BASED_NUM
 ;
 
-func_call : ID_OPEN_PARANTHES literal_list ")"
+macro_func_call : ID "(" macro_func_arg_val_list ")"
+;
+
+macro_func_arg_val_list : opt_macro_func_arg_val
+|  macro_func_arg_val_list "," opt_macro_func_arg_val
+;
+
+opt_macro_func_arg_val : 
+| expression			// only accept verbatims
+;
+
+arith_func_call : single_arg_func_call 
+| two_arg_func_call 
+| multi_arg_func_call
+;
+
+single_arg_func_call : single_arg_func_name "(" expression ")"
+;
+
+single_arg_func_name : K_LOG2  
+| K_FLOOR 
+| K_CEIL
+| K_ABS   
+| K_EVEN  
+| K_ODD   
+;
+
+two_arg_func_call : two_arg_func_name "(" expression ")"
+| two_arg_func_name "(" expression "," expression ")"
+;
+
+two_arg_func_name : K_HEX   
+| K_DEC
+| K_BIN   
+;
+
+multi_arg_func_call : multi_arg_func_name "(" arith_func_arg_list ")"
+;
+
+multi_arg_func_name : K_MAX   
+| K_MIN   
+;
+
+arith_func_arg_list : expression 
+| arith_func_arg_list "," expression
 ;
 
 
 
 expression : constant
+| verbatims
 | ID
-| func_call
+| macro_func_call
+| arith_func_call
 | "(" expression ")" 
 | "|" expression %prec UNARY_OR
 | "&" expression %prec UNARY_AND
@@ -258,7 +317,7 @@ statement :
 | ID "++"
 | ID "--"
 | ID "=" expression
-| ID "=" statement 
+;
 
 
 switch_block : "`switch" "(" expression ")" case_list opt_default "`endswitch"

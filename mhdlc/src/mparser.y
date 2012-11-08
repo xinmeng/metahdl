@@ -36,7 +36,6 @@ extern string WORKDIR;
   CExpression *expression_ptr;
   CConstant   *constant_ptr;
   CParameter  *param_ptr;
-  CNet        *net_ptr;
   vector<CExpression*> *exp_vct;
   CConcatenation*  concat_exp_ptr;
   CStatement*      stmt_ptr;

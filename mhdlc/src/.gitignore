@@ -1,0 +1,12 @@
+gmon.out
+.depend
+location.hh
+position.hh
+stack.hh
+mhdlc
+*.o
+*.bison.cc
+*.bison.hh
+*.flex.cc
+*.bison.output
+*~

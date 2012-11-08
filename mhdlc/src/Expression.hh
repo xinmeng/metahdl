@@ -2,6 +2,7 @@
 #define __EXPRESSION_HH__
 
 #include "Mfunc.hh"
+#include "CMacro.hh"
 #include "string.h"
 #include "location.hh"
 
@@ -129,11 +130,11 @@ public:
   inline virtual bool Update(tType new_type)  {return false;}
 
 public:
-  inline string BinStr(int width=-1) {
+  inline virtual string BinStr(int width=-1) {
     return ItoS(_value, width, 2);
   }
 
-  inline ulonglong CalcWidth(ulonglong val) {
+  inline virtual ulonglong CalcWidth(ulonglong val) {
     double logval =  log(val)/log(2);
     ulonglong i_logval = (ulonglong) logval;
 
@@ -200,11 +201,57 @@ public:
 extern CNumber* CONST_NUM_0;
 
 
+// ------------------------------
+//  CString
+// ------------------------------
+class CString : public CConstant
+{
+private:
+  string _str;
+  
+public:
+  inline CString() : CConstant(1,1), _str ("") {}
+  inline CString(const string &str) : CConstant(1,1) , _str (str) {}
+
+  inline virtual void Print(ostream &os=cout) {os<<_str;}
+  inline virtual CExpression* Reduce() {return this;}
+
+  inline virtual string BinStr(int width=-1) {return _str;}
+  inline virtual ulonglong CalcWidth(ulonglong val) {return 1;}
+};
+
+
+// ------------------------------
+//  CMppVariable
+// ------------------------------
+class CMppVariable : public CConstant, public CMacro
+{
+public:
+  inline CMppVariable(const string &name, ulonglong value) :
+    CMacro(name), CConstant(64, value) {}
+
+  inline virtual void Print(ostream &os=cout) {os<<_value;}
+  inline virtual CExpression* Reduce() {return this;}
+  
+  inline void SetValue(ulonglong value) {_value = value;}
+
+  inline virtual string Expand() {
+    ostringstream sstr;
+    sstr << _value;
+    return sstr.str();
+  }
+
+  inline virtual string Expand(const vector<string> &arg_values) {return Expand();}
+};
+
+
+
+
+
 
 // ------------------------------
 //   CSymbol
 // ------------------------------
-class CCodeBlock;
 class CSymbol
 {
 public:
@@ -492,6 +539,7 @@ struct CCompareConnection
 
 
 
+#if 0
 // ------------------------------
 //   CNet
 // ------------------------------
@@ -519,6 +567,8 @@ public:
   virtual bool HasParam() =0;
 
 };
+#endif
+
 
 
 class CParameter : public CExpression
