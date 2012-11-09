@@ -15,6 +15,12 @@ public:
   inline CStatement(int step_) : step (step_) {}
   
 public:
+  inline virtual void Evaluate() {
+    ostringstream sstr;
+    sstr << "Internal Error: Try to evaluate statement at " << loc << endl;
+    throw sstr.str();
+  }
+
   virtual void Print(ostream& os, int indent) =0;
   virtual void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) =0;
 };
@@ -47,6 +53,19 @@ public:
 
 
 public:
+  inline virtual void Evaluate() {
+    if (typeid (*_lval) != typeid (CArithMacro)) {
+      ostringstream sstr;
+      sstr << "Internal Evaluate: " << loc 
+	   << ", assignment state can only be evaluated on a arithmetic macro lval." << endl;
+      throw sstr.str();
+    }
+    else {
+      CArithMacro *var = dynamic_cast<CArithMacro*> (_lval);
+      var->SetValue(_rval->Value());
+    }
+  }
+
   inline void Print(ostream&os=cout, int indent=0) {
     PUT_SPACE(indent);
     if ( _lval ) {
@@ -387,13 +406,13 @@ public:
 
 };
 
-class CStmtVerbtim : public CStatement
+class CStmtVerbatim : public CStatement
 {
 private:
   string _str;
 
 public:
-  inline CStmtVerbtim (const string &str) : _str (str) {}
+  inline CStmtVerbatim (const string &str) : _str (str) {}
 
   inline void Print(ostream&os=cout, int indent=0) {
     PUT_SPACE(indent); 
@@ -402,6 +421,35 @@ public:
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {}
 };
+
+
+class CStmtSelfInc : public CStatement
+{
+private:
+  CArithMacro *_lval;
+  
+public:
+  inline CStmtSelfInc(CArithMacro *lval) : _lval (lval) {}
+
+  inline virtual void Evaluate() {_lval->SetValue( _lval->Value() + 1);}
+  inline virtual void Print(ostream &os=cout, int indent=0) {}
+  inline virtual void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {}
+};
+
+
+class CStmtSelfDec : public CStatement
+{
+private:
+  CArithMacro *_lval;
+
+public:
+  inline CStmtSelfDec(CArithMacro *lval) : _lval (lval) {}
+
+  inline virtual void Evaluate() {_lval->SetValue( _lval->Value() - 1);}
+  inline virtual void Print(ostream &os=cout, int indent=0) {}
+  inline virtual void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {}
+};
+
 
 
 #endif

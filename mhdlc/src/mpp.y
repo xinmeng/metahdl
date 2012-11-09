@@ -162,9 +162,14 @@ balanced_block :
 | balanced_block switch_block
 ;
 
-line_block : "`line" NUM STRING 
+line_block : "`line" NUM STRING // strip `"' at both ends
 ;
 
+// Enter <deep_expression> 
+// don't expand arithmetic macro, so expression are preserved in a
+// `deep' form with references to CArithMacro, which allows parser
+// to evalue it again and again with latest CArithMacro value. 
+// Lexer returns ID when encounter arithmetic macro
 for_block : "`for" "(" statements ";" expression ";" statements ")" balanced_block "`endfor"
 ;
 
@@ -175,12 +180,24 @@ statements :
 foreach_block : "`foreach" ID "(" foreach_val_list ")" balanced_block "`endfor"
 ;
 
+// Enter <verbatim_expression> 
+// Each expression is recursively expanded.  object macro and
+// arithmetic macro are expanded in lexer, function call macro are
+// expanded in parser. Eventally, `foreach_val_list' is an array of
+// `verbatims' separated by comma.
 foreach_val_list : expression	// only accept verbatims
 | foreach_val_list "," expression
 
 mpp_loop_block : "`__mpp_loop_end__"
 ;
 
+
+
+// Enter <const_expression>
+// `expression' here is only evaluated once, so it is not neccessary
+// to preserve it in data structure. So each expression is recursively
+// expanded. All expression variants are parsed. Expression used here
+// are constructed from constants. 
 if_block : "`ifdef" PURE_ID balanced_block "`endif" 
 | "`ifdef"  PURE_ID balanced_block "`else"  balanced_block "`endif" 
 | "`ifndef" PURE_ID balanced_block "`endif" 
@@ -222,7 +239,7 @@ mix_pure_id_verbatim :
 opt_arg_concat : OPT_COMMA PURE_ID // PURE_ID must be existing arg or '__VA_ARGS__'
 ;
 
-
+// Enter <const_expression> to reduce value before assignment
 let_statement : "`let" statement "\n"
 ;
 
@@ -232,6 +249,7 @@ constant : NUM
 | HEX_BASED_NUM
 ;
 
+// Enter <verbatim_expression> to produce verbatims list
 macro_func_call : ID "(" macro_func_arg_val_list ")"
 ;
 
@@ -240,9 +258,11 @@ macro_func_arg_val_list : opt_macro_func_arg_val
 ;
 
 opt_macro_func_arg_val : 
-| expression			// only accept verbatims
+| expression			
 ;
 
+// Enter <const_expression>
+// because arith_func_call only accept numbers as arguments
 arith_func_call : single_arg_func_call 
 | two_arg_func_call 
 | multi_arg_func_call
@@ -320,6 +340,7 @@ statement :
 ;
 
 
+// Enter <deep_expression> to extract expression
 switch_block : "`switch" "(" expression ")" case_list opt_default "`endswitch"
 ;
 

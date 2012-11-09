@@ -105,9 +105,11 @@ class CMacro
 {
 protected:
   string _name;
+  vector<CMacroBody*> *_body;
 
 public:
-  inline CMacro(const string &name) : _name (name) {}
+  inline CMacro(const string &name, vector<CMacroBody*> *body) : 
+    _name (name), _body (body) {}
   
   virtual string Expand()=0;
   virtual string Expand(const vector<string> &arg_vlaues)=0;
@@ -118,13 +120,13 @@ public:
 class CObjMacro : public CMacro
 {
 private:
-  string _value;
-  
-public:
-  inline CObjMacro(const string &name, const string &value) : 
-    CMacro(name), _value (value) {}
+  string _body;			// hide vector<CMacroBody*> *_body in base class
 
-  inline virtual string Expand() {return _value;}
+public:
+  inline CObjMacro(const string &name, const string &body) : 
+    CMacro(name, NULL), _body(body) {}
+
+  inline virtual string Expand() {return _body;}
   inline virtual string Expand(const vector<string> &arg_vlaues) {return Expand();}
 };
 
@@ -133,13 +135,12 @@ class CFuncMacro : public CMacro
 {
 protected:
   vector<string> *_arg_names;
-  vector<CMacroBody*> *_body;
 
 public:
   inline CFuncMacro(const string &name, 
 		    vector<string> *arg_names, 
 		    vector<CMacroBody*> *body) :
-    CMacro(name), _arg_names (arg_names), _body (body) {}
+    CMacro(name, body), _arg_names (arg_names) {}
 
   inline virtual string Expand() {
     ostringstream sstr;

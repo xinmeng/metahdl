@@ -222,13 +222,13 @@ public:
 
 
 // ------------------------------
-//  CMppVariable
+//  CArithMacro
 // ------------------------------
-class CMppVariable : public CConstant, public CMacro
+class CArithMacro : public CConstant, public CMacro
 {
 public:
-  inline CMppVariable(const string &name, ulonglong value) :
-    CMacro(name), CConstant(64, value) {}
+  inline CArithMacro(const string &name, ulonglong value) :
+    CMacro(name, NULL), CConstant(64, value) {}
 
   inline virtual void Print(ostream &os=cout) {os<<_value;}
   inline virtual CExpression* Reduce() {return this;}
