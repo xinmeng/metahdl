@@ -723,3 +723,68 @@ regexp_substitute(const string &str, const string &pattern)
   result_str = SvPV(get_sv("string", FALSE), n_a);
   return result_str;
 }
+
+
+
+string
+ItoS(ulonglong num, int width, int base)
+{
+  assert (base == 2 || base == 10 || base == 16);
+
+  if ( base == 2 ) {
+    string str;
+    int rmd;
+
+    do {
+      rmd = num % 2;
+      if ( rmd ) str = "1" + str;
+      else str = "0" + str;
+    }  while ( num = num / 2 ) ;
+  
+    if ( width < 0 || str.length() == width )  {
+      return str;
+    }
+    else if ( str.length() > width ) {
+      str = str.substr(str.length() - width);
+      return str;
+    }
+    else if ( str.length() < width ) {
+      string pad;
+      for ( int i = 0; i<width-str.length(); ++i) {
+	pad += "0";
+      }
+      str = pad + str;
+      return str;
+    }
+  }
+  else {
+    stringstream sstr;
+    sstr << setbase(base)
+	 << num;
+    return sstr.str();
+  }
+}
+
+ulonglong
+StoI(const string &str, int base)
+{
+  assert(base == 2 || base == 10 || base == 16);
+
+  string s = str;
+  string::iterator iter1 = s.begin(); 
+
+  while ( iter1 != s.end() ) {
+    for ( string::iterator iter = s.begin(); 
+	  iter != s.end(); iter++) {
+      if (*iter == '_' ) {
+	s.erase(iter);
+	iter1 = s.begin();
+	break;
+      }
+      else {
+	++iter1;
+      }
+    }
+  }
+  return (ulonglong) strtoll(s.c_str(), NULL, base);
+}

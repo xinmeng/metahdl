@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "ExpressionBase.hh"
 using namespace std;
 
 // ------------------------------
@@ -12,7 +13,7 @@ using namespace std;
 class CMacroBody
 {
 public:
-  virtual string Expand(const vector<string> &arg_values)=0;
+  virtual string Expand(const vector<CExpression*> &arg_values)=0;
 };
 
 class CMacroBodyLiteral : public CMacroBody
@@ -22,7 +23,7 @@ private:
 
 public:
   inline CMacroBodyLiteral(const string &literal) : _literal (literal) {}
-  inline virtual string Expand(const vector<string> &arg_values) {return _literal;}
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {return _literal;}
 };
 
 
@@ -33,8 +34,10 @@ private:
 
 public:
   inline CMacroBodyArgRef(const ulonglong &index) : _arg_index (index) {}
-  inline virtual string Expand(const vector<string> &arg_values) {
-    return arg_values[_arg_index];
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {
+    ostringstream sstr;
+    arg_values[_arg_index]->Print(sstr);
+    return sstr.str();
   }
 };
 
@@ -46,12 +49,13 @@ private:
 
 public:
   inline CMacroBodyStringfication(const ulonglong &index) : _arg_index (index) {}
-  inline virtual string Expand(const vector<string> &arg_values) {
-    string str = "\"";
-    str += arg_values[_arg_index];
-    str += "\"";
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {
+    ostringstream sstr;
+    sstr << "\"";
+    arg_values[_arg_index]->Print(sstr);
+    sstr << "\"";
 
-    return str;    
+    return sstr.str();    
   }
 };
 
@@ -64,19 +68,19 @@ private:
   
 public:
   inline CMacroBodyOptArgRef(const ulonglong &index ) : _opt_arg_index (index) {}
-  inline virtual string Expand(const vector<string> &arg_values){
+  inline virtual string Expand(const vector<CExpression*> &arg_values){
     if (_opt_arg_index > arg_values.size()-1) {
       return "";
     }
     else {
-      string str = "";
+      ostringstream sstr;
       for (int i=_opt_arg_index;i<arg_values.size();i++) {
-	str += arg_values[i];
+	arg_values[i]->Print(sstr);
 	if (i!=arg_values.size()-1) 
-	  str += ", ";
+	  sstr << ", ";
       }
     
-      return str;
+      return sstr.str();
     }
   }
 };
@@ -89,7 +93,7 @@ private:
 
 public:
   inline CMacroBodyOptComma(const ulonglong &index) : _opt_arg_index (index) {}
-  inline virtual string Expand(const vector<string> &arg_values) {
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {
     if (_opt_arg_index > arg_values.size() -1) 
       return "";
     else 
@@ -105,42 +109,70 @@ class CMacro
 {
 protected:
   string _name;
-  vector<CMacroBody*> *_body;
 
 public:
-  inline CMacro(const string &name, vector<CMacroBody*> *body) : 
-    _name (name), _body (body) {}
+  inline CMacro(const string &name) : _name (name) {}
   
   virtual string Expand()=0;
-  virtual string Expand(const vector<string> &arg_vlaues)=0;
+  virtual string Expand(const vector<CExpression*> &arg_vlaues)=0;
 };
-
 
 
 class CObjMacro : public CMacro
 {
 private:
-  string _body;			// hide vector<CMacroBody*> *_body in base class
-
+  string _body;
+  
 public:
+  inline CObjMacro(const string &name) : 
+    CMacro(name), _body ("") {}
+
   inline CObjMacro(const string &name, const string &body) : 
-    CMacro(name, NULL), _body(body) {}
+    CMacro(name), _body(body) {}
 
   inline virtual string Expand() {return _body;}
-  inline virtual string Expand(const vector<string> &arg_vlaues) {return Expand();}
+  inline virtual string Expand(const vector<CExpression*> &arg_vlaues) {return Expand();}
 };
+
+
+class CArithMacro : public CExpression, public CMacro
+{
+private:
+  CExpression *_value;
+
+public:
+  inline CArithMacro(const string &name, CExpression *value) :
+    CMacro(name), _value (value) {}
+
+  inline virtual void Print(ostream &os=cout) {_value->Print(os);}
+  inline virtual CExpression* Reduce() {return _value->Reduce();}
+  
+  inline void SetValue(CExpression *value) {_value = value;}
+
+  inline virtual string Expand() {
+    ostringstream sstr;
+    _value->Print(sstr);
+    return sstr.str();
+  }
+
+  inline virtual string Expand(const vector<string> &arg_values) {return Expand();}
+};
+
+
 
 
 class CFuncMacro : public CMacro
 {
 protected:
   vector<string> *_arg_names;
+  vector<CMacroBody*> *_body;
+
 
 public:
   inline CFuncMacro(const string &name, 
 		    vector<string> *arg_names, 
 		    vector<CMacroBody*> *body) :
-    CMacro(name, body), _arg_names (arg_names) {}
+    CMacro(name), _arg_names (arg_names), _body (body) {}
 
   inline virtual string Expand() {
     ostringstream sstr;
@@ -150,7 +182,7 @@ public:
     throw sstr.str();
   }
 
-  inline virtual string Expand(const vector<string> &arg_values) {
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {
     if (_arg_names->size() != arg_values.size()) {
       ostringstream sstr;
       sstr << "Internal Error: Macro \"" << _name << "\" requires " << _arg_names->size() 
@@ -185,7 +217,7 @@ public:
 
   inline virtual string Expand() {
     if (_arg_names->size()==0) {
-      vector<string> arg_values; // produce an empty arg value list
+      vector<CExpression*> arg_values; // produce an empty arg value list
 
       return Expand(arg_values);
     }
@@ -199,7 +231,7 @@ public:
   }
   
 
-  inline virtual string Expand(const vector<string> &arg_values) {
+  inline virtual string Expand(const vector<CExpression*> &arg_values) {
     if (_arg_names->size() > arg_values.size()) {
       ostringstream sstr;
       sstr << "Internal Error: Macro \"" << _name << "\" requires at least " << _arg_names->size()
@@ -218,7 +250,11 @@ public:
 
 };
 
-
+inline ulonglong
+MppBuildInFunc(const string & func_name, vector<CExpression*> *arg_values)
+{
+  return 0;
+}
 
 
 #endif

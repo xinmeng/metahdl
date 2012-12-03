@@ -442,7 +442,12 @@ start: {mwrapper.module_location = @$;}
 /* ; */
 
 
-constant: NUM   
+constant : STRING
+{
+  $$ = new CString (*$1);
+}
+
+| NUM   
 { 
   $$ = new CNumber (*$1);
 }

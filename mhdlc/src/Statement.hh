@@ -62,7 +62,7 @@ public:
     }
     else {
       CArithMacro *var = dynamic_cast<CArithMacro*> (_lval);
-      var->SetValue(_rval->Value());
+      var->SetValue(_rval);
     }
   }
 
@@ -431,7 +431,7 @@ private:
 public:
   inline CStmtSelfInc(CArithMacro *lval) : _lval (lval) {}
 
-  inline virtual void Evaluate() {_lval->SetValue( _lval->Value() + 1);}
+  inline virtual void Evaluate() {_lval->SetValue( new CNumber(_lval->Value() + 1));}
   inline virtual void Print(ostream &os=cout, int indent=0) {}
   inline virtual void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {}
 };
@@ -445,7 +445,7 @@ private:
 public:
   inline CStmtSelfDec(CArithMacro *lval) : _lval (lval) {}
 
-  inline virtual void Evaluate() {_lval->SetValue( _lval->Value() - 1);}
+  inline virtual void Evaluate() {_lval->SetValue( new CNumber(_lval->Value() - 1));}
   inline virtual void Print(ostream &os=cout, int indent=0) {}
   inline virtual void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {}
 };

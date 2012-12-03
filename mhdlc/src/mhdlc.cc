@@ -13,6 +13,8 @@ using namespace std;
 CModTab G_ModuleTable;
 CNumber* CONST_NUM_0 = new CNumber(32, 0);
 
+
+
 extern string LOGFILE;
 
 PerlInterpreter *my_perl;

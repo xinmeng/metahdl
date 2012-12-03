@@ -4,98 +4,36 @@
 #include "Mfunc.hh"
 #include "CMacro.hh"
 #include "string.h"
-#include "location.hh"
+#include "ExpressionBase.hh"
 
-enum tDirection {INPUT, OUTPUT, INOUT, NONPORT};
 
+// enum tDirection {INPUT, OUTPUT, INOUT, NONPORT};
+// enum tType {WIRE, REG, LOGIC, INT, INTEGER};
+// class CSymbol;
 
 // ------------------------------
 //   Base class
 // ------------------------------
-enum tType {WIRE, REG, LOGIC, INT, INTEGER};
-class CSymbol;
+// class CExpression
+// {
+// public: 
+//   inline CExpression() {};
 
-class CExpression
-{
-public: 
-  inline CExpression() {};
+// public:
+//   virtual bool         IsConst()  = 0;
+//   virtual ulonglong    Width()  = 0;
+//   virtual ulonglong    Value()  = 0;
+//   virtual CExpression* ValueExp() =0;
+//   virtual CExpression* Reduce()  =0;
+//   virtual void         Print(ostream& os=cout)  =0;
+//   virtual inline void  GetSymbol(set<CSymbol*> *) {}
+//   virtual bool         HasParam() =0;
+//   virtual bool         Update(tDirection direction) =0;
+//   virtual void         AddRoccure(yy::location loc) =0;
+//   virtual void         AddLoccure(yy::location loc) =0;
+//   virtual bool         Update(tType) =0;
 
-public:
-  virtual bool         IsConst()  = 0;
-  virtual ulonglong    Width()  = 0;
-  virtual ulonglong    Value()  = 0;
-  virtual CExpression* ValueExp() =0;
-  virtual CExpression* Reduce()  =0;
-  virtual void         Print(ostream& os=cout)  =0;
-  virtual inline void  GetSymbol(set<CSymbol*> *) {}
-  virtual bool         HasParam() =0;
-  virtual bool         Update(tDirection direction) =0;
-  virtual void         AddRoccure(yy::location loc) =0;
-  virtual void         AddLoccure(yy::location loc) =0;
-  virtual bool         Update(tType) =0;
-
-public:
-  inline string ItoS(ulonglong num, int width=-1, int base=2)
-  {
-    assert (base == 2 || base == 10 || base == 16);
-
-    if ( base == 2 ) {
-      string str;
-      int rmd;
-
-      do {
-	rmd = num % 2;
-	if ( rmd ) str = "1" + str;
-	else str = "0" + str;
-      }  while ( num = num / 2 ) ;
-  
-      if ( width < 0 || str.length() == width )  {
-	return str;
-      }
-      else if ( str.length() > width ) {
-	str = str.substr(str.length() - width);
-	return str;
-      }
-      else if ( str.length() < width ) {
-	string pad;
-	for ( int i = 0; i<width-str.length(); ++i) {
-	  pad += "0";
-	}
-	str = pad + str;
-	return str;
-      }
-    }
-    else {
-      stringstream sstr;
-      sstr << setbase(base)
-	   << num;
-      return sstr.str();
-    }
-  }
-
-  inline ulonglong StoI(const string &str, int base=10)
-  {
-    assert(base == 2 || base == 10 || base == 16);
-
-    string s = str;
-    string::iterator iter1 = s.begin(); 
-
-    while ( iter1 != s.end() ) {
-      for ( string::iterator iter = s.begin(); 
-	    iter != s.end(); iter++) {
-	if (*iter == '_' ) {
-	  s.erase(iter);
-	  iter1 = s.begin();
-	  break;
-	}
-	else {
-	  ++iter1;
-	}
-      }
-    }
-    return (ulonglong) strtoll(s.c_str(), NULL, base);
-  }
-};
+// };
 
 
 // ------------------------------
@@ -211,42 +149,18 @@ private:
   
 public:
   inline CString() : CConstant(1,1), _str ("") {}
-  inline CString(const string &str) : CConstant(1,1) , _str (str) {}
+  inline CString(const string &str) : CConstant(0,0) , _str (str) {}
 
-  inline virtual void Print(ostream &os=cout) {os<<_str;}
+  inline virtual void Print(ostream &os=cout) {os<<"\""<<_str<<"\"";}
   inline virtual CExpression* Reduce() {return this;}
 
   inline virtual string BinStr(int width=-1) {return _str;}
   inline virtual ulonglong CalcWidth(ulonglong val) {return 1;}
-};
 
-
-// ------------------------------
-//  CArithMacro
-// ------------------------------
-class CArithMacro : public CConstant, public CMacro
-{
-public:
-  inline CArithMacro(const string &name, ulonglong value) :
-    CMacro(name, NULL), CConstant(64, value) {}
-
-  inline virtual void Print(ostream &os=cout) {os<<_value;}
-  inline virtual CExpression* Reduce() {return this;}
+  inline virtual ulonglong Value() {throw "Internal Error: Unexpected call to CString::Value().";}
+  inline virtual ulonglong Width() {throw "Internal Error: Unexpected call to CString::Width().";}
   
-  inline void SetValue(ulonglong value) {_value = value;}
-
-  inline virtual string Expand() {
-    ostringstream sstr;
-    sstr << _value;
-    return sstr.str();
-  }
-
-  inline virtual string Expand(const vector<string> &arg_values) {return Expand();}
 };
-
-
-
-
 
 
 // ------------------------------
@@ -982,6 +896,41 @@ class CFuncCallExp : public CExpression
 #endif    
   }
 };
+
+
+// ------------------------------
+//   CMppFuncCall
+// ------------------------------
+class CMppFuncCall : public CExpression
+{
+private:
+  string _func_name;
+  vector<CExpression*> *_arg_values;
+
+public:
+  inline virtual bool         IsConst()  {return true;}
+  inline virtual ulonglong    Width()  {return 32;}
+  inline virtual ulonglong    Value()  {return MppBuildInFunc(_func_name, _arg_values);}
+  inline virtual CExpression* ValueExp() {return this;}
+  inline virtual CExpression* Reduce() {return new CNumber(Width(), Value());}
+  inline virtual void         Print(ostream& os=cout)  {
+    os << _func_name << "(";
+    for (vector<CExpression*>::iterator iter=_arg_values->begin();
+	 iter != _arg_values->end(); iter++) {
+      (*iter)->Print(os);
+      if (iter != _arg_values->end() -1 ) os << ", ";
+    }
+    os << ")";
+  }
+  inline virtual void  GetSymbol(set<CSymbol*> *) {}
+  inline virtual bool  HasParam() {return false;}
+  inline virtual bool  Update(tDirection direction) {};
+  inline virtual void  AddRoccure(yy::location loc) {};
+  inline virtual void  AddLoccure(yy::location loc) {};
+  inline virtual bool  Update(tType) {};
+  
+};
+
 
 // ------------------------------
 //   CParenthExp

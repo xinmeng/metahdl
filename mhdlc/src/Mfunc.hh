@@ -70,4 +70,8 @@ inline ulonglong Power(const ulonglong &base, const ulonglong &exp)
 
 string regexp_substitute(const string&str, const string &pattern);
 
+string ItoS(ulonglong num, int width=-1, int base=2);
+ulonglong StoI(const string &str, int base=10);
+
+
 #endif

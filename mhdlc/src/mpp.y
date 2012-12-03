@@ -8,7 +8,7 @@
 %initial-action
 {
   // Initialize the initial location.
-  @$.begin.filename = @$.end.filename = &mwrapper.filename;
+  @$.begin.filename = @$.end.filename = &wrapper.filename;
 };
 %defines
 %define "parser_class_name" "mppParser"
@@ -25,6 +25,26 @@
 
 %union {
   string *str;
+  vector<string> *str_vector_ptr;
+
+  CMacroBodyOptComma *macro_body_opt_comma;
+  CMacroBodyOptArgRef *macro_body_opt_arg_ref;
+  vector<CMacroBody*> *macro_body_vector_ptr;
+
+
+  CStatement *stmt_ptr;
+  CStmtSimple *assignment_stmt;
+  CStmtSelfInc *self_inc_stmt;
+  CStmtSelfDec *self_dec_stmt;
+  vector<CStatement*> *stmt_vector_ptr;
+
+  CConstant *constant_ptr;
+  CExpression *expression_ptr;
+  vector<CExpression*> *exp_vector_ptr;
+
+  
+
+  
 }
 
 
@@ -128,8 +148,7 @@
 %token <str> HEX_BASED_NUM
 %token <str> VERBATIM
 
-%token       OPT_COMMA ",[ \t]*``"
-
+%token <macro_body_opt_comma> OPT_COMMA ",[ \t]*``"
 
 %token       END 0 "end of file"
 
@@ -149,6 +168,17 @@
 %right "!" "~" UNARY_AND UNARY_OR UNARY_XOR
 %left  "++" "--"
 
+
+%type <str> verbatims opt_arg single_arg_func_name two_arg_func_name multi_arg_func_name
+%type <str_vector_ptr> arg_name_list foreach_val_list  
+%type <stmt_vector_ptr> statements
+%type <stmt_ptr> statement
+%type <expression_ptr> expression constant
+%type <expression_ptr> single_arg_func_call two_arg_func_call multi_arg_func_call
+%type <exp_vector_ptr> arith_func_arg_list
+%type <macro_body_vector_ptr> mix_pure_id_verbatim opt_arg_concat
+
+
 %% 
 
 balanced_block : 
@@ -160,6 +190,7 @@ balanced_block :
 | balanced_block define_block
 | balanced_block let_statement
 | balanced_block switch_block
+| balanced_block arith_func_call
 ;
 
 line_block : "`line" NUM STRING // strip `"' at both ends
@@ -173,8 +204,8 @@ line_block : "`line" NUM STRING // strip `"' at both ends
 for_block : "`for" "(" statements ";" expression ";" statements ")" balanced_block "`endfor"
 ;
 
-statements : 
-| statements "," statement
+statements : {$$ = new vector<CStatement*>;}
+| statements "," statement {$1->push_back($3); $$=$1;}
 ;
 
 foreach_block : "`foreach" ID "(" foreach_val_list ")" balanced_block "`endfor"
@@ -185,8 +216,8 @@ foreach_block : "`foreach" ID "(" foreach_val_list ")" balanced_block "`endfor"
 // arithmetic macro are expanded in lexer, function call macro are
 // expanded in parser. Eventally, `foreach_val_list' is an array of
 // `verbatims' separated by comma.
-foreach_val_list : expression	// only accept verbatims
-| foreach_val_list "," expression
+foreach_val_list : verbatims {$$=new vector<string>; $$->push_back(*$1);}
+| foreach_val_list "," verbatims {$1->push_back(*$3); $$=$1;}
 
 mpp_loop_block : "`__mpp_loop_end__"
 ;
@@ -215,51 +246,81 @@ verbatims : VERBATIM
 ;
 
 
-define_block : "`define" PURE_ID verbatims "\n"
+// Enter <define_block>
+define_block : "`define" PURE_ID "\n"
+| "`define" PURE_ID verbatims "\n"
 | "`define" PURE_ID_OPEN_PARANTHES arg_name_list ")" mix_pure_id_verbatim "\n"
 | "`define" PURE_ID_OPEN_PARANTHES arg_name_list opt_arg ")" mix_pure_id_verbatim "\n"
 ;
 
-arg_name_list : PURE_ID
-| arg_name_list "," PURE_ID
+arg_name_list : PURE_ID {$$=new vector<string>; $$->push_back($1);}
+| arg_name_list "," PURE_ID {$1->push_back($3); $$=$1;}
 ;
 
 
-opt_arg : "..."
-| PURE_ID "..."
+opt_arg : "..." {$$=new string ("__VA_ARG__");}
+| PURE_ID "..." {$$=$1;}
 ;
 
-mix_pure_id_verbatim : 
+mix_pure_id_verbatim : {$$=new vector<CMacroBody*>;}
 | mix_pure_id_verbatim PURE_ID	// mark argument replace point
 | mix_pure_id_verbatim VERBATIM	      // save macro definition literally
 | mix_pure_id_verbatim opt_arg_concat // remove ',' if optional arg is nil
 | mix_pure_id_verbatim ID	// stringfication
 ;
 
-opt_arg_concat : OPT_COMMA PURE_ID // PURE_ID must be existing arg or '__VA_ARGS__'
+// PURE_ID must be existing arg or '__VA_ARGS__'
+opt_arg_concat : OPT_COMMA PURE_ID 
+{
+  $$=new vector<CMacroBody*>; 
+  $$->push_back($1); 
+  $$->push_back(new CMacroBodyOptArgRef (1) );
+}
 ;
 
 // Enter <const_expression> to reduce value before assignment
 let_statement : "`let" statement "\n"
 ;
 
-constant : NUM
-| BIN_BASED_NUM
-| DEC_BASED_NUM
-| HEX_BASED_NUM
+constant: NUM   
+{ 
+  $$ = new CNumber (*$1);
+}
+
+| BIN_BASED_NUM 
+{
+  try{ $$ = new CBasedNum(*$1, 2);}
+  catch (string &str) {wrapper.error(@1, str);}
+}
+    
+| DEC_BASED_NUM 
+{ 
+  try{ $$ = new CBasedNum(*$1, 10);}
+  catch (string &str) {wrapper.error(@1, str);}
+}
+
+| HEX_BASED_NUM 
+{
+  try{ $$ = new CBasedNum(*$1, 16);}
+  catch (string &str) {wrapper.error(@1, str);}
+}
 ;
 
-// Enter <verbatim_expression> to produce verbatims list
-macro_func_call : ID "(" macro_func_arg_val_list ")"
-;
 
-macro_func_arg_val_list : opt_macro_func_arg_val
-|  macro_func_arg_val_list "," opt_macro_func_arg_val
-;
+// // Enter <verbatim_expression> to produce verbatims list
+// macro_func_call : ID "(" macro_func_arg_val_list ")" 
+// {
+//   $$ = new CString ("");
+// }
+// ;
 
-opt_macro_func_arg_val : 
-| expression			
-;
+// macro_func_arg_val_list : opt_macro_func_arg_val {$$ = new vector<CExpression*>; $$->push_back($1)}
+// |  macro_func_arg_val_list "," opt_macro_func_arg_val {$1->push_back($3), $$=$1;}
+// ;
+
+// opt_macro_func_arg_val : {$$=NULL;}
+// | expression {$$=$1;}			
+// ;
 
 // Enter <const_expression>
 // because arith_func_call only accept numbers as arguments
@@ -268,43 +329,54 @@ arith_func_call : single_arg_func_call
 | multi_arg_func_call
 ;
 
-single_arg_func_call : single_arg_func_name "(" expression ")"
+single_arg_func_call : single_arg_func_name "(" expression ")" 
+{
+  $$=new CString ("");		// expand func
+}
 ;
 
-single_arg_func_name : K_LOG2  
-| K_FLOOR 
-| K_CEIL
-| K_ABS   
-| K_EVEN  
-| K_ODD   
+single_arg_func_name : K_LOG2  {$$=new string ("log2");}
+| K_FLOOR {$$=new string ("floor");}
+| K_CEIL {$$=new string ("ceil");}
+| K_ABS  {$$=new string ("abs");}
+| K_EVEN  {$$=new string ("even");}
+| K_ODD   {$$=new string ("odd");}
 ;
 
-two_arg_func_call : two_arg_func_name "(" expression ")"
+two_arg_func_call : two_arg_func_name "(" expression ")" 
+{
+  $$ = new CString ("");
+}
 | two_arg_func_name "(" expression "," expression ")"
+{
+  $$ = new CString ("");
+}
 ;
 
-two_arg_func_name : K_HEX   
-| K_DEC
-| K_BIN   
+two_arg_func_name : K_HEX   {$$=new string("hex");}
+| K_DEC {$$=new string ("dec");}
+| K_BIN {$$=new string ("bin");}
 ;
 
 multi_arg_func_call : multi_arg_func_name "(" arith_func_arg_list ")"
+{
+  $$ = new CString ("");
+}
 ;
 
-multi_arg_func_name : K_MAX   
-| K_MIN   
+multi_arg_func_name : K_MAX    {$$ = new string ("max");}
+| K_MIN   {$$ = new string ("min");}
 ;
 
-arith_func_arg_list : expression 
-| arith_func_arg_list "," expression
+arith_func_arg_list : expression  {$$=new vector<CExpression*>; $$->push_back($1);}
+| arith_func_arg_list "," expression {$1->push_back($3); $$=$1;}
 ;
 
 
 
 expression : constant
-| verbatims
-| ID
-| macro_func_call
+| verbatims {$$=new CString (*$1);}
+| ID {$$=new CString (*$1);}
 | arith_func_call
 | "(" expression ")" 
 | "|" expression %prec UNARY_OR
