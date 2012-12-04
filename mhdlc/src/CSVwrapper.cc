@@ -14,5 +14,7 @@ CSVwrapper::Parse()
   svparser.parse();
   CloseIO();
 
+  RemovePostPPFile();
+
 }
 

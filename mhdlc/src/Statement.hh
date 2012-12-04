@@ -170,17 +170,13 @@ public:
     PUT_SPACE(indent);
     os << "if ( ";  
     _cond->Print(os); 
-    os << " ) begin" << endl;
+    os << " )" << endl;
     _if_stmt->Print(os, indent+step); 
-    PUT_SPACE(indent);
-    os << "end" << endl;
 
     if ( _else_stmt ) {
       PUT_SPACE(indent);
-      os << "else begin" << endl;
+      os << "else" << endl;
       _else_stmt->Print(os, indent+step); 
-      PUT_SPACE(indent);
-      os << "end" << endl;
     }
   }
 
@@ -212,10 +208,14 @@ public:
 
 public:
   inline void Print(ostream&os=cout, int indent=0) {
+    PUT_SPACE(indent);
+    os << "begin" << endl;
     for ( vector<CStatement*>::iterator iter = _stmt_list->begin(); 
 	  iter != _stmt_list->end(); ++iter) {
-      (*iter)->Print(os, indent);
+      (*iter)->Print(os, indent+2);
     }
+    PUT_SPACE(indent);
+    os << "end" << endl;
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
@@ -267,10 +267,8 @@ public:
       (*iter)->Print(os);
       if ( iter != _cond->end()-1 ) os << ", ";
     }
-    os << " : begin" << endl;
+    os << " : " << endl;
     _stmt->Print(os, indent+_step); 
-    PUT_SPACE(indent);
-    os << "end" << endl;
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
@@ -347,7 +345,7 @@ public:
 	if (_z) os << "z";
 	os << " (";
 	_exp->Print(os);
-	os << " ) " << endl;
+	os << " ) // sysnthesis parallel_case" << endl;
 	os << "`endif" << endl;
       }
       else { // Eliminate

@@ -498,7 +498,7 @@ net : net_name "[" expression ":" expression "]"
 	}
       }
 
-      if ( $3->Value() <= symb->lsb->Value() ) {
+      if ( $3->Value() < symb->lsb->Value() ) {
 	if ( !symb->UpdateLSB($3) ) {
 	  mwrapper.error(@3, "LSB exceed fixed value, check your declaration.");
 	}
@@ -936,7 +936,7 @@ balanced_stmt : ";"
   $11->AddRoccure(@11);
 
   $$ = new CStmtFOR( $3, $5, $7, $9, $11, $13);
-  mwrapper.warning(@$, "for-statment is now weakly supported in MetaHDL, better to use proprocessing directive `for.");
+  // mwrapper.warning(@$, "for-statment is now weakly supported in MetaHDL, better to use proprocessing directive `for.");
 }
 
 | "begin" "end" 
@@ -1196,7 +1196,8 @@ port_direction: "input" {$$ = INPUT;}
 /*******************************
      parameter_declaration
  ******************************/ 
-parameter_declaration : "parameter" parameter_assignments ";" 
+parameter_declaration : "parameter" {mwrapper.is_global_param=true;} parameter_assignments ";" 
+| "localparam" {mwrapper.is_global_param=false;} parameter_assignments ";"
 ;
 
 parameter_assignments : parameter_assignment
@@ -1218,7 +1219,7 @@ parameter_assignment : ID "=" expression
     $3->Update(INPUT);
     $3->AddRoccure(@3);
 
-    CParameter *param = new CParameter (*$1, $3);
+    CParameter *param = new CParameter (*$1, $3, mwrapper.is_global_param);
     mwrapper.param_table->Insert(param);
   }
 }
@@ -1939,7 +1940,7 @@ parameter_rule : {$$ = NULL;}
 parameter_override : parameter_num_override
 {
   if ( !mwrapper.mod_template->param_table->SetParam($1) ) {
-    mwrapper.warning(@1, "parameter number mismatch for " + mwrapper.mod_template_name);
+    mwrapper.error(@1, "parameter number mismatch for " + mwrapper.mod_template_name);
   }
 }
 | parameter_name_override 
@@ -1974,7 +1975,7 @@ parameter_name_override : "." ID "(" expression ")"
     mwrapper.error(@4, "non-constant expression as parameter.");
   }
   else if ( !mwrapper.mod_template->param_table->SetParam(*$2, $4) ) {
-    mwrapper.error(@2, mwrapper.mod_template_name + " has no parameter: " + *$2);
+    mwrapper.error(@2, mwrapper.mod_template_name + " has no public parameter: " + *$2);
   }
 }
 | parameter_name_override "," "." ID "(" expression ")"
@@ -1983,7 +1984,7 @@ parameter_name_override : "." ID "(" expression ")"
     mwrapper.error(@6, "non-constant expression as parameter.");
   }
   else if ( !mwrapper.mod_template->param_table->SetParam(*$4, $6) ) {
-    mwrapper.error(@4, mwrapper.mod_template_name + " has no parameter: " + *$4);
+    mwrapper.error(@4, mwrapper.mod_template_name + " has no public parameter: " + *$4);
   }
 }
 
@@ -2011,7 +2012,7 @@ connection_rule : "." net_name "(" expression ")"
   if ( ! port_symb ) {
     mwrapper.error(@$, mwrapper.mod_template_name + " has no port \"" + *$2 + "\".");
   }
-  else if ( (port_symb->direction == OUTPUT || port_symb->direction == INOUT) && typeid( *$4 ) == typeid(CConcatenation) ) {
+  else if ( (port_symb->direction == OUTPUT /*|| port_symb->direction == INOUT*/) && typeid( *$4 ) == typeid(CConcatenation) ) {
      CConcatenation *concat_exp = dynamic_cast<CConcatenation*> ($4);
      for ( vector<CExpression*>::iterator iter = concat_exp->List()->begin();
 	   iter != concat_exp->List()->end(); ++iter) {
@@ -2020,7 +2021,7 @@ connection_rule : "." net_name "(" expression ")"
 	}
      }
   }
-  else if ( (port_symb->direction == OUTPUT || port_symb->direction == INOUT) && typeid( *$4 ) != typeid(CVariable) ) {
+  else if ( (port_symb->direction == OUTPUT /*|| port_symb->direction == INOUT*/) && typeid( *$4 ) != typeid(CVariable) ) {
      mwrapper.error(@$, "output/inout port \"" + *$2 + "\" connects to RHS expression.");
   }
 
@@ -2132,6 +2133,24 @@ metahdl_constrol : "metahdl" ID ";"
   string cmd_line = COMMAND;
   if ( LEGACY_VERILOG_MODE )
     cmd_line = cmd_line + " -verilog ";
+
+  if (FORCE_WIDTH_OUTPUT) 
+    cmd_line = cmd_line + " --force-width-output";
+
+  switch (CASE_MODIFY_STYLE)
+    {
+    case PROPAGATE:
+      cmd_line = cmd_line + " --propagate-case-modifier";
+      break;
+  
+    case MACRO:
+      cmd_line = cmd_line + " --macro-case-modifier";
+      break;
+
+    case ELIMINATE:
+      cmd_line = cmd_line + " --eliminate-case-modifier";
+      break;
+    }
 
   for (list<string>::iterator iter = PATHS.begin(); 
        iter!=PATHS.end(); ++iter)

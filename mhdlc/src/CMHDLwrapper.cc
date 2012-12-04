@@ -16,6 +16,7 @@ CMHDLwrapper::Parse()
 
 
   GenSV();
+  RemovePostPPFile();  
 }
 
 void
@@ -31,5 +32,6 @@ CMHDLwrapper::DepParse()
   delete mparser;
 
   GenSV();
+  RemovePostPPFile();  
 }
 

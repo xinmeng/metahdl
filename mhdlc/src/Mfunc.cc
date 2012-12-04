@@ -39,6 +39,7 @@ bool CopyVerilogCode = false;
 bool LEGACY_VERILOG_MODE = false;
 bool FORCE_WIDTH_OUTPUT = false;
 bool OutputCodeLocation = false;
+bool PreservePostPPFile = false;
 enum e_case_modify_style_t CASE_MODIFY_STYLE = PROPAGATE;
 
 
@@ -425,6 +426,9 @@ GetOpt(int argc, char *argv[])
     else if ( !strcmp(argv[i], "--eliminate-case-modifier")) {
       CASE_MODIFY_STYLE = ELIMINATE;
     }
+    else if ( !strcmp(argv[i], "--preserve-postpp-file")) {
+      PreservePostPPFile = true;
+    }
     else if (!strcmp(argv[i], "-h"))
       {
 	cout << "syntax: mhdlc [options] filename" << endl
@@ -724,6 +728,19 @@ regexp_substitute(const string &str, const string &pattern)
   return result_str;
 }
 
+int
+regexp_match(const string &str, const string &pattern)
+{
+  string cmd_str = "$string = '" + str + "'; $string =~ " + pattern + ";";
+
+  SV *cmd_sv = newSVpvf(cmd_str.c_str());
+  SV *retval;
+ 
+  retval = my_eval_sv(cmd_sv, TRUE);
+  SvREFCNT_dec(cmd_sv);
+ 
+  return SvIV(retval);
+}
 
 
 string

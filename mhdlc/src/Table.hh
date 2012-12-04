@@ -45,6 +45,27 @@ public:
 	CVariable *var = dynamic_cast<CVariable*> (iter->second);
 	CSymbol *tmp_symb = var->Symb();
 	tmp_symb->name = regexp_substitute(tmp_symb->name, regexp);
+	
+	CExpression *exp;
+	if (regexp_match(tmp_symb->name, "/^$/") ) {
+	  iter->second = NULL; // _connect_map[iter->first] = NULL;
+	}
+	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[dD][0-9_]+$/")) {
+	  exp = new CBasedNum(tmp_symb->name, 10);
+	  iter->second = exp; // _connect_map[iter->first] = exp;
+	}
+	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[hH][0-9a-fA-F_]+$/")) {
+	  exp = new CBasedNum(tmp_symb->name, 16);
+	  iter->second = exp; // _connect_map[iter->first] = exp;
+	}
+	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[bB][01_]+$/")) {
+	  exp = new CBasedNum(tmp_symb->name, 2);
+	  iter->second = exp; // _connect_map[iter->first] = exp;
+	}
+	else if (regexp_match(tmp_symb->name, "/^[0-9_]+$/")) {
+	  exp = new CNumber(tmp_symb->name);
+	  iter->second = exp; // _connect_map[iter->first] = exp;
+	}
       }
     }
   }
@@ -327,8 +348,7 @@ public:
 
   inline bool SetParam(const string &name, CExpression* value) {
     if ( _param.count(name) > 0 ) {
-      _param[name]->SetValue(value);
-      return true;
+      return _param[name]->SetValue(value);
     }
     else {
       return false;
@@ -336,24 +356,40 @@ public:
   }
 
   inline bool SetParam(vector<CExpression*> *param_list) {
-    if ( param_list->size() != _order.size() ) {
-      for ( int i = 0; i< param_list->size(); ++i ) {
-	_param[_order[i]]->SetValue( (*param_list)[i]);
+    for ( int i = 0; i< param_list->size(); ++i ) {
+      if (i > _order.size() - 1 ) {
+	return false;
       }
-      return false;
-    }
-    else {
-      for ( int i = 0; i< _order.size(); ++i ) {
-	_param[_order[i]]->SetValue( (*param_list)[i]);
+      else {
+	if (!_param[_order[i]]->SetValue( (*param_list)[i])) {
+	  return false;
+	}
       }
-      return true;
     }
+
+    return true;
+
+//     if ( param_list->size() != _order.size() ) {
+//       for ( int i = 0; i< param_list->size(); ++i ) {
+// 	_param[_order[i]]->SetValue( (*param_list)[i]);
+//       }
+//       return false;
+//     }
+//     else {
+//       for ( int i = 0; i< _order.size(); ++i ) {
+// 	_param[_order[i]]->SetValue( (*param_list)[i]);
+//       }
+//       return true;
+//     }
   }
 
   inline vector<pair<string, CExpression*> >* GetParam() {
     vector<pair<string, CExpression*> > *param_list = new vector<pair<string, CExpression*> >;
     for ( int i=0; i<_order.size(); ++i) {
-      param_list->push_back( pair<string, CExpression*>(_order[i],  _param[_order[i]]->ValueExp() ) );
+      // param_list->push_back( pair<string, CExpression*>(_order[i],  _param[_order[i]]->ValueExp() ) );
+      if (_param[_order[i]]->global) {
+	param_list->push_back( pair<string, CExpression*>(_order[i],  _param[_order[i]]->ValueExp() ) );
+      }
     }
     return param_list;
   }

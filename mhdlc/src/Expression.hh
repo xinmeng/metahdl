@@ -492,9 +492,14 @@ private:
   CExpression* _value;
   CExpression* _override;
 
+public:
+  bool   global;
+  
+
+
 public: 
-  inline CParameter(const string &name, CExpression* value) : 
-    _name (name), _value (value), _override (NULL) {}
+  inline CParameter(const string &name, CExpression* value, bool type) : 
+    _name (name), _value (value), global (type), _override (NULL) {}
 
 public: 
   virtual inline void AddLoccure(yy::location loc) {};
@@ -541,7 +546,15 @@ public:
 
   inline string Name() {return _name;}
 
-  inline void SetValue(CExpression* override) {_override = override;}
+  inline bool SetValue(CExpression* override) {
+    if (global) {
+      _override = override;
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
   
   inline bool HasParam() {return true;}
 
@@ -701,17 +714,9 @@ public:
 #endif
   }
 
-  inline void AddLoccure(yy::location loc) {
-#if 0
-_symbol->loccur.push_back(loc);
-#endif 
-  }
+  inline void AddLoccure(yy::location loc) {_symbol->loccur.push_back(loc);}
 
-  inline void AddRoccure(yy::location loc) {
-#if 0
-    _symbol->roccur.push_back(loc);
-#endif
-  }
+  inline void AddRoccure(yy::location loc) {_symbol->roccur.push_back(loc);}
 
 };
 
@@ -795,19 +800,15 @@ public:
   inline bool Update(tType new_type) {return false;}
 
   inline virtual void AddRoccure(yy::location loc) {
-#if 0
     _cond->AddRoccure(loc);
     _t_opt->AddRoccure(loc);
     _f_opt->AddRoccure(loc);
-#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
-#if 0
     _cond->AddLoccure(loc);
     _t_opt->AddLoccure(loc);
     _f_opt->AddLoccure(loc);
-#endif
   }
 
 };
@@ -880,20 +881,16 @@ class CFuncCallExp : public CExpression
   inline bool Update(tType new_type) {return false;}
 
   inline virtual void AddRoccure(yy::location loc) {
-#if 0
     for (vector<CExpression*>::iterator iter = _args->begin();
 	 iter != _args->end(); ++iter) {
       (*iter)->AddRoccure(loc);
     }
-#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
-#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set arguments of function call to LHS variable." << endl;
     exit(1);
-#endif    
   }
 };
 
@@ -959,17 +956,8 @@ public:
 
   inline virtual bool Update(tDirection direction) {return _exp->Update(direction);}
   inline bool Update(tType new_type) {return false;}
-  inline virtual void AddRoccure(yy::location loc) {
-#if 0
-    _exp->AddRoccure(loc);
-#endif
-  }
-
-  inline virtual void AddLoccure(yy::location loc) {
-#if 0
-    _exp->AddLoccure(loc);
-#endif    
-  }
+  inline virtual void AddRoccure(yy::location loc) {_exp->AddRoccure(loc);}
+  inline virtual void AddLoccure(yy::location loc) {_exp->AddLoccure(loc);}
 };
 
 
@@ -1081,21 +1069,17 @@ public:
   }
 
   inline virtual void AddRoccure(yy::location loc) {
-#if 0
     for (vector<CExpression*>::iterator iter = _exp_list->begin();
 	 iter != _exp_list->end(); ++iter) {
       (*iter)->AddRoccure(loc);
     }
-#endif
   }
     
   inline virtual void AddLoccure(yy::location loc) {
-#if 0
     for (vector<CExpression*>::iterator iter = _exp_list->begin();
 	 iter != _exp_list->end(); ++iter) {
       (*iter)->AddLoccure(loc);
     }
-#endif
   }
 
   inline vector<CExpression*> *List() {return _exp_list;}
@@ -1196,18 +1180,14 @@ public:
 
 
   inline virtual void AddRoccure(yy::location loc) {
-#if 0
     _times->AddRoccure(loc);
     _exp_concat->AddRoccure(loc);
-#endif
   }
 
   inline virtual void AddLoccure(yy::location loc) {
-#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__ 
 	 << ":try to set DupConcat expression to LHS." << endl;
     exit(1);
-#endif
   }
 
 };
@@ -1256,16 +1236,12 @@ public:
   }
 
   virtual inline void AddRoccure(yy::location loc) {
-#if 0
     _exp->AddRoccure(loc);
-#endif
   }
 
   virtual inline void AddLoccure(yy::location loc) {
-#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set unary expression to LHS." << endl;
-#endif
   }
 
   virtual inline bool Update(tType new_type) {return true;}
@@ -1425,17 +1401,13 @@ public:
   }
 
   virtual inline void AddRoccure(yy::location loc) {
-#if 0
     _exp_a->AddRoccure(loc);
     _exp_b->AddRoccure(loc);
-#endif
   }
 
   virtual inline void AddLoccure(yy::location loc) {
-#if 0
     cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
 	 << ":try to set binary expression to LHS." << endl;
-#endif
   }
 
   virtual inline bool Update(tType new_type) {return true;}

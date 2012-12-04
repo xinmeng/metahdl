@@ -394,6 +394,21 @@ port_list ")" ";" body "endmodule"
   svwrapper.io_table->Reset();
 }
 
+| "module"  ID 
+{
+  svwrapper.io_table = new CIOTab;
+  svwrapper.param_table = new CParamTab;
+  svwrapper.symbol_table = new CSymbolTab;
+}
+"#" "(" module_parameter_port_list ")" 
+"(" port_list ")" ";" body "endmodule" 
+{
+  svwrapper.module_name = *$2;
+  svwrapper.module_location = @$;
+  svwrapper.BuildModule();
+  svwrapper.io_table->Reset();
+} 
+
 | "module"  ID ";" 
 {
   svwrapper.warning(@$, "Module " + *$2 + " has no IO." );
@@ -410,6 +425,13 @@ body "endmodule"
 } 
 ;
 
+
+module_parameter_port_list : module_parameter_assignment
+| module_parameter_port_list "," module_parameter_assignment
+;
+
+module_parameter_assignment : parameter_keywords parameter_assignment
+;
 
 
 body: 
@@ -841,7 +863,13 @@ port_direction: "input" {$$ = INPUT;}
 /*******************************
      parameter_declaration
  ******************************/ 
-parameter_keywords : "parameter" | "localparam";
+parameter_keywords : "parameter"
+{svwrapper.is_global_param = true;}
+
+| "localparam"
+{svwrapper.is_global_param = false;}
+;
+
 
 parameter_declaration : parameter_keywords parameter_assignments ";" 
 | parameter_keywords "[" expression ":" expression "]" parameter_assignments ";" 
@@ -863,7 +891,7 @@ parameter_assignment : ID "=" expression
     svwrapper.error(@3, "non-constant expression cannot be value of parameter.");
   }
   else {
-    CParameter *param = new CParameter (*$1, $3);
+    CParameter *param = new CParameter (*$1, $3, svwrapper.is_global_param);
     svwrapper.param_table->Insert(param);
   }
 }

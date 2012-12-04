@@ -74,14 +74,13 @@ public:
   inline void Print(ostream&os=cout) {
     PrintLoc(os); 
     if ( LEGACY_VERILOG_MODE ) {
-      os << "always @(*) begin " << endl;
+      os << "always @(*) " << endl;
     }
     else {
-      os << "always_comb begin" << endl; 
+      os << "always_comb" << endl; 
     }
 
     _stmt->Print(os, _step);
-    os << "end" << endl;
   }
   
   inline void GetSymbol() {
@@ -236,11 +235,9 @@ class CBlkLegacyFF : public CCodeBlock
 	 if ( _rst ) {
 	    os << " or negedge " << _rst->name;
 	 }
-	 os << ") begin" << endl;
+	 os << ")" << endl;
 
 	 _stmt->Print(os, _step);
-	 
-	 os << "end" << endl;
       }
 
       inline void GetSymbol() {

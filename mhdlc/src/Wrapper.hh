@@ -14,6 +14,8 @@ using namespace std;
 #include "Table.hh"
 #include "Mfunc.hh"
 
+extern bool PreservePostPPFile;
+
 class CWarningLocMessage
 {
 private:
@@ -44,6 +46,9 @@ public:
   string gen_file;
   yy::location module_location;
 
+  bool is_global_param;
+
+
   CIOTab* io_table;
   CParamTab* param_table;
   CSymbolTab *symbol_table;
@@ -59,7 +64,7 @@ protected:
 
 public:
   inline CWrapper() {};
-  inline CWrapper(string f, string n) : filename (f), _my_name (n) {
+  inline CWrapper(string f, string n) : is_global_param (false), filename (f), _my_name (n) {
     DecomposeName();
     SetPostPPFile();
     
@@ -128,6 +133,13 @@ public:
   inline void SetPostPPFile() 
   {
     post_pp_file = WORKDIR + "/" + module_name + extension + ".postpp";
+  }
+
+  virtual inline void RemovePostPPFile() {
+    if ( !PreservePostPPFile ) 
+      if ( unlink(post_pp_file.c_str()) ) {
+	cerr << "Cannot unlink " << post_pp_file << endl;
+      }
   }
 
   virtual inline string GetGenFileName() 
