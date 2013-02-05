@@ -17,6 +17,7 @@ public:
 public:
   virtual bool         IsConst()  = 0;
   virtual ulonglong    Width()  = 0;
+  virtual double       DoubleValue() =0;
   virtual ulonglong    Value()  = 0;
   virtual CExpression* ValueExp() =0;
   virtual CExpression* Reduce()  =0;

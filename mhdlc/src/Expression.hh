@@ -53,6 +53,7 @@ public:
   inline bool IsConst() {return true;}
 
   virtual inline ulonglong Width() {return _width;}
+  virtual inline double    DoubleValue() {return (double) Value();}
   virtual inline ulonglong Value() {return _value;}
   virtual inline CConstant* ValueExp() {return this;}
 
@@ -157,6 +158,8 @@ public:
   inline virtual string BinStr(int width=-1) {return _str;}
   inline virtual ulonglong CalcWidth(ulonglong val) {return 1;}
 
+
+  inline virtual double    DoubleValue() {throw "Internal Error: Unexpected call to CString::DoubleValue().";}
   inline virtual ulonglong Value() {throw "Internal Error: Unexpected call to CString::Value().";}
   inline virtual ulonglong Width() {throw "Internal Error: Unexpected call to CString::Width().";}
   
@@ -514,6 +517,8 @@ public:
       return _value->Width();
   }
 
+  inline virtual double DoubleValue() {return (double) Value();}
+
   inline ulonglong Value() {
     if ( _override ) 
       return _override->Value();
@@ -607,6 +612,8 @@ public:
 	}
      }
   }
+
+  inline virtual double DoubleValue() {return _symbol->value->DoubleValue();}
 
   inline ulonglong Value() {
     if ( IsConst() ) {
@@ -745,6 +752,8 @@ public:
     return Max(_t_opt->Width(), _f_opt->Width());
   }
 
+  inline double DoubleValue() {return _cond->Value() ? _t_opt->DoubleValue() : _f_opt->DoubleValue();}
+
   inline ulonglong Value() {
     return _cond->Value() ? _t_opt->Value() : _f_opt->Value();
   }
@@ -819,55 +828,59 @@ public:
 // ------------------------------
 class CFuncCallExp : public CExpression
 {
-   private:
-      string _func_name;
-      vector<CExpression*> *_args;
+private:
+  string _func_name;
+  vector<CExpression*> *_args;
 
-   public:
-      inline CFuncCallExp (const string &func_name, vector<CExpression*> *args) :
-	 _func_name (func_name), _args (args) {}
+public:
+  inline CFuncCallExp (const string &func_name, vector<CExpression*> *args) :
+    _func_name (func_name), _args (args) {}
 
-   public:
-      inline bool         IsConst() {return false; }
-      inline ulonglong    Width() {return 1;}
+public:
+  inline bool         IsConst() {return false; }
+  inline ulonglong    Width() {return 1;}
 
-      inline ulonglong    Value() {
-	 cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Value() from CFuncCallExp!"; 
-	 exit(1);
-      }
+  inline double       DoubleValue() {
+    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call DoubleValue() from CFuncCallExp!"; 
+    exit(1);
+  }
+  inline ulonglong    Value() {
+    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Value() from CFuncCallExp!"; 
+    exit(1);
+  }
 
-      inline CFuncCallExp* ValueExp() {return new CFuncCallExp(_func_name, _args);}
-      inline CExpression*  Reduce() {
-	 cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
-	 exit(1);
-      }
+  inline CFuncCallExp* ValueExp() {return new CFuncCallExp(_func_name, _args);}
+  inline CExpression*  Reduce() {
+    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
+    exit(1);
+  }
 
-      inline void Print(ostream& os=cout) {
-	 os << _func_name << "(";
-	 for ( vector<CExpression*>::iterator iter = _args->begin(); 
-	       iter != _args->end(); ++iter) {
-	    (*iter)->Print(os);
-	    if ( iter != _args->end() -1 ) os << ", ";
-	 }
-	 os<<")";
-      }
+  inline void Print(ostream& os=cout) {
+    os << _func_name << "(";
+    for ( vector<CExpression*>::iterator iter = _args->begin(); 
+	  iter != _args->end(); ++iter) {
+      (*iter)->Print(os);
+      if ( iter != _args->end() -1 ) os << ", ";
+    }
+    os<<")";
+  }
 
-      inline void GetSymbol(set<CSymbol*> *st) {
+  inline void GetSymbol(set<CSymbol*> *st) {
 #if 0
-	 for ( vector<CExpression*>::iterator iter = _args->begin(); 
-	       iter != _args->end(); ++iter) {
-	    (*iter)->GetSymbol(st);
-	 }
+    for ( vector<CExpression*>::iterator iter = _args->begin(); 
+	  iter != _args->end(); ++iter) {
+      (*iter)->GetSymbol(st);
+    }
 #endif
-      }
+  }
 
-      inline bool HasParam() {
-	 for ( vector<CExpression*>::iterator iter = _args->begin(); 
-	       iter != _args->end(); ++iter) {
-	    if ( (*iter)->HasParam() ) return true;
-	 }
-	 return false;
-      }
+  inline bool HasParam() {
+    for ( vector<CExpression*>::iterator iter = _args->begin(); 
+	  iter != _args->end(); ++iter) {
+      if ( (*iter)->HasParam() ) return true;
+    }
+    return false;
+  }
 
   inline virtual bool Update(tDirection direction) {
     bool flag = true;
@@ -907,7 +920,8 @@ private:
 public:
   inline virtual bool         IsConst()  {return true;}
   inline virtual ulonglong    Width()  {return 32;}
-  inline virtual ulonglong    Value()  {return MppBuildInFunc(_func_name, _arg_values);}
+  inline virtual double       DoubleValue() {return MppBuildInFunc(_func_name, _arg_values);}
+  inline virtual ulonglong    Value()  {return (ulonglong) DoubleValue();}
   inline virtual CExpression* ValueExp() {return this;}
   inline virtual CExpression* Reduce() {return new CNumber(Width(), Value());}
   inline virtual void         Print(ostream& os=cout)  {
@@ -943,6 +957,7 @@ public:
 public:
   inline bool         IsConst() {return _exp->IsConst(); }
   inline ulonglong    Width() {return _exp->Width();}
+  inline double       DoubleValue() {return _exp->DoubleValue();}
   inline ulonglong    Value() {return _exp->Value();}
   inline CParenthExp* ValueExp() {return new CParenthExp (_exp->ValueExp());}
   inline CExpression* Reduce() {return IsConst() ? _exp->Reduce() : NULL;}
@@ -990,6 +1005,12 @@ public:
       width += (*iter)->Width();
     }
     return width;
+  }
+
+  virtual inline double DoubleValue() {
+    cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
+	 << ":try to Call CConcatenation::DoubleValue()." << endl;
+    exit(1);
   }
 
   virtual inline ulonglong Value() {
@@ -1109,6 +1130,12 @@ public:
     }
   }
 
+  inline double DoubleValue() {
+    cerr << "**Internal Error:" << __FILE__ << ":" << __LINE__
+	 << ":try to Call CDupConcat::DoubleValue()." << endl;
+    exit(1);
+  }
+
   inline ulonglong Value() {
     if ( _times->IsConst() ) {
       CNumber *num = new CNumber(_exp_concat->Width(), _exp_concat->Value());
@@ -1208,6 +1235,7 @@ public:
   }
 
   virtual inline ulonglong Width() {};
+  virtual inline double    DoubleValue() {return (double) Value();}
   virtual inline ulonglong Value() {};
 
   virtual inline CExpression* ValueExp() =0;
@@ -1421,6 +1449,8 @@ public :
   inline CBinExpAND(CExpression* exp_a, CExpression* exp_b) : 
     CBinaryExp("&", exp_a, exp_b) {}
   
+  inline double    DoubleValue() {return (double) Value();}
+
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1438,6 +1468,7 @@ public:
   inline CBinExpOR(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("|", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return (double) Value();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1453,6 +1484,7 @@ public:
   inline CBinExpXOR(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("^", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return (double) Value();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1469,6 +1501,7 @@ public:
   inline CBinExpADD(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("+", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return _exp_a->DoubleValue() + _exp_b->DoubleValue();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1487,6 +1520,7 @@ public:
   inline CBinExpSUB(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("-", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return _exp_a->DoubleValue() - _exp_b->DoubleValue();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1504,6 +1538,7 @@ public:
   inline CBinExpMUL(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("*", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return _exp_a->DoubleValue() * _exp_b->DoubleValue();}
   inline ulonglong Width() {return _exp_a->Width() + _exp_b->Width();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
@@ -1521,6 +1556,7 @@ public:
   inline CBinExpDIV(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("/", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return _exp_a->DoubleValue() / _exp_b->DoubleValue();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1538,6 +1574,7 @@ public:
   inline CBinExpMOD(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("%", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return (double) Value();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1554,6 +1591,7 @@ public:
   inline CBinExpRSHFT(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp(">>", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return (double) Value();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1571,6 +1609,7 @@ public:
   inline CBinExpLSHFT(CExpression *exp_a, CExpression *exp_b) : 
     CBinaryExp("<<", exp_a, exp_b) {}
 
+  inline double    DoubleValue() {return (double) Value();}
   inline ulonglong Value() {
     ulonglong val_a = _exp_a->Value();
     ulonglong val_b = _exp_b->Value();
@@ -1601,24 +1640,25 @@ public:
     }
   }
 
+  virtual double    DoubleValue()=0;
   virtual ulonglong Value() =0;
   virtual CExpression* ValueExp() =0;
 
 };
 
-#define BIN_COND_EXP_DECLARE(name, str, operator)			\
+#define BIN_COND_EXP_DECLARE(name, operator)				\
   class name : public CBinaryCondExp					\
   {									\
   public:								\
     inline name(CExpression *exp_a, CExpression *exp_b) :		\
-      CBinaryCondExp(str, exp_a, exp_b) {}				\
+      CBinaryCondExp(#operator, exp_a, exp_b) {}			\
 									\
+    inline double    DoubleValue() {return (double) Value();}		\
     inline ulonglong Value() {return _exp_a->Value() operator _exp_b->Value() ? 1 : 0;} \
     inline name* ValueExp() {return new name (_exp_a->ValueExp(), _exp_b->ValueExp());} \
   }
   
-BIN_COND_EXP_DECLARE(CCondExpAND, "&&", &&);
-
+BIN_COND_EXP_DECLARE(CCondExpAND, &&);
 // class CCondExpAND : public CBinaryCondExp
 // {
 // public:
@@ -1629,76 +1669,84 @@ BIN_COND_EXP_DECLARE(CCondExpAND, "&&", &&);
 //   inline CExpression* ValueExp() {return new CCondExpAND (_exp_a->ValueExp(), _exp_b->ValueExp());}
 // };
 
-class CCondExpOR : public CBinaryCondExp
-{
-public:
-  inline CCondExpOR(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp("||", exp_a, exp_b) {}
+BIN_COND_EXP_DECLARE(CCondExpOR, ||);
+// class CCondExpOR : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpOR(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp("||", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() || _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpOR (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+//   inline ulonglong Value() {return _exp_a->Value() || _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpOR (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
 
-class CCondExpGT : public CBinaryCondExp
-{
-public:
-  inline CCondExpGT(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp(">", exp_a, exp_b) {}
+BIN_COND_EXP_DECLARE(CCondExpGT, >);
+// class CCondExpGT : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpGT(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp(">", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() > _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpGT (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+//   inline ulonglong Value() {return _exp_a->Value() > _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpGT (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
-class CCondExpLT : public CBinaryCondExp
-{
-public:
-  inline CCondExpLT(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp("<", exp_a, exp_b) {}
+BIN_COND_EXP_DECLARE(CCondExpLT, <);
+// class CCondExpLT : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpLT(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp("<", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() < _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpLT (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+//   inline ulonglong Value() {return _exp_a->Value() < _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpLT (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
-class CCondExpGE : public CBinaryCondExp
-{
-public:
-  inline CCondExpGE(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp(">=", exp_a, exp_b) {}
+BIN_COND_EXP_DECLARE(CCondExpGE, >=);
+// class CCondExpGE : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpGE(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp(">=", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() >= _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpGE (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+//   inline ulonglong Value() {return _exp_a->Value() >= _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpGE (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
-class CCondExpLE : public CBinaryCondExp
-{
-public:
-  inline CCondExpLE(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp("<=", exp_a, exp_b) {}
+BIN_COND_EXP_DECLARE(CCondExpLE, <=);
+// class CCondExpLE : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpLE(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp("<=", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() <= _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpLE (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+//   inline ulonglong Value() {return _exp_a->Value() <= _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpLE (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
-class CCondExpNE : public CBinaryCondExp
-{
-public:
-  inline CCondExpNE(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp("!=", exp_a, exp_b) {}
 
-  inline ulonglong Value() {return _exp_a->Value() != _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpNE (_exp_a->ValueExp(), _exp_b->ValueExp());}  
-};
+BIN_COND_EXP_DECLARE(CCondExpNE, !=);
+// class CCondExpNE : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpNE(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp("!=", exp_a, exp_b) {}
 
-class CCondExpEQ : public CBinaryCondExp
-{
-public:
-  inline CCondExpEQ(CExpression *exp_a, CExpression *exp_b) : 
-    CBinaryCondExp("==", exp_a, exp_b) {}
+//   inline ulonglong Value() {return _exp_a->Value() != _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpNE (_exp_a->ValueExp(), _exp_b->ValueExp());}  
+// };
 
-  inline ulonglong Value() {return _exp_a->Value() == _exp_b->Value() ? 1 : 0;}
-  inline CExpression* ValueExp() {return new CCondExpEQ (_exp_a->ValueExp(), _exp_b->ValueExp());}
-};
+BIN_COND_EXP_DECLARE(CCondExpEQ, ==);
+// class CCondExpEQ : public CBinaryCondExp
+// {
+// public:
+//   inline CCondExpEQ(CExpression *exp_a, CExpression *exp_b) : 
+//     CBinaryCondExp("==", exp_a, exp_b) {}
+
+//   inline ulonglong Value() {return _exp_a->Value() == _exp_b->Value() ? 1 : 0;}
+//   inline CExpression* ValueExp() {return new CCondExpEQ (_exp_a->ValueExp(), _exp_b->ValueExp());}
+// };
 
 
 #endif

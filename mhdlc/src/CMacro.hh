@@ -13,7 +13,7 @@ using namespace std;
 class CMacroBody
 {
 public:
-  virtual string Expand(const vector<CExpression*> &arg_values)=0;
+  virtual string Expand(const vector<string> &arg_values)=0;
 };
 
 class CMacroBodyLiteral : public CMacroBody
@@ -23,7 +23,7 @@ private:
 
 public:
   inline CMacroBodyLiteral(const string &literal) : _literal (literal) {}
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {return _literal;}
+  inline virtual string Expand(const vector<string> &arg_values) {return _literal;}
 };
 
 
@@ -34,10 +34,8 @@ private:
 
 public:
   inline CMacroBodyArgRef(const ulonglong &index) : _arg_index (index) {}
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {
-    ostringstream sstr;
-    arg_values[_arg_index]->Print(sstr);
-    return sstr.str();
+  inline virtual string Expand(const vector<string> &arg_values) {
+    return arg_values[_arg_index];
   }
 };
 
@@ -49,13 +47,8 @@ private:
 
 public:
   inline CMacroBodyStringfication(const ulonglong &index) : _arg_index (index) {}
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {
-    ostringstream sstr;
-    sstr << "\"";
-    arg_values[_arg_index]->Print(sstr);
-    sstr << "\"";
-
-    return sstr.str();    
+  inline virtual string Expand(const vector<string> &arg_values) {
+    return "\"" + arg_values[_arg_index] + "\"";
   }
 };
 
@@ -68,14 +61,14 @@ private:
   
 public:
   inline CMacroBodyOptArgRef(const ulonglong &index ) : _opt_arg_index (index) {}
-  inline virtual string Expand(const vector<CExpression*> &arg_values){
+  inline virtual string Expand(const vector<string> &arg_values){
     if (_opt_arg_index > arg_values.size()-1) {
       return "";
     }
     else {
       ostringstream sstr;
       for (int i=_opt_arg_index;i<arg_values.size();i++) {
-	arg_values[i]->Print(sstr);
+	sstr << arg_values[i];
 	if (i!=arg_values.size()-1) 
 	  sstr << ", ";
       }
@@ -93,7 +86,7 @@ private:
 
 public:
   inline CMacroBodyOptComma(const ulonglong &index) : _opt_arg_index (index) {}
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {
+  inline virtual string Expand(const vector<string> &arg_values) {
     if (_opt_arg_index > arg_values.size() -1) 
       return "";
     else 
@@ -114,7 +107,7 @@ public:
   inline CMacro(const string &name) : _name (name) {}
   
   virtual string Expand()=0;
-  virtual string Expand(const vector<CExpression*> &arg_vlaues)=0;
+  virtual string Expand(const vector<string> &arg_vlaues)=0;
 };
 
 
@@ -131,7 +124,7 @@ public:
     CMacro(name), _body(body) {}
 
   inline virtual string Expand() {return _body;}
-  inline virtual string Expand(const vector<CExpression*> &arg_vlaues) {return Expand();}
+  inline virtual string Expand(const vector<string> &arg_vlaues) {return Expand();}
 };
 
 
@@ -182,7 +175,7 @@ public:
     throw sstr.str();
   }
 
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {
+  inline virtual string Expand(const vector<string> &arg_values) {
     if (_arg_names->size() != arg_values.size()) {
       ostringstream sstr;
       sstr << "Internal Error: Macro \"" << _name << "\" requires " << _arg_names->size() 
@@ -217,7 +210,7 @@ public:
 
   inline virtual string Expand() {
     if (_arg_names->size()==0) {
-      vector<CExpression*> arg_values; // produce an empty arg value list
+      vector<string> arg_values; // produce an empty arg value list
 
       return Expand(arg_values);
     }
@@ -231,7 +224,7 @@ public:
   }
   
 
-  inline virtual string Expand(const vector<CExpression*> &arg_values) {
+  inline virtual string Expand(const vector<string> &arg_values) {
     if (_arg_names->size() > arg_values.size()) {
       ostringstream sstr;
       sstr << "Internal Error: Macro \"" << _name << "\" requires at least " << _arg_names->size()
