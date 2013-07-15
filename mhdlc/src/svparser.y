@@ -445,7 +445,12 @@ body:
 ;
 
 
-constant: NUM   
+constant : STRING
+{
+  $$ = new CString (*$1);
+}
+
+| NUM   
 { 
   $$ = new CNumber (*$1);
 }
@@ -888,6 +893,8 @@ parameter_assignment : ID "=" expression
     svwrapper.error(@1, *$1 + " has already been used as variable in your code.");
   }
   else if (!$3->IsConst()) {
+      if (typeid(*$3) == typeid(CString) ) 
+          cout << "CString" << endl;
     svwrapper.error(@3, "non-constant expression cannot be value of parameter.");
   }
   else {

@@ -491,6 +491,7 @@ WS [ \t]+
   {K_OUTPUT} return sv_token::K_OUTPUT;
   {K_PACKAGE} return sv_token::K_PACKAGE;
   {K_PACKED} return sv_token::K_PACKED;
+  {K_PARAMETER} return sv_token::K_PARAMETER;
   {K_PMOS} return sv_token::K_PMOS;
   {K_POSEDGE} return sv_token::K_POSEDGE;
   {K_PRIMITIVE} return sv_token::K_PRIMITIVE;
@@ -678,6 +679,23 @@ WS [ \t]+
   }
 
 
+  /* string */
+  \" buf = ""; yy_push_state(sc_string);
+  <sc_string>{
+      \\\" buf += "\"";
+      \n svwrapper.error(yylloc->end, "Line break inside string");
+      \" {
+          yylval->str = new string (buf); 
+          buf.erase();
+          yy_pop_state(); 
+          return sv_token::STRING; 
+      }
+      <<EOF>> svwrapper.error(yylloc->end, "Unexpected End-of-file inside string.");
+      . buf += svtext; 
+  }
+
+
+
   /* line comment */
   \/\/ yy_push_state(sc_line_cmt);
     
@@ -718,7 +736,6 @@ WS [ \t]+
    <<EOF>> svwrapper.error(yylloc->end, "Unexpected End-of-file inside task definition.");
    . /* zap */ ;
 }
-
 
  /* use string */ 
 <sc_use_string>{
