@@ -331,7 +331,7 @@ WS [ \t]+
 {K_INPUT} yy_push_state(sc_parse_mode); return sv_token::K_INPUT;
 {K_OUTPUT} yy_push_state(sc_parse_mode); return sv_token::K_OUTPUT;
 {K_PARAMETER} yy_push_state(sc_parse_mode); return sv_token::K_PARAMETER;
-{K_LOCALPARAM} yy_push_state(sc_parse_mode); return sv_token::K_LOCALPARAM;
+ /*{K_LOCALPARAM} yy_push_state(sc_parse_mode); return sv_token::K_LOCALPARAM;*/
 
 {K_FUNCTION} yy_push_state(sc_function);
 {K_TASK} yy_push_state(sc_task);
