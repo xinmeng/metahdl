@@ -28,7 +28,7 @@ extern bool CopyVerilogCode;
 
 %}
 
-%x sc_string sc_line_cmt sc_blk_cmt sc_ctrl_line sc_use_string
+%x sc_string sc_line_cmt sc_blk_cmt sc_ctrl_line sc_use_string sc_string_out
 %x sc_parse_mode
 %x sc_function sc_task
 
@@ -749,6 +749,17 @@ WS [ \t]+
 
 {WS} yylloc->step();
 \n yylloc->lines(1); yylloc->step();
+
+  /* string outside of parsing scope */
+\" yy_push_state(sc_string_out);
+<sc_string_out>{
+    \\\" { } 
+    \n svwrapper.error(yylloc->end, "Line break inside string");
+    \" yy_pop_state(); 
+    <<EOF>> svwrapper.error(yylloc->end, "Unexpected End-of-file inside string.");
+    . { } // buf += svtext; 
+}
+
 
 <<EOF>>	return sv_token::END;
 
