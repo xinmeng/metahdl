@@ -1762,61 +1762,78 @@ inst_block :  ID // 1
     else {
       char *mhdl_file, *sv_file, *v_file, *file;
       cerr << "\t" << @1 << ", instantiate " << *$1 << ", ";
-      if ( FastDependParse ) {
-	 cerr << "start fast depend parsing...";
-	 if ( file = SearchFile( *$1 + ".mhdl" )  ) {
-	    string *str = new string (file);
-	    cerr << endl << "\tDepend MHDL parsing " << file << "... " << endl << endl;
-	    CMHDLwrapper *depwrapper = new CMHDLwrapper ( *str ); 
-	    depwrapper->DepParse();
-	 }
-	 else if ( (file = SearchFile( *$1 + ".sv" )) || (file = SearchFile( *$1 + ".v" )) )  {
-	    string *str = new string (file);
-	    cerr << endl << "\tDepend SV parsing " << file << "... " << endl << endl;
-	    CSVwrapper *depwrapper = new CSVwrapper (*str);
-	    depwrapper->Parse();
-	 }
-	 else {
-	    mwrapper.error(@$, "Cannot find definition for module " + *$1);
-	 }
-      } 
-      else {
-	 cerr << "start comprehensive dependent parsing..." ;
-	 int flag = 0;
-
-	 if ( mhdl_file = SearchFile(*$1 + ".mhdl") ) flag |= 1;
-	 if ( sv_file = SearchFile(*$1 + ".sv" ) )    flag |= 2;
-	 if ( v_file = SearchFile(*$1 + ".v" ) )      flag |= 4;
-
-	 switch (flag ) {
-	    case 0: mwrapper.error(@$, "Cannot find definition for module " + *$1);
-	    case 1: file = mhdl_file; break;
-	    case 2: file = sv_file; break;
-	    case 4: file = v_file; break;
-	    case 3: case 5: case 7: {
-	       string mul_file;
-	       if ( mhdl_file ) mul_file = mhdl_file;
-	       if ( sv_file )   mul_file = mul_file + " " + sv_file;
-	       if ( v_file )    mul_file = mul_file + " " + v_file;
-	       mwrapper.error(@$, "Multiple definition found for module " + *$1 + ", found " + mul_file);
-	    }
-
-	    default: 
-	       mwrapper.error(@$, "Error flag when during searching instantiated module");
-	 }
-
-	 string *str = new string (file);
-	 if ( flag == 1 ) {
-	    cerr << endl << "\tDepend MHDL parsing " << file << "... " << endl << endl;
-	    CMHDLwrapper *depwrapper = new CMHDLwrapper ( *str ); 
-	    depwrapper->DepParse();
-	 }
-	 else {
-	    cerr << endl << "\tDepend SV parsing " << file << "... " << endl << endl;
-	    CSVwrapper *depwrapper = new CSVwrapper (*str);
-	    depwrapper->Parse();
-	 }
+      cerr << "start depend parsing...";
+      if ( file = SearchFile( *$1 + ".mhdl")  ) {
+          string *str = new string (file);
+          cerr << endl << "\tDepend MHDL parsing " << file << "... " << endl << endl;
+          CMHDLwrapper *depwrapper = new CMHDLwrapper ( *str ); 
+          depwrapper->DepParse();
       }
+      else if ( (file = SearchFile( *$1 + ".sv")) || (file = SearchFile( *$1 + ".v")) )  {
+          string *str = new string (file);
+          cerr << endl << "\tDepend SV parsing " << file << "... " << endl << endl;
+          CSVwrapper *depwrapper = new CSVwrapper (*str);
+          depwrapper->Parse();
+      }
+      else {
+          mwrapper.error(@$, "Cannot find definition for module " + *$1);
+      }
+
+      // if ( FastDependParse ) {
+      //    cerr << "start fast depend parsing...";
+      //    if ( file = SearchFile( *$1 + ".mhdl" )  ) {
+      //       string *str = new string (file);
+      //       cerr << endl << "\tDepend MHDL parsing " << file << "... " << endl << endl;
+      //       CMHDLwrapper *depwrapper = new CMHDLwrapper ( *str ); 
+      //       depwrapper->DepParse();
+      //    }
+      //    else if ( (file = SearchFile( *$1 + ".sv" )) || (file = SearchFile( *$1 + ".v" )) )  {
+      //       string *str = new string (file);
+      //       cerr << endl << "\tDepend SV parsing " << file << "... " << endl << endl;
+      //       CSVwrapper *depwrapper = new CSVwrapper (*str);
+      //       depwrapper->Parse();
+      //    }
+      //    else {
+      //       mwrapper.error(@$, "Cannot find definition for module " + *$1);
+      //    }
+      // } 
+      // else {
+      //    cerr << "start comprehensive dependent parsing..." ;
+      //    int flag = 0;
+
+      //    if ( mhdl_file = SearchFile(*$1 + ".mhdl") ) flag |= 1;
+      //    if ( sv_file = SearchFile(*$1 + ".sv" ) )    flag |= 2;
+      //    if ( v_file = SearchFile(*$1 + ".v" ) )      flag |= 4;
+
+      //    switch (flag ) {
+      //       case 0: mwrapper.error(@$, "Cannot find definition for module " + *$1);
+      //       case 1: file = mhdl_file; break;
+      //       case 2: file = sv_file; break;
+      //       case 4: file = v_file; break;
+      //       case 3: case 5: case 7: {
+      //          string mul_file;
+      //          if ( mhdl_file ) mul_file = mhdl_file;
+      //          if ( sv_file )   mul_file = mul_file + " " + sv_file;
+      //          if ( v_file )    mul_file = mul_file + " " + v_file;
+      //          mwrapper.error(@$, "Multiple definition found for module " + *$1 + ", found " + mul_file);
+      //       }
+
+      //       default: 
+      //          mwrapper.error(@$, "Error flag when during searching instantiated module");
+      //    }
+
+      //    string *str = new string (file);
+      //    if ( flag == 1 ) {
+      //       cerr << endl << "\tDepend MHDL parsing " << file << "... " << endl << endl;
+      //       CMHDLwrapper *depwrapper = new CMHDLwrapper ( *str ); 
+      //       depwrapper->DepParse();
+      //    }
+      //    else {
+      //       cerr << endl << "\tDepend SV parsing " << file << "... " << endl << endl;
+      //       CSVwrapper *depwrapper = new CSVwrapper (*str);
+      //       depwrapper->Parse();
+      //    }
+      // }
 
       mwrapper.mod_template = G_ModuleTable.Exist(*$1);
       if ( ! mwrapper.mod_template ) {
@@ -2156,7 +2173,7 @@ metahdl_constrol : "metahdl" ID ";"
        iter!=PATHS.end(); ++iter)
     cmd_line = cmd_line + " -I " + *iter ;
 
-  cmd_line = cmd_line + " -o " + WORKDIR + *$3 ;
+  cmd_line = cmd_line + " -o " + V_BASE + *$3 ;
 
 
   cerr << endl << "\tParsing on demand: " << cmd_line << endl << endl;

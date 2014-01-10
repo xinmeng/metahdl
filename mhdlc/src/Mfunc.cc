@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
+#include <errno.h>
 
 #include <sstream>
 #include <iomanip>
@@ -29,6 +31,8 @@ void ReportDefines(ostream &o);
 
 
 // global option variables
+char PATH_BUF [PATH_MAX];
+
 int DebugPPLexer = 0;
 int DebugMHDLLexer  = 0;
 int DebugMHDLParser = 0;
@@ -49,10 +53,15 @@ enum e_case_modify_style_t CASE_MODIFY_STYLE = PROPAGATE;
 
 string COMMAND = "";
 vector<string> FILES;
-list<string>   PATHS;
-string WORKDIR = "workdir";
+list<string>   PATHS, M_DIRS, I_DIRS;
+map<string, string> MIRROR;
+string M_BASE = "";
+string I_BASE = ""; 
+string V_BASE = "";
+//string WORKDIR = "workdir";
+
 string LOGFILE = "";
-string mhdlversion = "2.1";
+string mhdlversion = "3.0";
 
 
 int IsDir(const char *s)
@@ -76,72 +85,171 @@ int IsFile(const char *s)
 }
 
 
-char *
-SearchFile(const string &name)
+string 
+GetRealpath(const string &path)
 {
-  return SearchFile(name.c_str());
+    string msg;
+    string abspath;
+
+    if (realpath(path.c_str(), PATH_BUF)) 
+        abspath = PATH_BUF;
+    else {
+        msg = "Error:Can't call realpath() on '" + path +"'";
+        perror(msg.c_str());
+        exit(1);
+    }
+
+    return abspath;
 }
+
+list<string> 
+GetSubdir(string base)
+{
+    string msg, cmd, dir;
+    FILE *dirlist;
+    list<string> dirs;
+
+
+    base = GetRealpath(base);
+    cmd = "find " + base + " -type d";
+
+    dirlist = popen(cmd.c_str(), "r");
+    if (!dirlist) {
+        msg = "Error:'" + cmd + "' execution fail";
+        perror(msg.c_str());
+        exit(1);
+    }
+    else {
+        while (fgets(PATH_BUF, PATH_MAX, dirlist)) {
+            dir = PATH_BUF;
+            dir = dir.substr(0, dir.length()-1); // remove trailing "\n"
+            // cout << dir << endl;
+            dirs.push_back(dir);
+        }
+    }
+    pclose(dirlist);
+
+    return dirs;    
+}
+
+
+map<string, string>
+CreateMirrorDir(const string &mbase, const string &vbase, list<string> dirs)
+{
+    string msg, mdir, vdir;
+    map<string, string> mirror;
+
+    for (list<string>::iterator iter=dirs.begin(); iter != dirs.end(); iter++) {
+        mdir = *iter;
+
+        if (mdir == mbase) {
+            vdir = vbase;
+        }
+        else {
+            vdir = mdir;
+            if (vbase.length() == 1) 
+                vdir.replace(0, mbase.length(), "");
+            else 
+                vdir.replace(0, mbase.length(), vbase);
+        }
+        mirror[mdir] = vdir;
+        // cout << mdir << " -> " << vdir << endl;
+
+
+        if (mkdir(vdir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) ) {
+            if (errno != EEXIST) {
+                msg = "Error:mirror from '" + mbase + "' to '" + vbase + "' fail upon '" + vdir;
+                perror(msg.c_str());
+                exit(1);
+            }
+        }
+    }
+
+    return mirror;
+}
+
 
 char *
 SearchFile(const char *name)
 {
-  char *path;
-  string s;
+    string sname = name;
+    return SearchFile(sname);
+}
 
-  /* absolut path */
-  if ( name[0] == '/' ) {
-    if ( IsFile(name) ) {
-      path = (char *)calloc(1, strlen(name)+1);
-      strcpy(path, name);
-      return path;
+char *
+SearchFile(const string &name)
+{
+    char *path;
+    string s;
+
+    /* absolut path */
+    if ( name[0] == '/' ) {
+        if ( IsFile(name.c_str()) ) {
+            path = (char *)calloc(1, strlen(name.c_str())+1);
+            strcpy(path, name.c_str());
+            return path;
+        }
+        else 
+            return NULL;
     }
-    else 
-      return NULL;
-  }
-  /* relative path */
-  else {
-    for ( list<string>::iterator iter = PATHS.begin(); 
-	  iter != PATHS.end(); ++iter ) {
-      string tmp = *iter;
-      s = (*iter);
-      if ( s[s.length()-1] == '/' ) {
-	s = s + name;
-      }
-      else {
-	s = s + "/" + name;
-      }
+    /* relative path */
+    else {
+        string extention;
+        size_t pos = name.find_last_of(".");
+        list<string> *dirs;
+        if (pos == string::npos) 
+            extention = "";
+        else 
+            extention = name.substr(pos);
+        
+        if (extention == ".mhdl") {
+            dirs = &M_DIRS;
+        }
+        else {
+            dirs = &I_DIRS;
+        }
+
+        string dir;
+        for ( list<string>::iterator iter = dirs->begin(); 
+              iter != dirs->end(); ++iter ) {
+            dir = *iter;
+            if ( dir[dir.length()-1] == '/' ) {
+                s = dir + name;
+            }
+            else {
+                s = dir + "/" + name;
+            }
       
-      if ( IsFile( s.c_str() ) ) {
-	path = (char *)calloc(1, s.length()+1);
-	strcpy(path, s.c_str() );
+            if ( IsFile( s.c_str() ) ) {
+                dirs->erase(iter);
+                dirs->push_front(dir);
 
-	PATHS.erase(iter);
-	PATHS.push_front(tmp);
-
-	return path;
-      }
+                path = (char *)calloc(1, strlen(s.c_str())+1);
+                strcpy(path, s.c_str());
+                return path;
+            }
+        }
+        return NULL;
     }
-    return NULL;
-  }
 }
 
 
 void UseOutputPathFromENV()
 {
-  char *s = getenv("METAHDL_OUTPUT_PATH");
+  // char *s = getenv("METAHDL_OUTPUT_PATH");
   
-  if ( !s ) 
-    return;
-  else {
-    string path = s;
+  // if ( !s ) 
+  //   return;
+  // else {
+  //   string path = s;
     
-    size_t pos = path.find_first_of(' ');
+  //   size_t pos = path.find_first_of(' ');
     
-    if ( pos != string::npos ) 
-      path = path.substr(0, pos-1);
+  //   if ( pos != string::npos ) 
+  //     path = path.substr(0, pos-1);
 
-    WORKDIR = path;
-  }
+  //   WORKDIR = path;
+  // }
 }
 
 void 
@@ -256,15 +364,14 @@ GetOpt(int argc, char *argv[])
 	exit(1);
       }
       else {
-	s = argv[++i];
-	if ( WORKDIR == "workdir" ) {
-	  WORKDIR = s; 
-	}
-	else {
-	  fprintf(stderr, "**mhdlc warning: Multiple setting to output path, latest win. \nOrignal:%s Latest:%s\n", 
-		  WORKDIR.c_str(), s.c_str());
-	  WORKDIR = s;
-	}
+          V_BASE = argv[++i];
+          if (IsDir(V_BASE.c_str())) {
+              V_BASE = GetRealpath(V_BASE);
+          }
+          else {
+              fprintf(stderr, "**mhdlc error: output directory '%s' in arguments %d doesn't exist.", V_BASE.c_str(), i);
+              exit(1);
+          }          
       }
     }
     else if ( !strncmp(argv[i], "-l", 2) ) {
@@ -278,15 +385,12 @@ GetOpt(int argc, char *argv[])
 	LOGFILE = s;
       }
     }
-    else if ( !strcmp(argv[i], "-f")) 
-      {
-	if ( (i+1) >= argc || !strncmp(argv[i+1], "-", 1))
-	  {
+    else if ( !strcmp(argv[i], "-f")) {
+	if ( (i+1) >= argc || !strncmp(argv[i+1], "-", 1)) {
 	    fprintf(stderr, "**mhdlc error: No filelist provided to %s in arguments %d.\n", argv[i], i);
 	    exit(1);
-	  }
-	else 
-	  {
+        }
+	else {
 	    FILE *filelist = fopen(argv[++i], "r");
 	    if ( filelist ) {
 	      int lineno = 1;
@@ -330,90 +434,79 @@ GetOpt(int argc, char *argv[])
 	    }
 	  }
       }
-    else if ( !strcmp(argv[i], "-P" ) ) {
-       if ( (i+1) >= argc || !strncmp(argv[i+1], "-", 1)) {
-	  fprintf(stderr, "**mhdlc error: No path list  provided to %s in arguments %d.\n", argv[i], i);
-	  exit(1);
-       }
-       else {
-	  FILE *pathlist = fopen(argv[++i], "r");
-	  if ( pathlist ) {
-	     int lineno = 1;
-	     size_t n = 0;
-	     ssize_t l;
-	     char *rawline = NULL;
-	     string line;
-	     while ( (l=getline(&rawline, &n, pathlist)) != -1 ) {
-		if ( strcmp(rawline, "\n") && rawline[0] != '#') {
-		   /* is NOT empty line or comment line*/ 
-		   line = rawline;
-		   if ( line[line.length()-1] == '\n' ) {
-		      line = line.substr(0, line.length()-1);
-		   }
-		   if ( IsDir(line.c_str() ) ) {
-		      PATHS.push_back(line);
-		   }
-		   else {
-		      fprintf(stderr, "**mhdlc error: Invalid path \"%s\" in %s:%d, in arguments %d.\n", 
-			      line.c_str(), argv[i], lineno, i);
-		      exit(1);
-		   }
-		}
-		++lineno;
-	     }
-	  }
-	  else {
-	     fprintf(stderr, "**mhdlc error: Invalid pathlist %s in argument %d.\n",
-		     argv[i], i);
-	     exit(1);
-	  }
-       }
-
-
-		   
-    }
-    else if (arglen >= 2 && !strncmp(argv[i], "-D", 2))
-      {
-	if (arglen == 2)
-	  {
+    // else if ( !strcmp(argv[i], "-P" ) ) {
+    //    if ( (i+1) >= argc || !strncmp(argv[i+1], "-", 1)) {
+    //       fprintf(stderr, "**mhdlc error: No path list  provided to %s in arguments %d.\n", argv[i], i);
+    //       exit(1);
+    //    }
+    //    else {
+    //       FILE *pathlist = fopen(argv[++i], "r");
+    //       if ( pathlist ) {
+    //          int lineno = 1;
+    //          size_t n = 0;
+    //          ssize_t l;
+    //          char *rawline = NULL;
+    //          string line;
+    //          while ( (l=getline(&rawline, &n, pathlist)) != -1 ) {
+    //     	if ( strcmp(rawline, "\n") && rawline[0] != '#') {
+    //     	   /* is NOT empty line or comment line*/ 
+    //     	   line = rawline;
+    //     	   if ( line[line.length()-1] == '\n' ) {
+    //     	      line = line.substr(0, line.length()-1);
+    //     	   }
+    //     	   if ( IsDir(line.c_str() ) ) {
+    //     	      PATHS.push_back(line);
+    //     	   }
+    //     	   else {
+    //     	      fprintf(stderr, "**mhdlc error: Invalid path \"%s\" in %s:%d, in arguments %d.\n", 
+    //     		      line.c_str(), argv[i], lineno, i);
+    //     	      exit(1);
+    //     	   }
+    //     	}
+    //     	++lineno;
+    //          }
+    //       }
+    //       else {
+    //          fprintf(stderr, "**mhdlc error: Invalid pathlist %s in argument %d.\n",
+    //     	     argv[i], i);
+    //          exit(1);
+    //       }
+    //    }
+    // }
+    else if (arglen >= 2 && !strncmp(argv[i], "-D", 2)) {
+	if (arglen == 2)  {
 	    /* Perhaps we don't even need to notify user. */
 	    fprintf(stderr, "**mhdlc error: No define for -D in argument %d.\n", i);
 	    exit(1);
-	  }
-	else
-	  {
+        }
+	else {
 	    char *dname, *pnt;
 
 	    dname = (char*) malloc( (arglen+8)*sizeof(char) ); // NMALLOC(arglen+8, char);
 	    sprintf(dname, "`define %s", argv[i]+2);
 	    pnt = dname+8;
-	    while (*pnt)
-	      {
-		if (*pnt == '=')
-		  {
+	    while (*pnt)  {
+		if (*pnt == '=')  {
 		    *pnt = ' ';
 		    break;
-		  }
+                }
 		pnt++;
-	      }
+            }
 	    store_define(dname);
 	    free(dname);
-	  }
-      }
-    else if (!strcmp(argv[i], "-E"))
-      {
+        }
+    }
+    else if (!strcmp(argv[i], "-E")) {
 	/* Enable C style preprocessing of ifdef and friends. */
 	output_ifdef_directive = 1;
-      }
-    else if (!strcmp(argv[i], "-CL")) 
-      {
+    }
+    else if (!strcmp(argv[i], "-CL")) {
 	OutputCodeLocation = true;
-      }
-    else if (!strcmp(argv[i], "-L"))
-      {
+    }
+    else if (!strcmp(argv[i], "-L")) {
 	/* Write out `line directives for debugging. */
 	output_line_directive = 0;
-      }
+    }
     else if ( !strcmp(argv[i], "-F" ) ) {
        FastDependParse = true;
     }
@@ -429,21 +522,54 @@ GetOpt(int argc, char *argv[])
     else if ( !strcmp(argv[i], "--preserve-postpp-file")) {
       PreservePostPPFile = true;
     }
+    else if ( !strcmp(argv[i], "-mb")) {
+        if ( (i+1)>=argc || !strncmp(argv[i+1], "-", 1)) {
+            fprintf(stderr, "**mhdlc error: No directory provided to %s in arguments %d.\n", argv[i], i);
+            exit(1);
+        }
+        else {
+            s = argv[++i];
+            if ( IsDir(s.c_str()) ) {
+                M_BASE = GetRealpath(s);
+            }
+            else {
+                fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -I in argument %d.\n", s.c_str(), i);
+                exit(1);
+            }
+        }
+    }
+    else if ( !strcmp(argv[i], "-ib") ) {
+        if ( (i+1)>=argc || !strncmp(argv[i+1], "-", 1)) {
+            fprintf(stderr, "**mhdlc error: No directory provided to %s in arguments %d.\n", argv[i], i);
+            exit(1);
+        }
+        else {
+            s = argv[++i];
+            if ( IsDir(s.c_str()) ) {
+                I_BASE = GetRealpath(s);
+            }
+            else {
+                fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -I in argument %d.\n", s.c_str(), i);
+                exit(1);
+            }
+        }
+    }
     else if (!strcmp(argv[i], "-h"))
       {
 	cout << "syntax: mhdlc [options] filename" << endl
 	     << "options:" << endl
-	     << "  -I         Specify sigle search path. Search path can also be specified in" << endl
-	     << "             METAHDL_SEARCH_PATH environment variable." << endl
+	     << "  -I         Specify sigle MetaHDL search path. " << endl
+             << "  -mb        Specify MetaHDL Base directory, all subdirectoies are searched." << endl
+             << "  -ib        Specify IP Base directory, all subdirectoies are searched." << endl
 	     << "  -D         Define macro as used in VCS or GCC." << endl
 	     << "  -C         Copy V/SV codes touched by compiler into output dirctory." << endl
 	     << "  -CL        Output code location for cross referencing between .v/.sv and .mhdl source." << endl
 	     << "  -E         Preserve macro after preprocessing." << endl
 	     << "  -F         Fast dependency resolving, first found file win." << endl
 	     << "  -L         NOT output `line directive from preprocessor" << endl
-	     << "  -P         Specify a list of search paths in a file." << endl
+            // << "  -P         Specify a list of search paths in a file." << endl
 	     << "  -f         Specify a list of files to be processed." << endl
-	     << "  -o         Specify output directory. Output directory can also be sepcified in" << endl
+	     << "  -o         Specify output base directory." << endl
 	     << "             METAHDL_OUTPUT_PATH environment variable." << endl
 	     << "  -lXXX      Output summary of current compilation into log file XXX." << endl
 	     << endl
@@ -475,7 +601,7 @@ GetOpt(int argc, char *argv[])
     else if (!strcmp(argv[i], "--version")) 
       {
 	 cout << "MetaHDL compiler " << mhdlversion.c_str() << endl
-	      << "Copyright (C) 2010 MENG Xin, mengxin@vlsi.zju.edu.cn" << endl << endl;
+	      << "Copyright (C) 2010 MENG Xin, xinmeng@hotmail.com" << endl << endl;
 	 exit(0);
       }
     else if (!strcmp(argv[i], "-env")) {
@@ -536,33 +662,41 @@ GetOpt(int argc, char *argv[])
 	fprintf(stderr, "Unknown option: \"%s\"\n", argv[i]);
 	exit(1);
       }
-    else /* filename only.. */
-      {
-	cstr = SearchFile(argv[i]);
-	if ( cstr ) {
-	  FILES.push_back(cstr);
-	}
-	else {
-	  fprintf(stderr, "**mhdlc error: File \"%s\" does not exist in argument %d.\n", argv[i], i);
-	  exit(1);
-	}
-      }
-  }
-
-  if (WORKDIR[0] != '/' ) {
-    s = getenv("PWD");
-    if ( s == "/" ) {
-      WORKDIR = "/" + WORKDIR;
-    }
-    else {
-      WORKDIR = s + "/" + WORKDIR;
+    else { /* filename only.. */
+        cstr = argv[i];
+        FILES.push_back(cstr);
+	// cstr = SearchFile(argv[i]);
+	// if ( cstr ) {
+        //     FILES.push_back(cstr);
+	// }
+	// else {
+        //     fprintf(stderr, "**mhdlc error: File \"%s\" does not exist in argument %d.\n", argv[i], i);
+        //     exit(1);
+	// }
     }
   }
-  if ( WORKDIR.length() > 1 && WORKDIR[WORKDIR.length()-1] == '/' ) {
-    WORKDIR = WORKDIR.substr(0, WORKDIR.length()-1);
-  }
 
-  PATHS.push_back(WORKDIR);
+  if (I_BASE != "")
+      I_DIRS = GetSubdir(I_BASE);
+
+  M_DIRS = GetSubdir(M_BASE);
+  MIRROR = CreateMirrorDir(M_BASE, V_BASE, M_DIRS);
+  PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
+  
+  // if (WORKDIR[0] != '/' ) {
+  //   s = getenv("PWD");
+  //   if ( s == "/" ) {
+  //     WORKDIR = "/" + WORKDIR;
+  //   }
+  //   else {
+  //     WORKDIR = s + "/" + WORKDIR;
+  //   }
+  // }
+  // if ( WORKDIR.length() > 1 && WORKDIR[WORKDIR.length()-1] == '/' ) {
+  //   WORKDIR = WORKDIR.substr(0, WORKDIR.length()-1);
+  // }
+
+  // PATHS.push_back(WORKDIR);
 
 }
 
@@ -591,14 +725,14 @@ RptOpt()
      << "DebugMHDLParser: " << DebugMHDLParser << endl
      << "DebugSVLexer: " << DebugSVLexer << endl
      << "DebugSVParser: " << DebugSVParser << endl
-     << "workdir: " << WORKDIR << endl
      << endl;
+
 
   ReportDefines(os);
 
   os << endl
      << "===============================================" << endl
-     << " " << PATHS.size() << " search paths specified with -I/-P option" << endl
+     << " " << PATHS.size() << " search paths specified with -I/-mb option" << endl
      << "  or METAHDL_SEARCH_PATH environment variable" << endl
      << "===============================================" << endl;
   for ( list<string>::iterator iter=PATHS.begin(); 
@@ -627,30 +761,30 @@ RptOpt()
 void
 CreateWorkdir()
 {
-  int cmd_status;
-  string cmd;
+  // int cmd_status;
+  // string cmd;
 
-  cmd = "mkdir -p " + WORKDIR;
-  cmd_status = system(cmd.c_str());
-  if ( cmd_status != 0 ) {
-    cerr << "**mhdlc error:Cannot create working dir \"" << WORKDIR << "\"!" << endl;
-    exit(1);
-  }
+  // cmd = "mkdir -p " + WORKDIR;
+  // cmd_status = system(cmd.c_str());
+  // if ( cmd_status != 0 ) {
+  //   cerr << "**mhdlc error:Cannot create working dir \"" << WORKDIR << "\"!" << endl;
+  //   exit(1);
+  // }
   
-  FILE *t;
-  t = fopen( (WORKDIR + "/____MHDL_TEST_FILE____").c_str(), "w");
-  if ( t ) {
-    fclose(t);
-    cmd_status = unlink( (WORKDIR + "/____MHDL_TEST_FILE____").c_str() );
-    if ( cmd_status ) {
-      fprintf(stderr, "**mhdlc error: Invalid workdir \"%s\", cannot remove file in it.\n", WORKDIR.c_str());
-      exit(1);
-    }
-  }
-  else {
-    fprintf(stderr, "**mhdlc error: Invalid workdir \"%s\", cannot create file in it.\n", WORKDIR.c_str());
-    exit(1);
-  }
+  // FILE *t;
+  // t = fopen( (WORKDIR + "/____MHDL_TEST_FILE____").c_str(), "w");
+  // if ( t ) {
+  //   fclose(t);
+  //   cmd_status = unlink( (WORKDIR + "/____MHDL_TEST_FILE____").c_str() );
+  //   if ( cmd_status ) {
+  //     fprintf(stderr, "**mhdlc error: Invalid workdir \"%s\", cannot remove file in it.\n", WORKDIR.c_str());
+  //     exit(1);
+  //   }
+  // }
+  // else {
+  //   fprintf(stderr, "**mhdlc error: Invalid workdir \"%s\", cannot create file in it.\n", WORKDIR.c_str());
+  //   exit(1);
+  // }
 }
 
 

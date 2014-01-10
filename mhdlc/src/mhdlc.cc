@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
 
   GetOpt(argc, argv);
-  CreateWorkdir();
+  // CreateWorkdir();
   RptOpt(); // report option if "-log" is presented
   
 
@@ -43,18 +43,27 @@ int main(int argc, char *argv[])
   // process files
   ulonglong file_cnt = FILES.size();
   for (ulonglong i = 0; i < file_cnt; ++i ) {
-    tFileName f = DecomposeName( FILES[i] );
+      char *fname;
+      string dir_file;
+      if (fname = SearchFile(FILES[i])) 
+          dir_file = fname;
+      else {
+          fprintf(stderr, "**mhdlc:Can't find file '%s'.\n", fname);
+          exit(1);
+      }
+          
+      tFileName f = DecomposeName( dir_file );
 
     CMHDLwrapper *mwrapper;
     CSVwrapper *svwrapper;
     if (f.ext == ".mhdl") {
-      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing MHDL file:" << FILES[i] << endl;
-      mwrapper = new CMHDLwrapper (FILES[i]);
+      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing MHDL file:" << dir_file << endl;
+      mwrapper = new CMHDLwrapper (dir_file);
       mwrapper->Parse();
     }
     else {
-      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing SV file:" << FILES[i] << endl;
-      svwrapper = new CSVwrapper (FILES[i]);
+      cerr << "\n" << i+1 << "/" << file_cnt << " Parsing SV file:" << dir_file << endl;
+      svwrapper = new CSVwrapper (dir_file);
       svwrapper->Parse();
     }
   }
@@ -100,7 +109,7 @@ int main(int argc, char *argv[])
 	 << "    CPU Time: " << (double) time_used.tms_utime / CLK_PER_SEC << " sec" << endl
 	 << " System Time: " << (double) time_used.tms_stime / CLK_PER_SEC << " sec" << endl
 	 << "   User Time: " << end.tv_sec - start.tv_sec << " sec" << endl
-	 << "     workdir: " << WORKDIR << endl
+	 << "      output: " << V_BASE << endl
 	 << endl
 	 << "*********************************************************" << endl;
   }

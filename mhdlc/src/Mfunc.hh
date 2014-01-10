@@ -44,14 +44,17 @@ extern bool FORCE_WIDTH_OUTPUT;
 extern enum e_case_modify_style_t {PROPAGATE, MACRO, ELIMINATE}  CASE_MODIFY_STYLE;
 
 extern vector<string> FILES;
-extern list<string>   PATHS;
-extern string WORKDIR;
+extern list<string>   PATHS, M_DIRS, I_DIRS;
+extern string M_BASE, I_BASE, V_BASE;
+extern map<string, string> MIRROR;
+
+//extern string WORKDIR;
 
 
 void GetOpt(int, char**);
 void RptOpt();
 void CreateWorkdir();
-char* SearchFile(const char *);
+// char* SearchFile(const char *);
 char* SearchFile(const string &);
 
 inline ulonglong Max(const ulonglong &a, const ulonglong &b)

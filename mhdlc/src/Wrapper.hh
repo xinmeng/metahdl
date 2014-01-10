@@ -4,6 +4,8 @@
 #include "location.hh"
 #include "position.hh"
 
+#include <libgen.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -39,7 +41,7 @@ class CWrapper
 {
 public:
   string filename;
-  string path;
+  string path, workdir;
   string module_name;
   string extension;
   string post_pp_file;
@@ -107,32 +109,35 @@ public:
 
   inline void DecomposeName() 
   {
-    size_t pos, pos_ ;
+    size_t pos ;
+    string base_filename;
 
-    pos = filename.find_last_of("/");
-    if ( pos == string::npos  ) {
-      path = "";
-      pos = 0;
+    char *str = (char *)calloc(1, strlen(filename.c_str())+1);
+    strcpy(str, filename.c_str());
+    path = dirname(str);
+
+    strcpy(str, filename.c_str());
+    base_filename = basename(str);
+
+    pos = base_filename.find_last_of(".");
+    if ( pos == string::npos ) {
+        module_name  = base_filename;
+        extension   = "";
     }
     else {
-      path = filename.substr(0, ++pos);
+      module_name  = base_filename.substr(0, pos);
+      extension    = base_filename.substr(pos);
     }
-
-    pos_ = filename.find_last_of(".");
-    if ( pos_ == string::npos ) {
-      module_name  = filename.substr(pos);
-      extension   = "";
-    }
-    else {
-      module_name  = filename.substr(pos, pos_ - pos);
-      extension   = filename.substr(pos_);
-    }
-
+    
+    if (MIRROR.count(path) > 0) 
+        workdir = MIRROR[path];
+    else 
+        workdir = V_BASE;
   }
 
   inline void SetPostPPFile() 
   {
-    post_pp_file = WORKDIR + "/" + module_name + extension + ".postpp";
+    post_pp_file = workdir + "/" + module_name + extension + ".postpp";
   }
 
   virtual inline void RemovePostPPFile() {
@@ -145,9 +150,9 @@ public:
   virtual inline string GetGenFileName() 
   {
     if ( extension == ".mhdl" ) 
-      return WORKDIR + "/" + gen_file + ".sv";
+      return workdir + "/" + gen_file + ".sv";
     else 
-      return WORKDIR + "/" + gen_file + extension;
+      return workdir + "/" + gen_file + extension;
   }
 
   inline void error(const int lineno, const string &msg) const {
@@ -292,10 +297,10 @@ public:
 
   inline string GetGenFileName() {
     if ( LEGACY_VERILOG_MODE ) {
-      return WORKDIR + "/" + mctrl["outfile"]->str + ".v";
+      return workdir + "/" + mctrl["outfile"]->str + ".v";
     }
     else {
-      return WORKDIR + "/" + mctrl["outfile"]->str + ".sv";
+      return workdir + "/" + mctrl["outfile"]->str + ".sv";
     }
   }
 
