@@ -55,9 +55,9 @@ string COMMAND = "";
 vector<string> FILES;
 list<string>   PATHS, M_DIRS, I_DIRS;
 map<string, string> MIRROR;
-string M_BASE = "";
+string M_BASE = ".";
 string I_BASE = ""; 
-string V_BASE = "";
+string V_BASE = "../rtl";
 //string WORKDIR = "workdir";
 
 string LOGFILE = "";
@@ -111,7 +111,7 @@ GetSubdir(string base)
 
 
     base = GetRealpath(base);
-    cmd = "find " + base + " -type d";
+    cmd = "find -L " + base + " -type d";
 
     dirlist = popen(cmd.c_str(), "r");
     if (!dirlist) {
@@ -324,7 +324,7 @@ GetOpt(int argc, char *argv[])
   sv_flex_debug = 0;
 
   /* initialization  */
-  PATHS.push_back(getenv("PWD"));
+  // PATHS.push_back(getenv("PWD"));
 
   /* load environment vairables */
   AddSearchPathFromENV();
@@ -365,10 +365,7 @@ GetOpt(int argc, char *argv[])
       }
       else {
           V_BASE = argv[++i];
-          if (IsDir(V_BASE.c_str())) {
-              V_BASE = GetRealpath(V_BASE);
-          }
-          else {
+          if (!IsDir(V_BASE.c_str())) {
               fprintf(stderr, "**mhdlc error: output directory '%s' in arguments %d doesn't exist.", V_BASE.c_str(), i);
               exit(1);
           }          
@@ -528,12 +525,9 @@ GetOpt(int argc, char *argv[])
             exit(1);
         }
         else {
-            s = argv[++i];
-            if ( IsDir(s.c_str()) ) {
-                M_BASE = GetRealpath(s);
-            }
-            else {
-                fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -I in argument %d.\n", s.c_str(), i);
+            M_BASE = argv[++i];
+            if ( !IsDir(M_BASE.c_str()) ) {
+                fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -mb in argument %d.\n", M_BASE.c_str(), i);
                 exit(1);
             }
         }
@@ -679,7 +673,10 @@ GetOpt(int argc, char *argv[])
   if (I_BASE != "")
       I_DIRS = GetSubdir(I_BASE);
 
+  M_BASE = GetRealpath(M_BASE);
   M_DIRS = GetSubdir(M_BASE);
+
+  V_BASE = GetRealpath(V_BASE);
   MIRROR = CreateMirrorDir(M_BASE, V_BASE, M_DIRS);
   PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
   
@@ -732,12 +729,21 @@ RptOpt()
 
   os << endl
      << "===============================================" << endl
-     << " " << PATHS.size() << " search paths specified with -I/-mb option" << endl
+     << " " << PATHS.size() << " MetaHDL search paths specified with -I/-mb option" << endl
      << "  or METAHDL_SEARCH_PATH environment variable" << endl
      << "===============================================" << endl;
   for ( list<string>::iterator iter=PATHS.begin(); 
 	iter != PATHS.end(); ++iter) {
     os << *iter << endl;
+  }
+  os << endl;
+
+  os << "===================================" << endl
+     << " " << I_DIRS.size() << " IP search paths processed" << endl
+     << "===================================" << endl;
+  for (list<string>::iterator iter=I_DIRS.begin();
+       iter != I_DIRS.end(); ++iter) {
+      os << *iter << endl;
   }
   os << endl;
 
