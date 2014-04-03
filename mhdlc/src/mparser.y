@@ -299,6 +299,7 @@ extern string WORKDIR;
 %token K_FF	       "ff"	      
 %token K_ENDFF	       "endff"	      
 %token K_FSM	       "fsm"	      
+%token K_FSM_NC        "fsm_nc"	      
 %token K_ENDFSM	       "endfsm"     
 %token K_GOTO          "goto" 
 %token K_RAWCODE       "rawcode"
@@ -1588,125 +1589,214 @@ ff_item : net_lval "," expression "," expression ";"
 /*******************************
      fsm_block
  ******************************/
-fsm_block : "fsm" ID "," ID "," ID ";" 
-//            1   2   3  4   5  6   7
-{
-  mwrapper.in_fsm = true; 
-  mwrapper.state_graph = new map<string, CStTransition*>;
-
-  mwrapper.fsm_name=*$2; 
-  CSymbol *symb = mwrapper.symbol_table->Insert( *$2 + "_cs"); 
-  if ( LEGACY_VERILOG_MODE ) {
-    symb->Update(REG);
-  }
-  else {
-    symb->Update(LOGIC);
-  }
-  symb->Update(NONPORT);
-  symb->io_fixed = true;
-
-  symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
-  if ( LEGACY_VERILOG_MODE ) {
-    symb->Update(REG);
-  }
-  else {
-    symb->Update(LOGIC);
-  }
-  symb->Update(NONPORT);
-  symb->io_fixed = true;
-} // 8
-// 9         10        11
-statements fsm_items "endfsm" 
-{
-  CSymbol *clk = mwrapper.symbol_table->Insert(*$4);
-  clk->Update(INPUT);
-  if ( !LEGACY_VERILOG_MODE ) clk->Update(LOGIC);
-  clk->roccur.push_back(@4);
-
-  CSymbol *rst = mwrapper.symbol_table->Insert(*$6);
-  rst->Update(INPUT);
-  if ( !LEGACY_VERILOG_MODE ) rst->Update(LOGIC);
-  rst->roccur.push_back(@6);
-  
-  CStmtBunch *stmts = new CStmtBunch ($9);
-  $$ = new CBlkFSM (@$, *$2, clk, rst, mwrapper.state_graph, stmts, $10);
-  try { $$->CheckFSM(); }
-  catch (string &str) {
-    if ( mwrapper.mctrl["relaxedfsm"]->flag ) 
-      mwrapper.warning(@$, str);
-    else 
-      mwrapper.error(@$, str);
-  }
-
-  $$->BuildFSM(mwrapper.symbol_table);
-
-  $$->GetSymbol();
-  $$->SetDriver();
-
-  mwrapper.state_graph = NULL;
-  mwrapper.in_fsm = false;
-}
-
-| "fsm" ID ";" 
-  // 1   2  3
-{
-  mwrapper.in_fsm = true; 
-  mwrapper.state_graph = new map<string, CStTransition*>;
-
-  mwrapper.fsm_name=*$2; 
-  CSymbol *symb = mwrapper.symbol_table->Insert( *$2 + "_cs"); 
-  if ( LEGACY_VERILOG_MODE ) {
-    symb->Update(REG);
-  }
-  else {
-    symb->Update(LOGIC);
-  }
-  symb->Update(NONPORT);
-  symb->io_fixed = true;
-
-  symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
-  if ( LEGACY_VERILOG_MODE ) {
-    symb->Update(REG);
-  }
-  else {
-    symb->Update(LOGIC);
-  }
-  symb->Update(NONPORT);
-  symb->io_fixed = true;
-} // 4
-// 5         6        7
-statements fsm_items "endfsm" 
-{
-  CSymbol *clk = mwrapper.symbol_table->Insert(mwrapper.mctrl["clock"]->str);
-  clk->Update(INPUT);
-  if ( !LEGACY_VERILOG_MODE ) clk->Update(LOGIC);
-  clk->roccur.push_back(@1);
-
-  CSymbol *rst = mwrapper.symbol_table->Insert(mwrapper.mctrl["reset"]->str);
-  rst->Update(INPUT);
-  if ( !LEGACY_VERILOG_MODE ) rst->Update(LOGIC);
-  rst->roccur.push_back(@1);
-  
-  CStmtBunch *stmts = new CStmtBunch ($5);
-  $$ = new CBlkFSM (@$, *$2, clk, rst, mwrapper.state_graph, stmts, $6);
-  try { $$->CheckFSM(); }
-  catch (string &str) {
-    if ( mwrapper.mctrl["relaxedfsm"]->flag ) 
-      mwrapper.warning(@$, str);
-    else 
-      mwrapper.error(@$, str);
-  }
-
-  $$->BuildFSM(mwrapper.symbol_table);
-
-  $$->GetSymbol();
-  $$->SetDriver();
-
-  mwrapper.state_graph = NULL;
-  mwrapper.in_fsm = false;
-}
-
+fsm_keyword : "fsm" {mwrapper.fsm_nc = false;}
+| "fsm_nc" {mwrapper.fsm_nc = true;}
 ;
+
+fsm_header : fsm_keyword ID ";"
+{
+    mwrapper.in_fsm = true; 
+    mwrapper.state_graph = new map<string, CStTransition*>;
+    mwrapper.fsm_name = *$2;
+    mwrapper.fsm_clk_name = mwrapper.mctrl["clock"]->str;
+    mwrapper.fsm_clk = mwrapper.symbol_table->Insert(mwrapper.fsm_clk_name);
+    mwrapper.fsm_clk->Update(INPUT);
+    if ( !LEGACY_VERILOG_MODE ) mwrapper.fsm_clk->Update(LOGIC);
+    mwrapper.fsm_clk->roccur.push_back(@2);
+
+    mwrapper.fsm_rst_name = mwrapper.mctrl["reset"]->str;
+    mwrapper.fsm_rst = mwrapper.symbol_table->Insert(mwrapper.fsm_rst_name);
+    mwrapper.fsm_rst->Update(INPUT);
+    if ( !LEGACY_VERILOG_MODE ) mwrapper.fsm_rst->Update(LOGIC);
+    mwrapper.fsm_rst->roccur.push_back(@2);
+}
+
+| fsm_keyword ID "," ID "," ID ";"
+{
+    mwrapper.in_fsm = true; 
+    mwrapper.state_graph = new map<string, CStTransition*>;
+    mwrapper.fsm_name = *$2;
+    mwrapper.fsm_clk_name = *$4;
+    mwrapper.fsm_clk = mwrapper.symbol_table->Insert(mwrapper.fsm_clk_name);
+    mwrapper.fsm_clk->Update(INPUT);
+    if ( !LEGACY_VERILOG_MODE ) mwrapper.fsm_clk->Update(LOGIC);
+    mwrapper.fsm_clk->roccur.push_back(@4);
+
+    mwrapper.fsm_rst_name = *$6;
+    mwrapper.fsm_rst = mwrapper.symbol_table->Insert(mwrapper.fsm_rst_name);
+    mwrapper.fsm_rst->Update(INPUT);
+    if ( !LEGACY_VERILOG_MODE ) mwrapper.fsm_rst->Update(LOGIC);
+    mwrapper.fsm_rst->roccur.push_back(@6);
+}
+;
+
+fsm_block : fsm_header 
+            // 1
+{
+  CSymbol *symb = mwrapper.symbol_table->Insert( mwrapper.fsm_name + "_cs"); 
+  if ( LEGACY_VERILOG_MODE ) {
+    symb->Update(REG);
+  }
+  else {
+    symb->Update(LOGIC);
+  }
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
+
+  symb = mwrapper.symbol_table->Insert( mwrapper.fsm_name + "_ns");
+  if ( LEGACY_VERILOG_MODE ) {
+    symb->Update(REG);
+  }
+  else {
+    symb->Update(LOGIC);
+  }
+  symb->Update(NONPORT);
+  symb->io_fixed = true;
+} // 2
+statements fsm_items "endfsm" 
+// 3         4         5
+{
+  CStmtBunch *stmts = new CStmtBunch ($3);
+  $$ = new CBlkFSM (@$, mwrapper.fsm_name, mwrapper.fsm_nc, 
+                    mwrapper.fsm_clk, mwrapper.fsm_rst, 
+                    mwrapper.state_graph, stmts, $4);
+  try { $$->CheckFSM(); }
+  catch (string &str) {
+    if ( mwrapper.mctrl["relaxedfsm"]->flag ) 
+      mwrapper.warning(@$, str);
+    else 
+      mwrapper.error(@$, str);
+  }
+
+  $$->BuildFSM(mwrapper.symbol_table);
+
+  $$->GetSymbol();
+  $$->SetDriver();
+
+  mwrapper.state_graph = NULL;
+  mwrapper.in_fsm = false;
+}
+;
+
+// fsm_block : fsm_keyword ID "," ID "," ID ";" 
+// //            1   2   3  4   5  6   7
+// {
+//   mwrapper.in_fsm = true; 
+//   mwrapper.state_graph = new map<string, CStTransition*>;
+
+//   mwrapper.fsm_name=*$2; 
+//   CSymbol *symb = mwrapper.symbol_table->Insert( *$2 + "_cs"); 
+//   if ( LEGACY_VERILOG_MODE ) {
+//     symb->Update(REG);
+//   }
+//   else {
+//     symb->Update(LOGIC);
+//   }
+//   symb->Update(NONPORT);
+//   symb->io_fixed = true;
+
+//   symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
+//   if ( LEGACY_VERILOG_MODE ) {
+//     symb->Update(REG);
+//   }
+//   else {
+//     symb->Update(LOGIC);
+//   }
+//   symb->Update(NONPORT);
+//   symb->io_fixed = true;
+// } // 8
+// // 9         10        11
+// statements fsm_items "endfsm" 
+// {
+//   CSymbol *clk = mwrapper.symbol_table->Insert(*$4);
+//   clk->Update(INPUT);
+//   if ( !LEGACY_VERILOG_MODE ) clk->Update(LOGIC);
+//   clk->roccur.push_back(@4);
+
+//   CSymbol *rst = mwrapper.symbol_table->Insert(*$6);
+//   rst->Update(INPUT);
+//   if ( !LEGACY_VERILOG_MODE ) rst->Update(LOGIC);
+//   rst->roccur.push_back(@6);
+  
+//   CStmtBunch *stmts = new CStmtBunch ($9);
+//   $$ = new CBlkFSM (@$, *$2, clk, rst, mwrapper.state_graph, stmts, $10);
+//   try { $$->CheckFSM(); }
+//   catch (string &str) {
+//     if ( mwrapper.mctrl["relaxedfsm"]->flag ) 
+//       mwrapper.warning(@$, str);
+//     else 
+//       mwrapper.error(@$, str);
+//   }
+
+//   $$->BuildFSM(mwrapper.symbol_table);
+
+//   $$->GetSymbol();
+//   $$->SetDriver();
+
+//   mwrapper.state_graph = NULL;
+//   mwrapper.in_fsm = false;
+// }
+
+// | fsm_keyword ID ";" 
+//   // 1   2  3
+// {
+//   mwrapper.in_fsm = true; 
+//   mwrapper.state_graph = new map<string, CStTransition*>;
+
+//   mwrapper.fsm_name=*$2; 
+//   CSymbol *symb = mwrapper.symbol_table->Insert( *$2 + "_cs"); 
+//   if ( LEGACY_VERILOG_MODE ) {
+//     symb->Update(REG);
+//   }
+//   else {
+//     symb->Update(LOGIC);
+//   }
+//   symb->Update(NONPORT);
+//   symb->io_fixed = true;
+
+//   symb = mwrapper.symbol_table->Insert( *$2 + "_ns");
+//   if ( LEGACY_VERILOG_MODE ) {
+//     symb->Update(REG);
+//   }
+//   else {
+//     symb->Update(LOGIC);
+//   }
+//   symb->Update(NONPORT);
+//   symb->io_fixed = true;
+// } // 4
+// // 5         6        7
+// statements fsm_items "endfsm" 
+// {
+//   CSymbol *clk = mwrapper.symbol_table->Insert(mwrapper.mctrl["clock"]->str);
+//   clk->Update(INPUT);
+//   if ( !LEGACY_VERILOG_MODE ) clk->Update(LOGIC);
+//   clk->roccur.push_back(@1);
+
+//   CSymbol *rst = mwrapper.symbol_table->Insert(mwrapper.mctrl["reset"]->str);
+//   rst->Update(INPUT);
+//   if ( !LEGACY_VERILOG_MODE ) rst->Update(LOGIC);
+//   rst->roccur.push_back(@1);
+  
+//   CStmtBunch *stmts = new CStmtBunch ($5);
+//   $$ = new CBlkFSM (@$, *$2, clk, rst, mwrapper.state_graph, stmts, $6);
+//   try { $$->CheckFSM(); }
+//   catch (string &str) {
+//     if ( mwrapper.mctrl["relaxedfsm"]->flag ) 
+//       mwrapper.warning(@$, str);
+//     else 
+//       mwrapper.error(@$, str);
+//   }
+
+//   $$->BuildFSM(mwrapper.symbol_table);
+
+//   $$->GetSymbol();
+//   $$->SetDriver();
+
+//   mwrapper.state_graph = NULL;
+//   mwrapper.in_fsm = false;
+// }
+
+// ;
 
 
 fsm_items : fsm_item 

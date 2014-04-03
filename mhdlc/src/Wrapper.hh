@@ -204,9 +204,10 @@ extern CModTab G_ModuleTable;
 class CMHDLwrapper : public CWrapper
 {
 public:
-  bool in_fsm;
+  bool in_fsm, fsm_nc;
   bool in_sequential;
-  string fsm_name;
+  string fsm_name, fsm_clk_name, fsm_rst_name;
+  CSymbol *fsm_clk, *fsm_rst;
   string state_name;
   map<string, CStTransition*> *state_graph;
   vector<CCodeBlock*> *code_blocks;
@@ -223,6 +224,7 @@ public:
   inline CMHDLwrapper(string f) : CWrapper(f, "MHDL") 
   {
     in_fsm = false;
+    fsm_nc = false;
     in_sequential = false;
 
     state_graph  = NULL;

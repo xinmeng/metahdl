@@ -417,6 +417,7 @@ class CBlkFSM : public CCodeBlock
 {
 private:
   string _name;
+  bool _fsm_nc;
   CSymbol *_clk, *_rst;
   map<string, CStTransition*> *_graph;
   vector<CStateItem*> *_states;
@@ -428,18 +429,18 @@ private:
   
 public:
   inline CBlkFSM(const yy::location &loc, 
-		 const string &name, CSymbol *clk, CSymbol *rst, 
+		 const string &name, bool fsm_nc, CSymbol *clk, CSymbol *rst, 
 		 map<string, CStTransition*>* graph,  CStmtBunch* init, vector<CStateItem*> *states) : 
     CCodeBlock(loc), 
-    _name (name), _clk (clk), _rst (rst), 
+    _name (name), _fsm_nc (fsm_nc), _clk (clk), _rst (rst), 
     _graph (graph), _states (states), 
     _ff (NULL), _init (init), _body (NULL) {}
 
   inline CBlkFSM(const yy::location &loc, int step,
-		 const string &name, CSymbol *clk, CSymbol *rst, 
+		 const string &name, bool fsm_nc, CSymbol *clk, CSymbol *rst, 
 		 map<string, CStTransition*>* graph, CStmtBunch* init, vector<CStateItem*> *states) : 
     CCodeBlock(loc, step), 
-    _name (name), _clk (clk), _rst (rst), 
+    _name (name), _fsm_nc (fsm_nc), _clk (clk), _rst (rst), 
     _graph (graph), _states (states), 
     _ff (NULL), _init (init), _body (NULL) {}
 
@@ -464,8 +465,14 @@ public:
 
   inline void Print(ostream&os=cout) {
     os << "// Sequential part of FSM \"" << _name << "\" " << endl;
-    _ff->Print(os);
-    os << endl;
+    if (_fsm_nc) {
+        os << " // has been ommitted due to 'fsm_nc' keyword" << endl
+           << endl;
+    }
+    else {
+        _ff->Print(os);
+        os << endl;
+    }
     
     os << "// Combinational part of FSM \"" <<  _name << "\" " << endl;
     _body->Print(os);

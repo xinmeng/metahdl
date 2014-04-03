@@ -258,7 +258,8 @@ K_NONPORT       "nonport"
 K_FF           "ff"           
 K_ENDFF        "endff"        
 K_FSM          "fsm"          
-K_ENDFSM               "endfsm"      
+K_FSM_NC       "fsm_nc"          
+K_ENDFSM       "endfsm"      
 K_GOTO         "goto"
 K_RAWCODE       "rawcode"
 K_ENDRAWCODE    "endrawcode" 
@@ -550,6 +551,7 @@ WS [ \t]+
 {K_ENDFF} return mhdl_token::K_ENDFF;
 {K_GOTO} return mhdl_token::K_GOTO;
 {K_FSM} return mhdl_token::K_FSM;
+{K_FSM_NC} return mhdl_token::K_FSM_NC;
 {K_ENDFSM} return mhdl_token::K_ENDFSM;
 
  /* sc_message */
