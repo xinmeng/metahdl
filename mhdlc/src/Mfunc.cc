@@ -366,7 +366,7 @@ GetOpt(int argc, char *argv[])
       else {
           V_BASE = argv[++i];
           if (!IsDir(V_BASE.c_str())) {
-              fprintf(stderr, "**mhdlc error: output directory '%s' in arguments %d doesn't exist.", V_BASE.c_str(), i);
+              fprintf(stderr, "**mhdlc error: output directory '%s' in arguments %d doesn't exist.\n", V_BASE.c_str(), i);
               exit(1);
           }          
       }

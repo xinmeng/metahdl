@@ -984,12 +984,12 @@ balanced_stmt : ";"
 
 | "begin" statements "end" 
 {
-  $$ = new CStmtBunch ($2);
+    $$ = new CStmtBunch ($2, true);
 }
 
 | "begin" ":" ID statements "end" 
 {
-  $$ = new CStmtBunch ($4);
+    $$ = new CStmtBunch ($4, true, *$3);
 }
 
 | "if" "(" expression ")" balanced_stmt "else" balanced_stmt

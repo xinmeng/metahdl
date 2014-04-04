@@ -196,26 +196,40 @@ class CStmtBunch : public CStatement
 {
 private:
   vector<CStatement*> *_stmt_list;
+  bool _enclosed;
+  string _name;
   
   inline CStmtBunch() : CStatement(), _stmt_list (NULL) {}
 
 public:
-  inline CStmtBunch(vector<CStatement*> *stmt_list) : 
-    CStatement(), _stmt_list (stmt_list) {}
+  inline CStmtBunch(vector<CStatement*> *stmt_list, bool enclosed=false, string name="") : 
+      CStatement(), _stmt_list (stmt_list), 
+      _enclosed (enclosed), _name (name) {}
 
-  inline CStmtBunch(vector<CStatement*> *stmt_list, int step_) : 
-    CStatement(step_), _stmt_list (stmt_list) {}
+  inline CStmtBunch(vector<CStatement*> *stmt_list, int step_, bool enclosed=false, string name="") : 
+      CStatement(step_), _stmt_list (stmt_list),
+      _enclosed (enclosed), _name (name)  {}
 
 public:
   inline void Print(ostream&os=cout, int indent=0) {
-    PUT_SPACE(indent);
-    os << "begin" << endl;
+    if (_enclosed) {
+        PUT_SPACE(indent);
+        os << "begin";
+        if (_name != "") 
+            os << ":" << _name << endl;
+        else 
+            os << endl;
+        indent += 2;
+    }
     for ( vector<CStatement*>::iterator iter = _stmt_list->begin(); 
 	  iter != _stmt_list->end(); ++iter) {
-      (*iter)->Print(os, indent+2);
+      (*iter)->Print(os, indent);
     }
-    PUT_SPACE(indent);
-    os << "end" << endl;
+    if (_enclosed ) {
+        indent -= 2;
+        PUT_SPACE(indent);
+        os << "end" << endl;
+    }
   }
 
   inline void GetSymbol(set<CSymbol*> *lsymb, set<CSymbol*> *rsymb) {
