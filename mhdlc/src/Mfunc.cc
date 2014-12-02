@@ -678,7 +678,9 @@ GetOpt(int argc, char *argv[])
 
   V_BASE = GetRealpath(V_BASE);
   MIRROR = CreateMirrorDir(M_BASE, V_BASE, M_DIRS);
-  PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
+//  PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
+  M_DIRS.insert(M_DIRS.end(), PATHS.begin(), PATHS.end());
+  I_DIRS.insert(I_DIRS.end(), PATHS.begin(), PATHS.end());
   
   // if (WORKDIR[0] != '/' ) {
   //   s = getenv("PWD");
