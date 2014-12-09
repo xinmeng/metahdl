@@ -56,7 +56,7 @@ vector<string> FILES;
 list<string>   PATHS, M_DIRS, I_DIRS;
 map<string, string> MIRROR;
 string M_BASE = ".";
-string I_BASE = ""; 
+set<string> I_BASE; // = ""; 
 string V_BASE = "../rtl";
 //string WORKDIR = "workdir";
 
@@ -540,7 +540,9 @@ GetOpt(int argc, char *argv[])
         else {
             s = argv[++i];
             if ( IsDir(s.c_str()) ) {
-                I_BASE = GetRealpath(s);
+                if (I_BASE.count(s) == 0) {
+                    I_BASE.insert(GetRealpath(s));
+                }
             }
             else {
                 fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -I in argument %d.\n", s.c_str(), i);
@@ -670,8 +672,12 @@ GetOpt(int argc, char *argv[])
     }
   }
 
-  if (I_BASE != "")
-      I_DIRS = GetSubdir(I_BASE);
+  if (I_BASE.size() != 0)
+      for (set<string>::iterator iter = I_BASE.begin(); 
+           iter != I_BASE.end(); iter++) {
+          list<string> i_dirs = GetSubdir(*iter);
+          I_DIRS.insert(I_DIRS.end(), i_dirs.begin(), i_dirs.end());
+      }
 
   M_BASE = GetRealpath(M_BASE);
   M_DIRS = GetSubdir(M_BASE);
@@ -745,6 +751,15 @@ RptOpt()
      << "===================================" << endl;
   for (list<string>::iterator iter=I_DIRS.begin();
        iter != I_DIRS.end(); ++iter) {
+      os << *iter << endl;
+  }
+  os << endl;
+
+  os << "===================================" << endl
+     << " " << M_DIRS.size() << " MetaHDL search paths processed" << endl
+     << "===================================" << endl;
+  for (list<string>::iterator iter=M_DIRS.begin();
+       iter != M_DIRS.end(); ++iter) {
       os << *iter << endl;
   }
   os << endl;

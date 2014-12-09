@@ -45,7 +45,8 @@ extern enum e_case_modify_style_t {PROPAGATE, MACRO, ELIMINATE}  CASE_MODIFY_STY
 
 extern vector<string> FILES;
 extern list<string>   PATHS, M_DIRS, I_DIRS;
-extern string M_BASE, I_BASE, V_BASE;
+extern string M_BASE, V_BASE;
+extern set<string> I_BASE;
 extern map<string, string> MIRROR;
 
 //extern string WORKDIR;
