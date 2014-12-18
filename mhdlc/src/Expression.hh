@@ -837,19 +837,60 @@ public:
     _func_name (func_name), _args (args) {}
 
 public:
-  inline bool         IsConst() {return false; }
-  inline ulonglong    Width() {return 1;}
+  inline bool         IsConst() {
+      if (_func_name == "log2") {
+          for (vector<CExpression*>::iterator iter=_args->begin(); iter!=_args->end();
+               iter++)
+              if (!(*iter)->IsConst()) {
+                  cerr << "log2 function called on non-constant argument: ";
+                  (*iter)->Print(cerr);
+                  return false;
+              }
+          return true;
+      }
+      else 
+          return false; 
+  }
+
+  inline ulonglong    Width() {
+      if (_func_name == "log2") 
+          return 32;
+      else 
+          return 1;
+  }
 
   inline double       DoubleValue() {
-    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call DoubleValue() from CFuncCallExp!"; 
-    exit(1);
+      if (_func_name == "log2" ) {
+          CExpression * arg = (*_args)[0];
+          if (arg->IsConst())
+              return log2(arg->DoubleValue());
+          else {
+              cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call log2 on non-constant argument: ";
+              arg->Print(cerr);
+              exit(1);
+          }              
+      }
+      else {
+          cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call DoubleValue() from CFuncCallExp!"; 
+          exit(1);
+      }
   }
   inline ulonglong    Value() {
-    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Value() from CFuncCallExp!"; 
-    exit(1);
+      if (_func_name == "log2")
+          return ceil(this->DoubleValue());
+      else {
+          cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Value() from CFuncCallExp!"; 
+          exit(1);
+      }
   }
 
-  inline CFuncCallExp* ValueExp() {return new CFuncCallExp(_func_name, _args);}
+  inline CExpression* ValueExp() {
+      vector<CExpression*> *val_exp_args = new vector<CExpression*>;
+      for (vector<CExpression*>::iterator iter=_args->begin(); iter!=_args->end(); 
+           iter++)
+          val_exp_args->push_back((*iter)->ValueExp());
+      return new CFuncCallExp(_func_name, val_exp_args);
+  }
   inline CExpression*  Reduce() {
     cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
     exit(1);
