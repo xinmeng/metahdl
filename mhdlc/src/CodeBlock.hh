@@ -555,7 +555,7 @@ public:
     if ( _init ) stmt_list->push_back(_init);
     stmt_list->push_back(fsm_case);
 
-    CStmtBunch *comb_body = new CStmtBunch ( stmt_list );
+    CStmtBunch *comb_body = new CStmtBunch ( stmt_list, true, _name + "_comb_part" );
     
     _body = new CBlkComb (_loc, comb_body);
 
