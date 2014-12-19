@@ -892,8 +892,13 @@ public:
       return new CFuncCallExp(_func_name, val_exp_args);
   }
   inline CExpression*  Reduce() {
-    cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
-    exit(1);
+      if (_func_name == "log2") {
+          return new CNumber(32, Value());          
+      }
+      else {
+          cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
+          exit(1);
+      }
   }
 
   inline void Print(ostream& os=cout) {

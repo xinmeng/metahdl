@@ -584,6 +584,11 @@ expression : constant
   $$ = new CDupConcat ($2, $3);
 }
 
+| net_name "(" expressions ")" 
+{
+   $$ = new CFuncCallExp ( *$1, $3);
+}
+
 | "(" expression ")" 
 {
   $$ = new CParenthExp ($2);
