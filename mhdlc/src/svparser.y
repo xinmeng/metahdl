@@ -798,6 +798,13 @@ var_type_opt :
 ;
  
 
+// demensions : "[" expression ":" expression "]"
+// {}
+
+// | demensions "[" expression ":" expression "]"
+// {}
+
+
 /*******************************
         port_declaration
  *******************************/
