@@ -2133,11 +2133,11 @@ connection_rule : "." net_name "(" expression ")"
   }
   else if (port_symb->msb->Value() - port_symb->lsb->Value() + 1 != $4->Width()) {
       ostringstream msg;
-      msg << "port connection width mis-match: " 
-          << port_symb->msb->Value() - port_symb->lsb->Value() + 1 
-          << " vs. " 
-          << $4->Width();
-      mwrapper.warning(@$, "port connection width mis-match" + msg.str());
+      msg << port_symb->name << "(" << port_symb->msb->Value() - port_symb->lsb->Value() + 1 << ")"
+          << " connects to " ;
+      $4->Print(msg);
+      msg << "(" << $4->Width() << ").";
+      mwrapper.warning(@$, "port connection width mis-match: " + msg.str());
   }
 
   if ( port_symb->direction == INPUT ) {
