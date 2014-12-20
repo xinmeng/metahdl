@@ -2131,6 +2131,14 @@ connection_rule : "." net_name "(" expression ")"
   else if ( (port_symb->direction == OUTPUT /*|| port_symb->direction == INOUT*/) && typeid( *$4 ) != typeid(CVariable) ) {
      mwrapper.error(@$, "output/inout port \"" + *$2 + "\" connects to RHS expression.");
   }
+  else if (port_symb->msb->Value() - port_symb->lsb->Value() + 1 != $4->Width()) {
+      ostringstream msg;
+      msg << "port connection width mis-match: " 
+          << port_symb->msb->Value() - port_symb->lsb->Value() + 1 
+          << " vs. " 
+          << $4->Width();
+      mwrapper.warning(@$, "port connection width mis-match" + msg.str());
+  }
 
   if ( port_symb->direction == INPUT ) {
      $4->AddRoccure(@$);
