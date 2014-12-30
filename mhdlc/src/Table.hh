@@ -403,9 +403,13 @@ public:
 
   inline void Print(ostream &os=cout) {
     for (int i=0; i<_order.size(); ++i) {
-      os << "parameter " << _order[i] << " = ";
-      _param[_order[i]]->ValueExp()->Print(os);
-      os << ";" << endl;
+        if (_param[_order[i]]->global) 
+            os << "parameter ";
+        else 
+            os << "localparam ";
+        os << _order[i] << " = ";
+        _param[_order[i]]->ValueExp()->Print(os);
+        os << ";" << endl;
     }
   }
 
