@@ -183,6 +183,7 @@ public:
   bool is_2D;
   CExpression* length_msb;
   bool is_const;
+  bool is_local;
   CExpression* value;
 
 #if 0
@@ -198,39 +199,39 @@ public:
     name (name_), msb (CONST_NUM_0), lsb (CONST_NUM_0), direction (NONPORT), type (WIRE), 
     type_fixed (false), io_fixed (false), width_fixed (false),
     is_2D (false), length_msb (NULL),
-    is_const (false), value (NULL),  reference (NULL) {}
+    is_const (false), is_local (false), value (NULL),  reference (NULL) {}
   
   inline CSymbol(const string &name_, CExpression* msb_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (NONPORT), type (WIRE),
     type_fixed (false), io_fixed (false), width_fixed (false), 
     is_2D (false), length_msb (NULL),
-    is_const (false), value (NULL),  reference (NULL)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (NULL)  {}    
     
   inline CSymbol(const string &name_, CExpression* msb_, tType type_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (NONPORT), type (type_),
     type_fixed (false), io_fixed (false), width_fixed (false), 
     is_2D (false), length_msb (NULL),
-    is_const (false), value (NULL),  reference (NULL)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (NULL)  {}    
 
 
   inline CSymbol(const string &name_, CExpression* msb_, CExpression* length_msb_, tType type_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (NONPORT), type (type_),
     type_fixed (false), io_fixed (false), width_fixed (false), 
     is_2D (true), length_msb (length_msb_),
-    is_const (false), value (NULL),  reference (NULL)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (NULL)  {}    
 
 
   inline CSymbol(const string &name_, CExpression* msb_, tDirection direction_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (direction_), type (WIRE),
     io_fixed (false), width_fixed (false), 
     is_2D (false), length_msb (NULL),
-    is_const (false), value (NULL),  reference (NULL)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (NULL)  {}    
 
   inline CSymbol(const string &name_, CExpression* msb_, tDirection direction_, CSymbol* reference_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (direction_), type (WIRE),
     type_fixed (false), io_fixed (false), width_fixed (false), 
     is_2D (false), length_msb (NULL),
-    is_const (false), value (NULL),  reference (reference_)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (reference_)  {}    
 
 
 
@@ -256,9 +257,13 @@ public:
   inline void PrintDeclare(ostream &os=cout) {
     if ( LEGACY_VERILOG_MODE ) {
       if (is_const ) {
-	os << "parameter " << name << " = ";
-	value->Print(os);
-	os << ";" << endl;
+          if (is_local)
+              os << "localparam ";
+          else 
+              os << "parameter ";
+          os << name << " = ";
+          value->Print(os);
+          os << ";" << endl;
       }
       else {
 	os.width(8);

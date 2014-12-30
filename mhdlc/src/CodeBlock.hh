@@ -521,6 +521,7 @@ public:
 
       CSymbol *state_name = SymbolTabel->Exist( (*_states)[i]->Name() );
       state_name->is_const = true;
+      state_name->is_local = true;
       state_name->Update(LOGIC);
       state_name->msb      = st_msb;
       state_name->value = one_hot_num;
@@ -528,6 +529,7 @@ public:
       CNumber *index_num = new CNumber (i);
       CSymbol *state_idx = SymbolTabel->Exist( "_" + (*_states)[i]->Name() + "_" );
       state_idx->is_const = true;
+      state_idx->is_local = true;
       state_idx->type     = INT;
       state_idx->value = index_num;
 
