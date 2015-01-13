@@ -408,7 +408,7 @@ public:
         else 
             os << "localparam ";
         os << _order[i] << " = ";
-        _param[_order[i]]->ValueExp()->Print(os);
+        _param[_order[i]]->DefinitionExp()->Print(os);
         os << ";" << endl;
     }
   }

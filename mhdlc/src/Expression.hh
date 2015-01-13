@@ -531,6 +531,8 @@ public:
       return _value->Value();
   }
 
+  inline CExpression* DefinitionExp() {return _value;}
+
   inline CExpression* ValueExp() {
     if ( _override ) {
       return _override;
