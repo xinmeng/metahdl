@@ -5,7 +5,7 @@
 %error-verbose
 %debug
 %locations
-%expect 1
+%expect 2
 %initial-action
 {
   // Initialize the initial location.
@@ -427,6 +427,7 @@ start: {mwrapper.module_location = @$;}
 | start inst_block {mwrapper.module_location = @$; mwrapper.code_blocks->push_back($2);}
 | start rawcode_block {mwrapper.module_location = @$; mwrapper.code_blocks->push_back($2);}
 | start metahdl_constrol {mwrapper.module_location = @$;}
+| start generate_block {mwrapper.module_location = @$; /* mwrapper.code_blocks->push_back($2);*/}
 ;
 
 /* body: port_declaration  */
@@ -2131,14 +2132,14 @@ connection_rule : "." net_name "(" expression ")"
   else if ( (port_symb->direction == OUTPUT /*|| port_symb->direction == INOUT*/) && typeid( *$4 ) != typeid(CVariable) ) {
      mwrapper.error(@$, "output/inout port \"" + *$2 + "\" connects to RHS expression.");
   }
-  else if (port_symb->msb->Value() - port_symb->lsb->Value() + 1 != $4->Width()) {
-      ostringstream msg;
-      msg << port_symb->name << "(" << port_symb->msb->Value() - port_symb->lsb->Value() + 1 << ")"
-          << " connects to " ;
-      $4->Print(msg);
-      msg << "(" << $4->Width() << ").";
-      mwrapper.warning(@$, "port connection width mis-match: " + msg.str());
-  }
+  /* else if (port_symb->msb->Value() - port_symb->lsb->Value() + 1 != $4->Width()) { */
+  /*     ostringstream msg; */
+  /*     msg << port_symb->name << "(" << port_symb->msb->Value() - port_symb->lsb->Value() + 1 << ")" */
+  /*         << " connects to " ; */
+  /*     $4->Print(msg); */
+  /*     msg << "(" << $4->Width() << ")."; */
+  /*     mwrapper.warning(@$, "port connection width mis-match: " + msg.str()); */
+  /* } */
 
   if ( port_symb->direction == INPUT ) {
      $4->AddRoccure(@$);
@@ -2177,6 +2178,88 @@ connection_rule : "." net_name "(" expression ")"
   mwrapper.mod_template->io_table->Connect(PREFIX, *$1);
 }
 ;
+
+/*******************************
+    generate_block
+ *******************************/
+generate_block : "generate" generate_statements "endgenerate"
+{
+    cout << "Generate block: "  << endl;
+}
+;
+
+generate_statements : generate_statement
+{
+    cout << "single statement" << endl;
+}
+
+| generate_statements generate_statement
+{
+    cout << "multiple statement " << endl;
+}
+;
+
+
+generate_statement : generate_balanced_statement
+{
+}
+
+| generate_unbalanced_statement
+{}
+
+;
+
+generate_balanced_statement : assign_block 
+{}
+
+| combinational_block 
+{}
+
+| ff_block 
+{}
+
+| legacyff_block 
+{}
+
+| inst_block 
+{} 
+
+| "begin" ":" ID generate_statements "end"
+{}
+
+| "for" "(" net_lval "=" expression ";" expression ";" net_lval "=" expression ")" generate_statement
+{}
+
+| "if" "(" expression ")" generate_balanced_statement "else" generate_balanced_statement
+{}
+
+| "case" "(" expression ")" generate_case_items "endcase" 
+{}
+
+;
+
+generate_unbalanced_statement : "if" "(" expression ")" generate_statement
+{}
+
+| "if" "(" expression ")" generate_balanced_statement "else" generate_unbalanced_statement
+{}
+; 
+
+generate_case_items : generate_case_item
+{} 
+
+| generate_case_items generate_case_item
+{}
+; 
+
+generate_case_item : expressions ":" generate_statement
+{}
+
+| "default" ":" generate_statement
+{}
+;
+
+
 
 
 /*******************************
