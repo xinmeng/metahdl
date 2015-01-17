@@ -488,6 +488,14 @@ net : net_name "[" expression ":" expression "]"
   }
   else {
     if ( $3->IsConst() && $5->IsConst() ) {
+        if ($3->Value() < $5->Value()) {
+            ostringstream msg;
+            msg << "MSB (" << $3->Value() << ") "
+                << "LSB (" << $5->Value() << "), "
+                << "not allowed.";
+            mwrapper.error(@1, msg.str());
+        }
+
        $3->Update(INPUT);
        $3->AddRoccure(@3);
        $5->Update(INPUT);
