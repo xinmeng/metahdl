@@ -169,6 +169,10 @@ MEM		\[[^;\n\]]*\]
 <COPY>`FSDB_DUMP_BEGIN		{store_it(yytext,FALSE,FALSE);}
 <COPY>`FSDB_DUMP_END            {store_it(yytext,FALSE,FALSE);}
 <COPY>`fsdbDumpMDA              {store_it(yytext,FALSE,FALSE);}
+<COPY>`REG_HDL_PATH_BEGIN       {store_it(yytext,FALSE,FALSE);}
+<COPY>`REG_HDL_PATH_END         {store_it(yytext,FALSE,FALSE);}
+<COPY>`vmm_verbose              {store_it(yytext,FALSE,FALSE);}
+<COPY>`vmm_debug                {store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>`accelerate		{fprintf(yyout, "%s",yytext);}
 <INITIAL>`noaccelerate		{fprintf(yyout, "%s",yytext);}
@@ -206,6 +210,10 @@ MEM		\[[^;\n\]]*\]
 <INITIAL>`FSDB_DUMP_BEGIN	{fprintf(yyout, "%s",yytext);}
 <INITIAL>`FSDB_DUMP_END         {fprintf(yyout, "%s",yytext);}
 <INITIAL>`fsdbDumpMDA           {fprintf(yyout, "%s",yytext);}
+<INITIAL>`REG_HDL_PATH_BEGIN    {fprintf(yyout, "%s",yytext);}   
+<INITIAL>`REG_HDL_PATH_END      {fprintf(yyout, "%s",yytext);}   
+<INITIAL>`vmm_verbose           {fprintf(yyout, "%s",yytext);}   
+<INITIAL>`vmm_debug             {fprintf(yyout, "%s",yytext);}   
 
 
 <INITIAL,DEFINE,MACRO,CMNT,CCMNT,MPP,COPY,INCL,SKIP_TO_EOL>`line.*\n {
