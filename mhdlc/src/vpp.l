@@ -117,16 +117,25 @@ MEM		\[[^;\n\]]*\]
 %%
 
 <INITIAL>"/*"		{cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(CMNT);}
+<INITIAL>^{WHITE}*rawcode{WHITE}*{NEWLINE} {cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(CMNT);}
+
 <COPY>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
+<COPY>^{WHITE}*rawcode{WHITE}*{NEWLINE}	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
+
 <MPP>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);return TTCOMMENT2;}
+<MPP>^{WHITE}*rawcode{WHITE}*{NEWLINE}	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
+
 
 <CMNT>{NEWLINE} 	{fprintf(yyout, "%s",yytext);nl_count++;}
 <CMNT>"/*" 		{fprintf(yyout, "%s",yytext);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CMNT>"*/" 		{fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
+<CMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
 <CMNT>. 		{fprintf(yyout, "%s",yytext);}
+
 <CCMNT>{NEWLINE}	{store_it(yytext,FALSE,FALSE);nl_count++;}
 <CCMNT>"/*" 		{store_it(yytext,FALSE,FALSE);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CCMNT>"*/" 		{store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}
+<CCMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}
 <CCMNT>. 		{store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>"//".*$	{fprintf(yyout, "%s",yytext);}
