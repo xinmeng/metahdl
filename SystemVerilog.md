@@ -1,0 +1,1 @@
+SystemVerilog is a new industry standard for _Hardware Description_ and _Hardware Verification_.
