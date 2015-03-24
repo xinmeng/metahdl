@@ -182,17 +182,14 @@ SearchFile(const string &name)
     char *path;
     string s;
 
-    /* absolut path */
-    if ( name[0] == '/' ) {
-        if ( IsFile(name.c_str()) ) {
-            path = (char *)calloc(1, strlen(name.c_str())+1);
-            strcpy(path, name.c_str());
-            return path;
-        }
-        else 
-            return NULL;
+    /* absolut path, or relative path,
+     * check file existance  */
+    if ( IsFile(name.c_str()) ) {
+        path = (char *)calloc(1, strlen(name.c_str())+1);
+        strcpy(path, name.c_str());
+        return path;
     }
-    /* relative path */
+    /* otherwise, search file in paths */
     else {
         string extention;
         size_t pos = name.find_last_of(".");
