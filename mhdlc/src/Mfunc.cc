@@ -110,7 +110,7 @@ GetSubdir(string base)
     list<string> dirs;
 
 
-    base = GetRealpath(base);
+    // base = GetRealpath(base);
     cmd = "find -L " + base + " -type d";
 
     dirlist = popen(cmd.c_str(), "r");
@@ -538,7 +538,8 @@ GetOpt(int argc, char *argv[])
             s = argv[++i];
             if ( IsDir(s.c_str()) ) {
                 if (I_BASE.count(s) == 0) {
-                    I_BASE.insert(GetRealpath(s));
+                    // I_BASE.insert(GetRealpath(s));
+                    I_BASE.insert(s);
                 }
             }
             else {
@@ -676,10 +677,10 @@ GetOpt(int argc, char *argv[])
           I_DIRS.insert(I_DIRS.end(), i_dirs.begin(), i_dirs.end());
       }
 
-  M_BASE = GetRealpath(M_BASE);
+  // M_BASE = GetRealpath(M_BASE);
   M_DIRS = GetSubdir(M_BASE);
 
-  V_BASE = GetRealpath(V_BASE);
+  // V_BASE = GetRealpath(V_BASE);
   MIRROR = CreateMirrorDir(M_BASE, V_BASE, M_DIRS);
 //  PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
   M_DIRS.insert(M_DIRS.end(), PATHS.begin(), PATHS.end());
