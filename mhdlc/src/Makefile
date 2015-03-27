@@ -14,7 +14,7 @@ TOP_EXE = mhdlc
 
 SUPPRESS_ERR = -Wno-write-strings -Wno-format-security
 PROFLAGS = -pg
-CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
+CPPFLAGS = -g `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
 LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
 
 
