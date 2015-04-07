@@ -22,9 +22,12 @@ while ( <FH> ) {
 	elsif ( /^ +0 \$accept/ || /^ +\d+ \@/ || /^$/) { 
 	    # drop this line
 	}
+        elsif ( /\$\@\d: \/\* empty \*\// ) {
+            # drop this line
+        }
 	else {
 	    $_ =~ s/^ +\d+ (.*)/$1/;
-	    $_ =~ s/\@\d //g;
+	    $_ =~ s/\$\@\d //g;
 	    
 
 	    $_ =~ s/(\$|%|&|\{|\}|\#)/\\textbf{\\textcolor{red}{\\$1}}/g;

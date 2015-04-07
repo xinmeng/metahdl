@@ -1,14 +1,20 @@
 release =
 
+ifeq ($(HOST),debian)
 FLEX = flex
 BISON= bison
+else
+FLEX = /home/xinmeng/tools/bin/flex
+BISON= /tools/bison/2.5.0/bin/bison
+endif
+
 CXX = g++
 TOP_EXE = mhdlc
 
 
 SUPPRESS_ERR = -Wno-write-strings -Wno-format-security
 PROFLAGS = -pg
-CPPFLAGS = -g  `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
+CPPFLAGS = -g `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
 LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
 
 
@@ -66,13 +72,13 @@ CC_SRC = $(M_ALL_CC_SRC) $(SV_ALL_CC_SRC) $(PP_ALL_CC_SRC) $(UTIL_ALL_CC_SRC) $(
 
 
 
-.phony: lib clean obj tar release
+.phony: lib clean obj tar release 
 
 
 $(TOP_EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(LIBFLAGS)
 
-release : CPPFLAGS = -O3  `perl -MExtUtils::Embed -e ccopts` $(SUPPRESS_ERR)
+release : CPPFLAGS = -O3 `perl -MExtUtils::Embed -e ccopts` $(SUPPRESS_ERR)
 release : LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
 release : $(TOP_EXE)
 
@@ -115,7 +121,7 @@ tar:
 	bzip2 src.tar
 
 clean: 
-	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend $(TOP_EXE) src.tar* *~
+	rm -fv $(M_FLEX_CC_SRC) $(M_BISON_CC_SRC) $(M_BISON_INC) $(M_BISON_OUTPUT) $(SV_FLEX_CC_SRC) $(SV_BISON_CC_SRC)  $(SV_BISON_INC) $(SV_BISON_OUTPUT) $(PP_FLEX_CC_SRC) $(PP_BISON_CC_SRC) $(PP_BISON_INC) $(OBJS) $(BISON_AUX_INC) .depend $(TOP_EXE) src.tar* *~ gmon.out *.log
 
 
 
