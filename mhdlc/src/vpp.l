@@ -286,7 +286,7 @@ MEM		\[[^;\n\]]*\]
 			 yymore();
 			}
 
-<INITIAL>`undef[^\n]*	{undef_macro(yytext);fprintf(yyout, "%s",yytext);}
+<INITIAL>`undef[^\n]*	{undef_macro(yytext);/*fprintf(yyout, "%s",yytext);*/}
 <COPY>`undef[^\n]*	{undef_macro(yytext);store_it(yytext,FALSE, FALSE);}
 
 <INITIAL,COPY>`include	{incl_saved_state=YYSTATE;BEGIN(INCL);}
