@@ -1,0 +1,5 @@
+parameter A = 4;
+parameter B = 5; 
+parameter C = A + B;
+
+assign o1[C-1:0] = {~i1[A-1:0], i2[B-1:0]};

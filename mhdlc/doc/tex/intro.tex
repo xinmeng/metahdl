@@ -1,10 +1,10 @@
-\mhdl{} is a \hdl{} (HDL) aims at synthesizable digital VLSI designs (commonly 
-known as \rtl{} (RTL) designs. \mhdl{} selectively inherits \sv{}
+\gls{mhdl} is an \gls{hdl} aims at synthesizable digital VLSI designs (commonly 
+known as \gls{rtl} designs). \gls{mhdl} selectively inherits \gls{sv}
 syntax, eliminates unnecessary variants, extends existing
 synthesizable language structures and adds new grammars to simplify
 RTL coding. Designers will find it quite intuitive and flexible when
-using \mhdl{}. A compiler named \mhdlc{}\index{\mhdlc{}} is
-implemented to translate \mhdl{} to \sv{}.  
+using \gls{mhdl}. A compiler named \gls{mhdlc} is
+implemented to translate \gls{mhdl} to \gls{sv} or \gls{v}.  
 
 \section{Features}
 \begin{enumerate}
@@ -12,48 +12,46 @@ implemented to translate \mhdl{} to \sv{}.
 \item Flexible declarations
 \item Port inference and automatic variable declarations
 \item Enhanced instantiation syntax
-\item New syntax for \ff{}\index{Flip-Flop} (FF) and \fsm{}\index{Finite State Machine} (FSM)
+\item New syntax for \gls{ff} and \gls{fsm}
 \item Parameter tracing
 \item Automatic dependency resolving
 \item Lightweight lint checking
 \item Independent Verilog Parser to support IP integration
 \item Rich user control syntax
-\item Re-indent the generated \sv{}
+\item Re-indent the generated \gls{sv}/\gls{v}
 \end{enumerate}
 
 \section{Document Organization}
-In the reset of this manual, \mhdl{} syntax and usage will be
+In the reset of this manual, \gls{mhdl} syntax and usage will be
 documented in detail, following is the organization of this document:
 \begin{itemize}
-\item \autoref{sec:basic concepts} gives many basic and important concepts about
-language and RTL design, all readers are expected to read this chapter
+\item \autoref{sec:basic concepts} gives many basic and important concepts
+behind \gls{mhdl}. All readers are expected to read this chapter
 carefully, otherwise, later chapters are difficult to understand.
 \item \autoref{sec:syntax} gives major syntax explanations and sample codes. 
 After reading this chapter, readers can develop complex chips with
-powerful capabilities provided by \mhdl{}.
-\item \autoref{sec:pp} describes preprocessor in \mhdlc{} and its directives. Designers can 
-achieve script like code configurations by using this build-in
+powerful capabilities provided by \gls{mhdl}.
+\item \autoref{sec:pp} describes preprocessor in \gls{mhdlc} and
+  support directives. Designers can 
+achieve script-like code configurations by using this build-in
 preprocessor, instead of writing dozens of one-time scripts.
-\item \autoref{sec:user control} lists various user control syntax that alters compiler execution. 
-\item \autoref{sec:flow} describes mechanism and operation flow of \mhdlc{}.
-\item \autoref{sec:command line opt} documents all command line options accepted by \mhdlc{}.
-\item \autoref{sec:for vperl} provides additional information for those who originally use \vperl{} 
-for daily coding. Differences with \vperl{} are summarized there.
-\item \autoref{sec:bnf} is the complete formal syntax of \mhdl{}.
+\item \autoref{sec:user control} lists various user control
+  variables that alter compiler execution. 
+\item \autoref{sec:flow} describes mechanism and operation flow of \gls{mhdlc}.
+\item \autoref{sec:command line opt} documents all 
+  command line options accepted by \gls{mhdlc}.
+\item \autoref{sec:for vperl} provides additional information for those who originally use \gls{vperl}\cite{Yan2004}
+for daily coding. Differences with \gls{vperl} are summarized there.
+\item \autoref{sec:bnf} is the complete formal syntax of \gls{mhdl}.
 \end{itemize}
 
 \section{Download}
-\mhdlc{} is not available publically right now (hopefully next few monthes),
-but anyone can goto \href{http://metahdl.tech.officelive.com/download.aspx}{MetaHDL Code Request} to register and get invitation. Registered users will receive
-complete source code package and be notified on any update and new releases. 
-
-This document is built from \LaTeX{} sources which is distributed with \mhdlc{}
-source code. You can refer to \hyperref[build time]{build time} to check the 
-version of this document. Latest version in PDF format can be checked out 
-from \href{http://code.google.com/p/metahdl/source/checkout}{SVN}. 
+\gls{mhdlc} is publically available at \url{http://metahdl.googlecode.com}.
+This document is built from \LaTeX{} sources which are distributed with \gls{mhdlc}
+source code. 
 
 \section{Bug Report}
-If you find any bug of \mhdlc{}, ambiguous contents or typo in this
+If you find any bug of \gls{mhdlc}, ambiguous contents or typo in this
 document, please contact author via
 \href{mailto:\DocAuthor}{\DocAuthor}, thanks!
 

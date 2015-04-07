@@ -31,7 +31,9 @@ start $::=$\hspace{1ex} /* empty */
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-constant $::=$\hspace{1ex} \textbf{\textcolor{red}{NUM}}
+constant $::=$\hspace{1ex} \textbf{\textcolor{red}{STRING}}
+
+\mbox{$|$ \textbf{\textcolor{red}{NUM}}}
 
 \mbox{$|$ \textbf{\textcolor{red}{BIN\_BASED\_NUM}}}
 
@@ -257,6 +259,11 @@ parameter\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{parameter}} par
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+parameter\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{localparam}} parameter\_assignments \textbf{\textcolor{red}{;}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 parameter\_assignments $::=$\hspace{1ex} parameter\_assignment
 
 \mbox{$|$ parameter\_assignments \textbf{\textcolor{red}{,}} parameter\_assignment}
@@ -350,12 +357,21 @@ ff\_item $::=$\hspace{1ex} net\_lval \textbf{\textcolor{red}{,}} expression \tex
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-fsm\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{fsm}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} statements fsm\_items \textbf{\textcolor{red}{endfsm}}
+fsm\_keyword $::=$\hspace{1ex} \textbf{\textcolor{red}{fsm}}
+
+\mbox{$|$ \textbf{\textcolor{red}{fsm\_nc}}}
 
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-fsm\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{fsm}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}} statements fsm\_items \textbf{\textcolor{red}{endfsm}}
+fsm\_header $::=$\hspace{1ex} fsm\_keyword \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}
+
+\mbox{$|$ fsm\_keyword \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{,}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+fsm\_block $::=$\hspace{1ex} fsm\_header statements fsm\_items \textbf{\textcolor{red}{endfsm}}
 
 \vspace{1em}
 \noindent

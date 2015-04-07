@@ -1,14 +1,424 @@
-\mhdl{} syntax born from \sv{}. It selectively
- inherits synthesizable syntax of \sv{}, eliminates unnecessary
+\gls{mhdl} syntax borns from \gls{sv}. It selectively
+ inherits synthesizable syntax of \gls{sv}, eliminates unnecessary
 variants, extends module instantiation syntax, add new syntax for
-Flip-Flop and FSM. \vlog{} or \sv{} designers will find it quite
-intuitive to use \mhdl{} syntax. In the rest of this chapter,
+Flip-Flop and FSM. \gls{v} or \gls{sv} designers will find it quite
+intuitive to use \gls{mhdl} syntax. In the rest of this chapter,
 major syntax are presented with examples, refer to \autoref{sec:bnf} for complete syntax.
 
-\section{Expression and Statement}\input{exp_stmt.tex}
-\section{Combinational Logic}\input{comb_logic.tex}
-\section{Flip-Flop}\input{ff.tex}
-\section{FSM}\label{sec:syntax.fsm}\input{fsm.tex}
-\section{Module Instantiation}\input{inst.tex}
-\section{Parameterization}\input{param.tex}
-\section{Escape from \mhdl}\input{esc_mhdl.tex}
+\section{Combinational Logic}
+There are two and only two types of \gls{code block} in 
+\gls*{mhdl} for coding combinational logic:
+\begin{enumerate}
+\item \mhdl{assign} statement
+\item \mhdl{always_comb} statement
+\end{enumerate}
+Both syntax are same in \gls*{sv}. 
+
+\section{Sequential Logic}
+There are two types of \gls{code block} in \gls*{mhdl} for coding
+sequential logic:
+\begin{enumerate}
+\item \mhdl{always_ff @()} statement, which is same in \gls*{sv}
+\item \mhdl{ff} - \mhdl{endff} block, which is introduec by \gls*{mhdl}
+\end{enumerate}
+The troditional \gls*{sv} syntax is good except its redundancy: \gls{ff}
+variable appears twice (even more) in different clause of \mhdl{if}-\mhdl{else}
+branches. For a multi-bit vector variable, such redundancy could lead 
+to typo and width mismatch among all branches. 
+
+For well-coded \gls{ff}, combinational part of the \gls{ff} sources should be
+coded in a separate \gls{code block}, so the \mhdl{if}-\mhdl{else} branches 
+can be reduced. \gls{mhdl} provides a new \mhdl{ff}-\mhdl{endff} \gls{code block}
+to such reduced \gls*{ff} coding. Such new syntax can eliminate redundancy. 
+\gls{ff} code in follow two forms are equivalent. 
+\begin{mhdle}
+// troditional sequential block
+always_ff @ (posedge clk or negedge rst_n)
+  if (!rst_n)
+     a_ff <= 1'b0;
+  else 
+     a_ff <= a;
+
+// MetaHDL new sequential block
+ff; 
+  a_ff, a, 1'b0;
+endff
+\end{mhdle}
+
+\mhdl{ff} block can specify clock and reset signal name, however, they are 
+usually ommitted to further reduce redundancy. Each line in \mhdl{ff} block
+describes a \gls{ff}. A line has three element:
+\begin{enumerate}
+\item \gls{ff} variable name, \mhdl{a_ff} here. 
+\item An expression containing the logic to update the \gls{ff}, \mhdl{a} here. 
+  Any expression defined in \autoref{sec:bnf} are allowed here. 
+\item An constant as reset value. It is optional. If not reset value provided, 
+  \gls{ff} variable will not be reset. 
+\end{enumerate}
+Here is example:
+
+\begin{minipage}[t]{.48\textwidth}
+\begin{mhdle}[caption={MetaHDL FF syntax}]
+ff clk_a, clk_a_rst_n;
+   a_ff, a, 1'b0;
+   b_ff, b;
+   c_ff, a_ff & b_ff, 1'b0;
+endff
+\end{mhdle}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.48\textwidth}
+\begin{mhdle}[caption={Generated SystemVerilog}]
+always_ff @(posedge clk_a or negedge clk_a_rst_n)
+  if (clk_a_rst_n)
+    a_ff <= 1'b0;
+    c_ff <= 1'b0;
+  else begin
+     a_ff <= a;
+     b_ff <= b;
+     c_ff <= a_ff & b_ff;
+  end
+\end{mhdle}
+\end{minipage}
+
+\section{FSM}
+\gls{fsm} in conventional RTL design requires many
+constant/parameter definitions to improve code readability. But these
+definitions are hard to maintain during develop iteration, especially
+for one-hot encoded FSM. \gls{mhdl} introduces \emph{symbol based} FSM
+programming paradigm that liberates designers from such frustrated
+situation.
+
+\gls{fsm} \gls{code block}
+is enclosed by keywords \mhdl{fsm}/\mhdl{fsm_nc} and \mhdl{endfsm}.
+\mhdl{fsm} is followed by three identifiers: 
+\begin{enumerate}
+\item FSM name, which is mandatory.
+\item clock signal name, which is optional.
+\item reset signal name, which is optional, too. 
+\end{enumerate}
+FSM name is used as based name of state
+register, \mhdl{_cs} and \mhdl{_ns} suffix are appended to FSM name to create
+current state register and next state next state register,
+respectively. clock and reset signal names are used in sequential block of
+FSM, which resets state register and perform current state
+refreshing. clock and reset names can be omitted together, and default
+name \mhdl{clock} and \mhdl{reset\_n} will be used. State transition is explicitly
+stated by \mhdl{goto} keyword, instead of next state assignment.
+
+Symbol based FSM programming allows designers to code FSM using
+state names, one-hot state encodings are automatically generated
+by \gls{mhdlc}. Constant definitions are generated according to state
+names to improve code readability. To help designers eliminate state
+name typo, \gls{mhdlc} will build a \emph{Directed Graph} representing state
+transition during parsing, to check the connectivity of every state. Dead
+states and unreachable states are reported to designers for
+confirmation. \autoref{lst:fsm in mhdl} is \gls{mhdl} FSM description,
+\autoref{lst:fsm in sv} is the corresponding \gls{sv} description, including
+constant definition. 
+
+\begin{figure}[pbt]
+\begin{minipage}[t]{.48\textwidth}
+\begin{mhdle}[caption={FSM in MetaHDL}, label={lst:fsm in mhdl}]
+fsm cmdrx, clk, rst_n;
+  cm_pim_ack = 1'b0;
+  
+  IDLE: begin
+    if ( pim_cm_req ) begin
+      cm_pim_ack = 1'b1;
+      goto DATA;
+    end
+    else begin
+      goto IDLE;
+    end
+  end
+
+  DATA: begin
+    cm_pim_ack = 1'b1;
+    if ( pim_cm_eof ) begin
+      cm_pim_ack = 1'b0;
+      goto IDLE;
+    end
+    else begin
+      goto DATA;
+    end
+  end
+
+endfsm
+\end{mhdle}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.48\textwidth}
+\begin{mhdle}[caption={Generated FSM in SystemVerilog}, label={lst:fsm in sv}]
+// other declarations...
+const logic [1:0] DATA = 2'b10;
+const logic [1:0] IDLE = 2'b01;
+const int _DATA_ = 1;
+const int _IDLE_ = 0;
+
+// Sequential part of  cmdrx
+always_ff @(posedge clk or negedge rst_n)
+  if (~rst_n) begin
+    cmdrx_cs <= IDLE;
+  end
+  else begin
+    cmdrx_cs <= cmdrx_ns;
+  end
+
+// Combnational part of cmdrx
+always_comb begin
+  cm_pim_ack = 1'b0;
+  unique case ( 1'b1 )
+    cmdrx_cs[_IDLE_] : begin
+      if ( pim_cm_req ) begin
+        cm_pim_ack = 1'b1;
+        cmdrx_ns = DATA;
+      end
+      else begin
+        cmdrx_ns = IDLE;
+      end
+    end
+
+    cmdrx_cs[_DATA_] : begin
+      cm_pim_ack = 1'b1;
+      if ( pim_cm_eof ) begin
+        cm_pim_ack = 1'b0;
+        cmdrx_ns = IDLE;
+      end
+      else begin
+        cmdrx_ns = DATA;
+      end
+    end
+
+    default: begin
+      cmdrx_ns = 2'hX;
+    end
+  endcase
+end
+\end{mhdle}
+\end{minipage}
+\end{figure}
+
+Different of \mhdl{fsm} and \mhdl{fsm_nc} is Verilog generated 
+from \mhdl{fsm_nc} block will not contain the sequential block. 
+That means designers have to manually code the sequential block. 
+This is expecially designed for FSM with synchronous reset. 
+\textbf{Note} that the manual crafted sequential block \emph{must}
+come after the \mhdl{fsm_nc} block, because \mhdl{*_ns} and \mhdl{*_cs}
+signals are only accessible after \mhdl{fsm_nc} block is parsed. 
+
+\section{Module Instantiation}
+\gls{sv} module instantiation syntax is extended in \gls{mhdl}, BNF is
+shown in \autoref{sec:bnf}, start from non-terminal ``inst\_block''.
+Features of \gls{mhdl} instantiation syntax are highlighted below:
+\begin{enumerate}
+\item Instance name is optional. Default instance name is prefix \mhdl{x_}
+concatenate with module name. 
+\item Port connection is optional. Default behavior is to connect ports 
+  to net with identical name. 
+\item Prefix and/or Suffix rule is allowed in port connection (see example below). 
+\item Regular expression rule is allowed in port connection (see example below).
+\end{enumerate}
+\begin{figure}[ptb]
+  \begin{minipage}[t]{.48\textwidth}
+    \begin{mhdle}[caption={\texttt{moda.mhdl}}]
+input i1;
+input i2;
+output o1;
+output [1:0] o2;
+    \end{mhdle}
+    \begin{mhdle}[caption={Instantiation in MetaHDL}]
+// simplest instantiation
+moda;
+
+// prefix rule
+moda x1_moda ( x1_ +);
+
+// suffix rule
+// after prefix rule
+moda x2_moda ( x2_ + , /*\label{ln:inst 2}*/
+               + _22);
+
+
+// Perl compatible regexp
+moda x3_moda ( "s/o/out/g", 
+               "s/i/in/g" );
+    \end{mhdle}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.48\textwidth}
+    \begin{mhdle}[caption={Generated SystemVerilog}]
+moda x_moda (
+                .i1 (i1),
+                .i2 (i2),
+                .o1 (o1),
+                .o2 (o2)
+            );
+
+moda x1_moda (
+                 .i1 (x1_i1),
+                 .i2 (x1_i2),
+                 .o1 (x1_o1),
+                 .o2 (x1_o2)
+             );
+
+moda x2_moda (
+                 .i1 (x2_i1_22),
+                 .i2 (x2_i2_22),
+                 .o1 (x2_o1_22),
+                 .o2 (x2_o2_22)
+             );
+
+moda x3_moda (
+                 .i1 (in1),
+                 .i2 (in2),
+                 .o1 (out1),
+                 .o2 (out2)
+             );
+    \end{mhdle}
+  \end{minipage}
+\end{figure}
+
+
+\section{Parameter Tracing}
+\gls{mhdl} enables designers to creates parameterized module in two ways: 
+\begin{itemize}
+\item Write parameterized module from draft.
+\item Build parameterized module from existing parameterized modules. 
+\end{itemize}
+Designers declare parameters, and use them in ports or net index. \mhdlc{} 
+will automatically parameterize ports in generated declarations. If a module 
+to be instantiated is a parameterized module, \mhdlc{} can trace parameter usage
+in port connections and automatically parameterize wrapper module. 
+\autoref{lst:modc in mhdl}, \autoref{lst:modc in sv}, \autoref{lst:wrapper in mhdl} and 
+\autoref{lst:wrapper in sv} demonstrate a example parameter tracing.
+
+\begin{figure}[ptb]
+  \begin{minipage}[t]{.48\textwidth}
+    \begin{mhdle}[caption={Inner module: \texttt{modc} in \gls{mhdl}}, label={lst:modc in mhdl}]
+parameter A = 4;
+parameter B = 5; 
+parameter C = A + B;
+
+assign o1[C-1:0] = {~i1[A-1:0], i2[B-1:0]};
+    \end{mhdle}
+    \begin{mhdle}[caption={Generated \texttt{modc} in SystemVerilog}, label={lst:modc in sv}]
+module modc (
+  i1, 
+  i2, 
+  o1);
+
+parameter A = 4;
+parameter B = 5;
+parameter C = 4 + 5;
+
+input [A - 1:0] i1;
+input [B - 1:0] i2;
+output [C - 1:0] o1;
+
+logic [A - 1:0] i1;
+logic [B - 1:0] i2;
+logic [C - 1:0] o1;
+
+assign o1[C - 1:0] = {~i1[A - 1:0], i2[B - 1:0]};
+endmodule
+    \end{mhdle}
+    \begin{mhdle}[caption={Wrapper Module in MetaHDL}, label={lst:wrapper in mhdl}]
+parameter SETA = 8,
+          SETB = 9;
+
+
+modc #( .A(2) ) x0_modc ( x0_ + );
+
+modc #( SETA, SETB ) x1_modc ( x1_ + );
+
+modc #( .A(SETA) ) x2_modc (x2_ +,
+                           .o1 (x2_o1[10:0]));
+    \end{mhdle}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.48\textwidth}
+    \begin{mhdle}[caption={Generated wrapper module in SystemVerilog}, label={lst:wrapper in sv}]
+module modwrapper (
+  x0_i1, 
+  x0_i2, 
+  x0_o1, 
+  x1_i1, 
+  x1_i2, 
+  x1_o1, 
+  x2_i1, 
+  x2_i2, 
+  x2_o1);
+
+parameter SETA = 8;
+parameter SETB = 9;
+
+input   [1   :0]  x0_i1;
+input   [4   :0]  x0_i2;
+output  [6   :0]  x0_o1;
+input   [SETA - 1:0]  x1_i1;
+input   [SETB - 1:0]  x1_i2;
+output  [SETA + SETB - 1:0]  x1_o1;
+input   [SETA - 1:0]  x2_i1;
+input   [4   :0]  x2_i2;
+output  [10  :0]  x2_o1;
+
+logic   [1   :0]  x0_i1;
+logic   [4   :0]  x0_i2;
+logic   [6   :0]  x0_o1;
+logic   [SETA - 1:0]  x1_i1;
+logic   [SETB - 1:0]  x1_i2;
+logic   [SETA + SETB - 1:0]  x1_o1;
+logic   [SETA - 1:0]  x2_i1;
+logic   [4   :0]  x2_i2;
+logic   [10  :0]  x2_o1;
+
+modc #(
+       .A( 2 ),
+       .B( 5 ),
+       .C( 2 + 5 )	 
+      ) x0_modc (
+                 .i1 (x0_i1),
+                 .i2 (x0_i2),
+                 .o1 (x0_o1)
+                );
+
+modc #(
+       .A( SETA ),
+       .B( SETB ),
+       .C( SETA + SETB )	 
+      ) x1_modc (
+                 .i1 (x1_i1),
+                 .i2 (x1_i2),
+                 .o1 (x1_o1)
+                );
+
+modc #(
+       .A( SETA ),
+       .B( 5 ),
+       .C( SETA + 5 )	 
+      ) x2_modc (
+                 .i1 (x2_i1),
+                 .i2 (x2_i2),
+                 .o1 (x2_o1[10:0])
+                );
+
+endmodule
+    \end{mhdle}
+  \end{minipage}
+\end{figure}
+
+\section{Optional Declaration}
+Declaration in \gls{v} and \gls{sv} is mandatory, but in \gls{mhdl} is optional.
+\gls{mhdlc} can automatcially infer width, port direction, and variable type 
+from a well designed synthesizable RTL code. But in some cases, designers want
+to override the inference results. This can be done by declaration statements.
+Usually,  declaration is used in follow sceanrios:
+\begin{enumerate}
+\item A parameterized port/net/reg, such as \mhdl{assign a[A-1:0] = b[A-1:0];}
+\item Force port direction, such as \mhdl{input a; output b, nonport c;}
+\item 2 dimensional array, such as \mhdl{reg [31:0] a [15:0];}
+\item Integer iteration variable used in \mhdl{for} statement, such as \mhdl{int i; for (i=0;i<32;i=i+1)     a[i] = b[31-i];}
+\end{enumerate}
+
+\section{Runtime Compiler Control}
