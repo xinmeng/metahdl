@@ -147,10 +147,11 @@ CreateMirrorDir(const string &mbase, const string &vbase, list<string> dirs)
         }
         else {
             vdir = mdir;
-            if (vbase.length() == 1) 
-                vdir.replace(0, mbase.length(), "");
-            else 
-                vdir.replace(0, mbase.length(), vbase);
+            vdir.replace(0, mbase.length(), vbase);
+            // if (vbase.length() == 1)
+            //     vdir.replace(0, mbase.length(), "");
+            // else
+            //     vdir.replace(0, mbase.length(), vbase);
         }
         mirror[mdir] = vdir;
         // cout << mdir << " -> " << vdir << endl;
