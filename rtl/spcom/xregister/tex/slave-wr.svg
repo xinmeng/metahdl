@@ -1,0 +1,184 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+ width="100%" height="100%">
+<g stroke-width="1pt" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+  <clipPath id="window0">
+    <path d="M0 0 L 126 0 L 126 363 L 0 363 Z"/>
+  </clipPath>
+</defs>
+<g clip-path = "url(#window0)">
+<text x="122" y="22" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">clk</text>
+<text x="122" y="55" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">state</text>
+<text x="122" y="88" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">pkt_data[15:0]</text>
+<text x="122" y="154" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">wd_xxx___sel</text>
+<text x="122" y="187" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">wr_data[31:0]</text>
+<text x="122" y="220" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">wd_xxx___wr</text>
+<text x="122" y="253" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">wr</text>
+<text x="122" y="286" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">req</text>
+<text x="122" y="319" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">wr_req</text>
+<text x="122" y="352" font-family="Verdana,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="end" xml:space="preserve">ack</text>
+</g>
+<defs>
+  <clipPath id="window1">
+    <path d="M126 0 L 1344 0 L 1344 363 L 126 363 Z"/>
+  </clipPath>
+</defs>
+<g clip-path = "url(#window1)">
+<line x1="207" y1="0" x2="207" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="369" y1="0" x2="369" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="531" y1="0" x2="531" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="693" y1="0" x2="693" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="855" y1="0" x2="855" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="1017" y1="0" x2="1017" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="1179" y1="0" x2="1179" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="1341" y1="0" x2="1341" y2="363" stroke="rgb(192,192,192)" stroke-dasharray="12, 4" fill="none"/>
+<line x1="125" y1="29" x2="204" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="204" y1="29" x2="210" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="210" y1="4" x2="285" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="285" y1="4" x2="291" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="291" y1="29" x2="366" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="366" y1="29" x2="372" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="372" y1="4" x2="447" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="447" y1="4" x2="453" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="453" y1="29" x2="528" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="528" y1="29" x2="534" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="534" y1="4" x2="609" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="609" y1="4" x2="615" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="615" y1="29" x2="690" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="690" y1="29" x2="696" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="696" y1="4" x2="771" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="771" y1="4" x2="777" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="777" y1="29" x2="852" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="852" y1="29" x2="858" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="858" y1="4" x2="933" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="933" y1="4" x2="939" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="939" y1="29" x2="1014" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1014" y1="29" x2="1020" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1020" y1="4" x2="1095" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1095" y1="4" x2="1101" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1101" y1="29" x2="1176" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1176" y1="29" x2="1182" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1182" y1="4" x2="1257" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1257" y1="4" x2="1263" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1263" y1="29" x2="1338" y2="29" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1338" y1="29" x2="1344" y2="4" stroke="rgb(0,0,0)" fill="none"/>
+<text x="230" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">space</text>
+<line x1="126" y1="62" x2="366" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="126" y1="37" x2="366" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="230" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">space</text>
+<line x1="366" y1="62" x2="372" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="366" y1="37" x2="372" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="372" y1="62" x2="526" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="372" y1="37" x2="526" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="426" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">address</text>
+<line x1="526" y1="62" x2="532" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="526" y1="37" x2="532" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="532" y1="62" x2="690" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="532" y1="37" x2="690" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="580" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">wr_data_hi</text>
+<line x1="690" y1="62" x2="696" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="690" y1="37" x2="696" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="696" y1="62" x2="852" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="696" y1="37" x2="852" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="743" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">wr_data_lo</text>
+<line x1="852" y1="62" x2="858" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="852" y1="37" x2="858" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="858" y1="62" x2="1176" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="858" y1="37" x2="1176" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="991" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">wait_ack</text>
+<line x1="1176" y1="62" x2="1182" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1176" y1="37" x2="1182" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1182" y1="62" x2="1341" y2="62" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="1182" y1="37" x2="1341" y2="37" stroke="rgb(0,0,0)" fill="none"/>
+<text x="1242" y="56" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">space</text>
+<polygon points="127,95 205,95 205,70 127,70" fill="rgb(128,128,128)"/>
+<line x1="126" y1="95" x2="204" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="126" y1="70" x2="204" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="207,82 204,95 204,70" fill="rgb(128,128,128)"/>
+<line x1="204" y1="95" x2="210" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="204" y1="70" x2="210" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="210" y1="95" x2="366" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="210" y1="70" x2="366" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<text x="270" y="89" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">space</text>
+<line x1="366" y1="95" x2="372" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="366" y1="70" x2="372" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="372" y1="95" x2="528" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="372" y1="70" x2="528" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<text x="427" y="89" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">address</text>
+<line x1="528" y1="95" x2="534" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="528" y1="70" x2="534" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="534" y1="95" x2="690" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="534" y1="70" x2="690" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<text x="581" y="89" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">wr_data_hi</text>
+<line x1="690" y1="95" x2="696" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="690" y1="70" x2="696" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="696" y1="95" x2="852" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="696" y1="70" x2="852" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<text x="743" y="89" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">wr_data_lo</text>
+<polygon points="855,82 859,95 859,70" fill="rgb(128,128,128)"/>
+<line x1="852" y1="95" x2="858" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="852" y1="70" x2="858" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="859,95 1340,95 1340,70 859,70" fill="rgb(128,128,128)"/>
+<line x1="858" y1="95" x2="1339" y2="95" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="858" y1="70" x2="1339" y2="70" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="126" y1="161" x2="450" y2="161" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="450" y1="161" x2="456" y2="136" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="456" y1="136" x2="591" y2="136" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="591,136 597,161 598,161 598,136 597,136" fill="rgb(128,128,128)"/>
+<line x1="591" y1="136" x2="597" y2="161" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="591" y1="136" x2="597" y2="136" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="598,161 1342,161 1342,136 598,136" fill="rgb(128,128,128)"/>
+<line x1="597" y1="161" x2="1341" y2="161" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="597" y1="136" x2="1341" y2="136" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="127,194 853,194 853,169 127,169" fill="rgb(128,128,128)"/>
+<line x1="126" y1="194" x2="852" y2="194" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="169" x2="852" y2="169" stroke="rgb(0,0,255)" fill="none"/>
+<polygon points="855,181 852,194 852,169" fill="rgb(128,128,128)"/>
+<line x1="852" y1="194" x2="858" y2="169" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="852" y1="169" x2="858" y2="194" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="858" y1="194" x2="1177" y2="194" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="858" y1="169" x2="1177" y2="169" stroke="rgb(0,0,255)" fill="none"/>
+<polygon points="1180,181 1184,194 1184,169" fill="rgb(128,128,128)"/>
+<line x1="1177" y1="194" x2="1183" y2="169" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1177" y1="169" x2="1183" y2="194" stroke="rgb(0,0,255)" fill="none"/>
+<polygon points="1184,194 1345,194 1345,169 1184,169" fill="rgb(128,128,128)"/>
+<line x1="1183" y1="194" x2="1344" y2="194" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1183" y1="169" x2="1344" y2="169" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="227" x2="528" y2="227" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="528" y1="227" x2="534" y2="202" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="534" y1="202" x2="1177" y2="202" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1177" y1="202" x2="1183" y2="227" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1183" y1="227" x2="1342" y2="227" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="260" x2="852" y2="260" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="852" y1="260" x2="858" y2="235" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="858" y1="235" x2="1176" y2="235" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1176" y1="235" x2="1182" y2="260" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1182" y1="260" x2="1341" y2="260" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="293" x2="852" y2="293" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="852" y1="293" x2="858" y2="268" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="858" y1="268" x2="1176" y2="268" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1176" y1="268" x2="1182" y2="293" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1182" y1="293" x2="1341" y2="293" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="326" x2="852" y2="326" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="852" y1="326" x2="858" y2="301" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="858" y1="301" x2="1176" y2="301" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1176" y1="301" x2="1182" y2="326" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1182" y1="326" x2="1339" y2="326" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="126" y1="359" x2="1014" y2="359" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1014" y1="359" x2="1020" y2="334" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1020" y1="334" x2="1176" y2="334" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1176" y1="334" x2="1182" y2="359" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="1182" y1="359" x2="1342" y2="359" stroke="rgb(0,0,255)" fill="none"/>
+<line x1="369" y1="66" x2="369" y2="129" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="369" y1="115" x2="453" y2="115" stroke="rgb(0,0,0)" fill="none"/>
+<line x1="453" y1="101" x2="453" y2="132" stroke="rgb(0,0,0)" fill="none"/>
+<polygon points="375,115 370,113 370,117" stroke="rgb(0,0,0)" fill="rgb(0,0,0)"/>
+<polygon points="453,115 448,113 448,117" stroke="rgb(0,0,0)" fill="rgb(0,0,0)"/>
+<text x="455" y="120" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">decode latency</text>
+<text x="858" y="319" font-family="Arial,sans-serif" font-size="10pt" fill="rgb(0,0,0)" text-anchor="start" xml:space="preserve">aggregate wr_req from all address spaces</text>
+</g>
+</g>
+</svg>

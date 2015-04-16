@@ -1,0 +1,72 @@
+\newglossaryentry{target}
+{
+  name={Target}, 
+  description={Functional block that is controlled by a CSR module.}
+}
+
+\newglossaryentry{master}
+{
+  name={Master},
+  description={Register access master that can initiate read/write operation
+    to CSR. Each Master has its own address space.}
+}
+
+\newglossaryentry{field}
+{
+  name={Field},
+  description={Minimal granularity of CSR. Each field could 
+    have more than one bits, but it is an undividable block that delivers
+    atomic control/status information.}
+}
+
+\newglossaryentry{word}
+{
+  name={Word, or Logical Word}, 
+  text={Word}, 
+  description={A group of \gls{field} concatenating together to form 
+    a fixed length (usually 32-bit) entity for \gls{master} read. There
+    could be ``holes'' in Word, which is padded with 0.}
+}
+
+\newglossaryentry{ff}
+{
+  name={FF, Flip-Flop},
+  text={FF},
+  description={A basic element in digital VLSI design.}
+}
+
+
+\newglossaryentry{csr slave}
+{
+  name={CSR Slave}, 
+  description={CSR Access Slave, that executes CSR Access Master 
+    access to locally developed registers.}
+}
+
+\newglossaryentry{csr bridge}
+{
+  name={CSR Bridge},
+  description={CSR Access Bridge, that executes CSR Access Master 
+    access to Register File or memory.}
+}
+
+\newglossaryentry{csr master}
+{
+  name={CSR Master}, 
+  description={CSR Access Master, that sends register access
+    request to CSR Access Slave.}
+}
+
+\newglossaryentry{value deliver}
+{
+  name={Value Deliver},
+  description={A toggled based CDC cell that has FIFO compliance interface
+    for delivering value from one clock domain to another.}
+}
+
+\newglossaryentry{reg file}
+{
+  name={Register File},
+  description={Existing register implementation inside 3rd IPs. Usually, it 
+    has its own access port and corresponding access master.}
+}

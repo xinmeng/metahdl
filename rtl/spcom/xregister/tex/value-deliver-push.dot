@@ -1,0 +1,11 @@
+digraph push_fsm {
+rankdir=LR;
+
+node [shape=doublecircle]; idle;
+
+node [shape=oval];
+
+idle -> wait_ack [label="vld assertion"];
+
+wait_ack -> idle [label="ack toggle"]
+}
