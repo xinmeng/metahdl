@@ -1,10 +1,14 @@
+// - Convert 2D port to 1D port.\lstset{emph={binary\_aggregator\_2d}, emphstyle=\color{red}}
 module binary_aggregator (clk, rst_n, 
                           candidate_vld, candidate_key, candidate_data, 
                           winner_vld, winner_key, winnder_data);
 
-   parameter CANDIDATE_CNT = 5;
-   parameter KEY_WIDTH     = 6;
-   parameter DATA_WIDTH    = 16;
+   parameter CANDIDATE_CNT  = 5;
+   parameter KEY_WIDTH      = 6;
+   parameter DATA_WIDTH     = 16;
+   parameter LV_PER_STAGE   = 0; // Number of combination level per FF stages
+   parameter FF_START_POINT = 0; // 0: arange FF from top node (output node) 
+                                 // 1: arange FF from lowest node 
    
 
    input clk, rst_n;
@@ -29,19 +33,19 @@ module binary_aggregator (clk, rst_n,
 
    binary_aggregator_2d
      #(.CANDIDATE_CNT (CANDIDATE_CNT), 
-       .KEY_WIDTH (KEY_WIDTH), 
-       .DATA_WIDTH (DATA_WIDTH)) 
+       .KEY_WIDTH (KEY_WIDTH), .DATA_WIDTH (DATA_WIDTH), 
+       .LV_PER_STAGE (LV_PER_STAGE), .FF_START_POINT (FF_START_POINT))
        binary_aggregator_2d 
-     (.clk (clk), .rst_n (rst_n),
+         (.clk (clk), .rst_n (rst_n),
 
-      .candidate_vld (candidate_vld), 
-      .candidate_key (candidate_key_2d), 
-      .candidate_data (candidate_data_2d),
-      
-      .winner_vld (winner_vld),
-      .winner_key (winner_key), 
-      .winner_data (winner_data)
-      );
+          .candidate_vld (candidate_vld), 
+          .candidate_key (candidate_key_2d), 
+          .candidate_data (candidate_data_2d),
+         
+          .winner_vld (winner_vld),
+          .winner_key (winner_key), 
+          .winner_data (winner_data)
+          );
 
 endmodule // binary_aggregator
-
+// - \lstset{}
