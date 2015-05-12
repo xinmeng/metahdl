@@ -504,13 +504,23 @@ net : net_name "[" expression ":" expression "]"
       CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
       if ( $3->Value() >= symb->msb->Value() ) {
 	if ( !symb->Update($3) ) {
-	  mwrapper.error(@3, "MSB exceed fixed value, check your declaration.");
+            ostringstream msg;
+            msg << "MSB \"";
+            $3->Print(msg);
+            msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->msb->Value() 
+                << ", check your declaration.";
+            mwrapper.error(@3, msg.str());
 	}
       }
 
       if ( $3->Value() < symb->lsb->Value() ) {
 	if ( !symb->UpdateLSB($3) ) {
-	  mwrapper.error(@3, "LSB exceed fixed value, check your declaration.");
+            ostringstream msg;
+            msg << "LSB \"";
+            $3->Print(msg);
+            msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->lsb->Value() 
+                << ", check your declaration.";
+            mwrapper.error(@3, msg.str());
 	}
       }
 
@@ -2065,7 +2075,11 @@ parameter_override : parameter_num_override
 parameter_num_override : expression 
 {
   if ( !$1->IsConst() ) {
-    mwrapper.error(@1, "non-constant expression as parameter.");
+      ostringstream buf;
+      buf << "non-constant expression \"";
+      $1->Print(buf);
+      buf << "\", as parameter.";
+      mwrapper.error(@1, buf.str());
   }
   else {
     $$ = new vector<CExpression*>;
@@ -2076,7 +2090,11 @@ parameter_num_override : expression
 | parameter_num_override "," expression 
 {
   if ( ! $3->IsConst() ) {
-    mwrapper.error(@3, "non-constant expression as parameter.");
+      ostringstream buf;
+      buf << "non-constant expression \"";
+      $3->Print(buf);
+      buf << "\" as parameter.";
+      mwrapper.error(@3, buf.str());
   }
   else {
     $1->push_back($3);
@@ -2088,7 +2106,11 @@ parameter_num_override : expression
 parameter_name_override : "." ID "(" expression ")"
 {
   if ( ! $4->IsConst()) {
-    mwrapper.error(@4, "non-constant expression as parameter.");
+      ostringstream buf;
+      buf << "non-constant expression \"";
+      $4->Print(buf);
+      buf << "\" as parameter.";
+      mwrapper.error(@4, buf.str());
   }
   else if ( !mwrapper.mod_template->param_table->SetParam(*$2, $4) ) {
     mwrapper.error(@2, mwrapper.mod_template_name + " has no public parameter: " + *$2);
@@ -2097,7 +2119,11 @@ parameter_name_override : "." ID "(" expression ")"
 | parameter_name_override "," "." ID "(" expression ")"
 {
   if ( ! $6->IsConst()) {
-    mwrapper.error(@6, "non-constant expression as parameter.");
+      ostringstream buf;
+      buf << "non-constant expression \"";
+      $6->Print(buf);
+      buf << "\" as parameter.";
+      mwrapper.error(@6, buf.str());
   }
   else if ( !mwrapper.mod_template->param_table->SetParam(*$4, $6) ) {
     mwrapper.error(@4, mwrapper.mod_template_name + " has no public parameter: " + *$4);
