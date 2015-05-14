@@ -1,4 +1,5 @@
 *~
+*.log
 gmon.out
 mhdlc/src/*.o
 

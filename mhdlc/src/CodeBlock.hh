@@ -63,24 +63,38 @@ class CBlkComb : public CCodeBlock
 {
 private:
   CStatement* _stmt;
+    set<string> _for_iter_var;
   
 public:
-  inline CBlkComb(const yy::location &loc, CStatement* stmt) : 
-    CCodeBlock(loc), _stmt (stmt) {}
+    inline CBlkComb(const yy::location &loc, CStatement* stmt, const set<string> &for_iter_var) : 
+        CCodeBlock(loc), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
-  inline CBlkComb(const yy::location &loc, int step, CStatement* stmt) : 
-    CCodeBlock(loc, step), _stmt (stmt) {}
+    inline CBlkComb(const yy::location &loc, int step, CStatement* stmt, const set<string> &for_iter_var) : 
+        CCodeBlock(loc, step), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
   inline void Print(ostream&os=cout) {
     PrintLoc(os); 
     if ( LEGACY_VERILOG_MODE ) {
-      os << "always @(*) " << endl;
+        os << "always @(*) ";
     }
     else {
-      os << "always_comb" << endl; 
+        os << "always_comb";
     }
 
+    if (_for_iter_var.size()>0) {
+        os << " begin" << endl;
+        for (set<string>::iterator iter=_for_iter_var.begin();
+             iter != _for_iter_var.end(); iter++) {
+            PUT_SPACE(_step);
+            os << "integer " << *iter << ";" << endl;            
+        }
+    }
+    else {
+        os << endl;
+    }
     _stmt->Print(os, _step);
+    if (_for_iter_var.size()>0) 
+        os << "end" << endl;
   }
   
   inline void GetSymbol() {
@@ -212,19 +226,20 @@ class CBlkLegacyFF : public CCodeBlock
    private:
       CSymbol *_clk, *_rst;
       CStatement *_stmt;
+    set<string> _for_iter_var;
 
    public: 
-      inline CBlkLegacyFF(const yy::location &loc, CSymbol *clk, CSymbol *rst, CStatement *stmt) : 
-	 CCodeBlock (loc), _clk (clk), _rst (rst), _stmt (stmt) {}
+    inline CBlkLegacyFF(const yy::location &loc, CSymbol *clk, CSymbol *rst, CStatement *stmt, const set<string> &for_iter_var) : 
+        CCodeBlock (loc), _clk (clk), _rst (rst), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
-      inline CBlkLegacyFF(const yy::location &loc, CSymbol *clk, CStatement *stmt) : 
-	 CCodeBlock (loc), _clk (clk), _rst (NULL), _stmt (stmt) {}
+    inline CBlkLegacyFF(const yy::location &loc, CSymbol *clk, CStatement *stmt, const set<string> &for_iter_var) : 
+        CCodeBlock (loc), _clk (clk), _rst (NULL), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
-      inline CBlkLegacyFF(const yy::location &loc, int step, CSymbol *clk, CSymbol *rst, CStatement *stmt) : 
-	 CCodeBlock (loc, step), _clk (clk), _rst (rst), _stmt (stmt) {}
+    inline CBlkLegacyFF(const yy::location &loc, int step, CSymbol *clk, CSymbol *rst, CStatement *stmt, const set<string> &for_iter_var) : 
+        CCodeBlock (loc, step), _clk (clk), _rst (rst), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
-      inline CBlkLegacyFF(const yy::location &loc, int step, CSymbol *clk, CStatement *stmt) : 
-	 CCodeBlock (loc, step), _clk (clk), _rst (NULL), _stmt (stmt) {}
+    inline CBlkLegacyFF(const yy::location &loc, int step, CSymbol *clk, CStatement *stmt, const set<string> &for_iter_var) : 
+        CCodeBlock (loc, step), _clk (clk), _rst (NULL), _stmt (stmt), _for_iter_var (for_iter_var) {}
 
       inline void Print(ostream&os=cout) {
 	 PrintLoc(os);
@@ -235,9 +250,24 @@ class CBlkLegacyFF : public CCodeBlock
 	 if ( _rst ) {
 	    os << " or negedge " << _rst->name;
 	 }
-	 os << ")" << endl;
+	 os << ")";
+
+         if (_for_iter_var.size()>0) {
+             os << " begin" << endl;
+             for (set<string>::iterator iter=_for_iter_var.begin(); 
+                  iter != _for_iter_var.end(); iter++) {
+                 PUT_SPACE(_step);
+                 os << "integer " << *iter << ";" << endl;
+             }
+         }
+         else {
+             os << endl;
+         }
 
 	 _stmt->Print(os, _step);
+
+         if (_for_iter_var.size()>0) 
+             os << "end" << endl;
       }
 
       inline void GetSymbol() {
@@ -559,7 +589,8 @@ public:
 
     CStmtBunch *comb_body = new CStmtBunch ( stmt_list, true, _name + "_comb_part" );
     
-    _body = new CBlkComb (_loc, comb_body);
+    set<string> for_iter_var;
+    _body = new CBlkComb (_loc, comb_body, for_iter_var);
 
     
 

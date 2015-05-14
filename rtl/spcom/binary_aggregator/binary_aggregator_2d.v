@@ -1,3 +1,4 @@
+// - \label{code:binary aggregator 2d}
 module binary_aggregator_2d (clk, rst_n, 
                              candidate_vld, candidate_key, candidate_data, 
                              winner_vld, winner_key, winner_data);
@@ -64,42 +65,74 @@ module binary_aggregator_2d (clk, rst_n,
             .key_w (key_w[n]), .data_w (data_w[n]), .vld_w (vld_w[n])           
             );
          // - \lstset{}
-         // - ** Node Interconnection 
+         // - ** Node Interconnection
+         // - \insertfigure[hbtp]{Node ID and Candidate ID}{ba_node_id}{fig:ba node id}
          // - Each candidate input and node output have an place-holder signal for
          // - potential FF'ed version.
          // - If FF is expected at that level, place-holder signal has FF RTL
          // - attached, otherwise, the place-holder signal is directly connected to the
          // - un-FF'ed signal.
-         // - Wieh such design, nodes inteconnection is fully de-couple with FF insertion. 
-         always @(*) begin
-            // - Node left-hand input 
-            if (2*n+1 >= NODE_CNT) begin // input from leaf
-               key_a[n]   = candidate_key_ff[(2*n+1)%NODE_CNT];
-               data_a[n]  = candidate_data_ff[(2*n+1)%NODE_CNT];
-               vld_a[n]   = candidate_vld_ff[(2*n+1)%NODE_CNT];
+         // - With such design, nodes inteconnection is fully de-couple with FF insertion.
+         // - As illustrated in \autoref{fig:ba node id},
+         // - for node $n$, its left-hand and right-hand input node ID are:
+         // - \begin{align}
+         // - n_{left} & = 2 n + 1 \\
+         // - n_{right} & = 2 n + 2
+         // - \end{align}
+         // - If $2n +1 $ or $2n+2$ exceeds \mhdl{NODE_CNT}, it means the input is connected
+         // - leaf, which is candidate input. Candidate ID $c$ is $2n+1-\text{NODE\_CNT}$ or
+         // - $2n+2-\text{NODE\_CNT}$.
+         // - 
+         // - Node left-hand input \lstset{emph={key\_a, data\_a, vld\_a}, emphstyle={\color{red}}}
+         if (2*n+1 >= NODE_CNT) begin // input from leaf
+            always @(*) begin
+               key_a[n]   = candidate_key_ff[(2*n+1) - NODE_CNT];
+               data_a[n]  = candidate_data_ff[(2*n+1)- NODE_CNT];
+               vld_a[n]   = candidate_vld_ff[(2*n+1) - NODE_CNT];
             end
-            else begin         // input from winner of next level node
+         end
+         else begin         // input from winner of next level node
+            always @(*) begin
                key_a[n]   = key_w_ff[2*n+1];
                data_a[n]  = data_w_ff[2*n+1];
                vld_a[n]   = vld_w_ff[2*n+1];
             end
-
-            // - Node right-hand input
-            if (2*n+2 >= NODE_CNT) begin // input from leaf
-               key_b[n]   = candidate_key_ff[(2*n+2)%NODE_CNT];
-               data_b[n]  = candidate_data_ff[(2*n+2)%NODE_CNT];
-               vld_b[n]   = candidate_vld_ff[(2*n+2)%NODE_CNT];
+         end // else: !if(2*n+1 >= NODE_CNT)
+         
+         // - Node right-hand input \lstset{emph={key\_b, data\_b, vld\_b}, emphstyle={\color{green}}}
+         if (2*n+2 >= NODE_CNT) begin // input from leaf
+            always @(*) begin
+               key_b[n]   = candidate_key_ff[(2*n+2) - NODE_CNT];
+               data_b[n]  = candidate_data_ff[(2*n+2)- NODE_CNT];
+               vld_b[n]   = candidate_vld_ff[(2*n+2) - NODE_CNT];
             end
-            else begin         // input from winner of next level node
+         end
+         else begin         // input from winner of next level node
+            always @(*) begin
                key_b[n]   = key_w_ff[2*n+2];
                data_b[n]  = data_w_ff[2*n+2];
                vld_b[n]   = vld_w_ff[2*n+2];
             end
-         end // always @ assign
+         end // else: !if(2*n+2 >= NODE_CNT)
       end // block: node_inst
    endgenerate
+   // - \lstset{}
 
    // - * FF Insertion
+   // - FF can be configurably inserted to improve timing. Two parameters
+   // - controls FF insertion behavior:
+   // - \begin{enumerate}
+   // - \item \mhdl{LV_PER_STAGE}. Level per stage specifies levels of
+   // -       node between two FFs. If set to 0, no FF is inserted.
+   // - \item \mhdl{FF_START_POINT}. Start point of FF insertion. FF is
+   // -       insertion is done level by level. Such iteration can start
+   // -       from top level (set value to 0, by default), or from lowest
+   // -       level (set value to 1). 
+   // - \end{enumerate}
+   // - \insertfigure[hbtp]{FF Insertion Example}{ba_ff_insertion}{fig:ba ff insertion}
+   // - \autoref{fig:ba ff insertion} is an example. Empty boxes means the FF
+   // - place hold signals are directly connected to un-FF'ed signals. Green boxes
+   // - means FF RTL code is implemented.
    generate
       // - ** Insert FF for candidate input
       // - For an unbalanced tree, not all candidates connect to same
@@ -161,16 +194,6 @@ module binary_aggregator_2d (clk, rst_n,
       // - l_{FF} = n\times\text{LV\_PER\_STAGE}, (n=0,1,2,\cdots)
       // - \end{equation}
       for (l=LEVEL_CNT-1; l>=0; l=l-1) begin
-         if ( LV_PER_STAGE && 
-              ((FF_START_POINT && (LEVEL_CNT-1-l)%LV_PER_STAGE) ||  // insert FF from lowest level
-               (!FF_START_POINT && l%LV_PER_STAGE) )                // insert FF from top level
-              )begin
-            always @(*) begin
-               vld_w_ff[n]  = vld_w[n];
-               key_w_ff[n]  = key_w[n];
-               data_w_ff[n] = data_w[n];
-            end
-         end
          // - For all nodes at $l_{FF}$ that needs FF, interation at level plane.
          // - For level $l$, first node ID
          // - at this level is $2^l-1$, total number of nodes at this
@@ -178,13 +201,25 @@ module binary_aggregator_2d (clk, rst_n,
          // - \begin{equation}
          // - N_{start} + count - 1 = (2^l-1)+ 2^l - 1 = 2^{l+1} - 2
          // - \end{equation}
-         else begin
-            for (n=2**l-1; n<=2**(l+1)-2; n=n+1) begin
-               // node ID is bounded at NODE_CNT. 
-               // This check can also be put into 'for' statement (n<=2**(l+1)-2 && n<NODE_CNT),
-               // but VCS will issue warning about genvar is used at both sides
-               // of condition expression. WTF.
-               if (n < NODE_CNT)  begin
+         for (n=2**l-1; n<=2**(l+1)-2; n=n+1) begin
+            // node ID is bounded at NODE_CNT. 
+            // This check can also be put into 'for' statement (n<=2**(l+1)-2 && n<NODE_CNT),
+            // but VCS will issue warning about genvar is used at both sides
+            // of condition expression. WTF.
+            if (n < NODE_CNT)  begin
+               // - Current Level has no FF
+               if ( LV_PER_STAGE && 
+                    ((FF_START_POINT && (LEVEL_CNT-1-l)%LV_PER_STAGE) ||  // insert FF from lowest level
+                     (!FF_START_POINT && l%LV_PER_STAGE) )                // insert FF from top level
+                    ) begin
+                  always @(*) begin
+                     vld_w_ff[n]  = vld_w[n];
+                     key_w_ff[n]  = key_w[n];
+                     data_w_ff[n] = data_w[n];
+                  end
+               end
+               // - Insert FF
+               else begin
                   always @(posedge clk or negedge rst_n)
                     if (!rst_n) begin
                        vld_w_ff[n]  <= 1'b0;
@@ -196,11 +231,10 @@ module binary_aggregator_2d (clk, rst_n,
                        key_w_ff[n]  <= key_w[n];
                        data_w_ff[n] <= data_w[n];
                     end
-               end // if (n < NODE_CNT)
-            end // for (n=2**l-1; n<2**(l+1)-1; n=n+1)
-         end // else: !if( LV_PER_STAGE &&...
+               end // else: !if( LV_PER_STAGE &&...
+            end // if (n < NODE_CNT)
+         end // for (n=2**l-1; n<=2**(l+1)-2; n=n+1)
       end // for (l=LEVEL_CNT-1; l>=0; l=l-1)
-
    endgenerate
 
    // - * Module output

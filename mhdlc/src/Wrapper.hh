@@ -215,7 +215,7 @@ public:
   string mod_template_name;
   map<string, CCtrlValType*> mctrl;
   set<string> symbol_to_remove;
-
+  set<string> for_iter_var;
 
 private:
   inline CMHDLwrapper() {};

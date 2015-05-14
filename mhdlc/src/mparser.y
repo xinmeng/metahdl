@@ -956,6 +956,9 @@ balanced_stmt : ";"
   $11->AddRoccure(@11);
 
   $$ = new CStmtFOR( $3, $5, $7, $9, $11, $13);
+  CVariable *var = dynamic_cast<CVariable*> ($3);
+
+  mwrapper.for_iter_var.insert(var->Symb()->name);
   // mwrapper.warning(@$, "for-statment is now weakly supported in MetaHDL, better to use proprocessing directive `for.");
 }
 
@@ -1473,11 +1476,12 @@ legacyff_block : always_keyword "@" "(" "posedge" net_name "or" "negedge" net_na
    rst->Update(INPUT);
    rst->roccur.push_back(@8);
 
-   $$ = new CBlkLegacyFF (@$, clk, rst, $11);
+   $$ = new CBlkLegacyFF (@$, clk, rst, $11, mwrapper.for_iter_var);
    $$->GetSymbol();
    $$->SetDriver();
 
    mwrapper.in_sequential = false;
+   mwrapper.for_iter_var.clear();
 }
 //      1         2   3      4        5      6            7                        8
 | always_keyword "@" "(" "posedge" net_name ")" {mwrapper.in_sequential = true;} statement
@@ -1486,11 +1490,12 @@ legacyff_block : always_keyword "@" "(" "posedge" net_name "or" "negedge" net_na
    clk->Update(INPUT);
    clk->roccur.push_back(@5);
 
-   $$ = new CBlkLegacyFF (@$, clk, $8);
+   $$ = new CBlkLegacyFF (@$, clk, $8, mwrapper.for_iter_var);
    $$->GetSymbol();
    $$->SetDriver();
 
    mwrapper.in_sequential =false;
+   mwrapper.for_iter_var.clear();
 }
 ;
 
@@ -1499,9 +1504,10 @@ legacyff_block : always_keyword "@" "(" "posedge" net_name "or" "negedge" net_na
 ******************************/
 combinational_block : "always_comb" statement
 {
-  $$ = new CBlkComb (@$, $2);
-  $$->GetSymbol();
-  $$->SetDriver();
+    $$ = new CBlkComb (@$, $2, mwrapper.for_iter_var);
+    $$->GetSymbol();
+    $$->SetDriver();
+    mwrapper.for_iter_var.clear();
 }
 ; 
 
