@@ -1361,8 +1361,8 @@ variable_declaration : variable_type net_names ";"
     for (vector<string>::iterator iter = $2->begin();
 	 iter != $2->end(); ++iter) {
       CSymbol *symb = mwrapper.symbol_table->Insert( (*iter) );
-      symb->direction = NONPORT;
-      symb->io_fixed  = true;
+      // symb->direction = NONPORT;
+      // symb->io_fixed  = true;
       symb->is_2D = true;
       symb->length_msb = $4;
       symb->type = $1;
@@ -1407,8 +1407,8 @@ variable_declaration : variable_type net_names ";"
     for (vector<string>::iterator iter = $7->begin();
 	 iter != $7->end(); ++iter) {
       CSymbol *symb = mwrapper.symbol_table->Insert( (*iter) );
-      symb->direction = NONPORT;
-      symb->io_fixed  = true;
+      // symb->direction = NONPORT;
+      // symb->io_fixed  = true;
       symb->is_2D = true;
       symb->length_msb = $9;
       symb->type = $1;
