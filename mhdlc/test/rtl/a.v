@@ -1,39 +1,37 @@
 module a (
-  b, 
-  c, 
-  clk, 
-  rst_n);
+  din, 
+  dout, 
+  err, 
+  sel);
 
-parameter A = 3;
 
-input   [1   :0]  b;
-output  [1   :0]  c;
-input             clk;
-input             rst_n;
+input   [2   :0]  din[5   :0]  ;
+output  [2   :0]  dout;
+output            err;
+input   [5   :0]  sel;
 
-reg     [1   :0]  a;
-wire    [1   :0]  b;
-reg     [1   :0]  c;
-wire              clk;
-wire              i;
-wire              j;
-wire              rst_n;
+wire    [2   :0]  din[5   :0]  ;
+`ifdef FSDB_MDA_ENABLE
+// synopsys translate_off
+`FSDB_DUMP_BEGIN
+  `fsdbDumpMDA(din);
+`FSDB_DUMP_END
+// synopsys translate_on
+`endif
 
-always @(*)  begin
-  integer i
-  for (i = 0; i < A; i = i + 1)
-    a[i] = b;
-end
+wire    [2   :0]  dout;
+wire              err;
+wire    [5   :0]  sel;
 
-always @(posedge clk or negedge rst_n) begin
-  integer i;
-  integer j;
-  if ( !rst_n )
-    for (i = 0; i < 100; i = i + 1)
-      a[i] <= b[i];
-  else
-    for (j = 0; j < 100; j = j + 1)
-      c[j] <= a[i];
-end
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d (
+                                    .din (din),
+                                    .dout (dout),
+                                    .err (err),
+                                    .sel (sel)
+                                   );
 
 endmodule

@@ -790,6 +790,39 @@ ansi_port_declaration : port_direction var_type_opt net_name
   }
   
 }
+| port_direction var_type_opt "[" expression ":" expression "]" net_name "[" expression ":" expression "]"
+{
+  if ( !$6->IsConst() ) {
+    svwrapper.error(@6, "non-constant LSB in port declaration.");
+  }
+  else if ( $6->Value() != 0 ) {
+    svwrapper.warning(@5, "non-zero LSB can only confuse others, nothing more!");
+  }
+  else if ( ! $4->IsConst() ) {
+     svwrapper.error(@4, "non-constant MSB in port declaration.");
+  }
+  else if (!$10->IsConst()) {
+      svwrapper.error(@10, "non-constant MSB in length declaration.");
+  }
+  else {
+     CSymbol* symb = svwrapper.symbol_table->Insert( (*$8) );
+     symb->io_fixed  = true;
+     symb->direction = $1;
+     symb->width_fixed = true;
+     symb->msb         = $4;
+     symb->lsb         = $6;
+     symb->is_2D       = true;
+     symb->length_msb  = $10;
+
+     if ( svwrapper.io_table->Exist((*$8)) ) {
+	svwrapper.error(@$, "port " + (*$8) + " has already been declared." );
+     }
+     else {
+	svwrapper.io_table->Insert(symb);
+     }
+  }
+  
+}
 ;
 
 var_type_opt : 
@@ -854,6 +887,39 @@ port_declaration: port_direction var_type_opt net_names ";"
       }
     }
   }
+}
+| port_direction var_type_opt "[" expression ":" expression "]" net_name "[" expression ":" expression "]" ";"
+{
+  if ( !$6->IsConst() ) {
+    svwrapper.error(@6, "non-constant LSB in port declaration.");
+  }
+  else if ( $6->Value() != 0 ) {
+    svwrapper.warning(@5, "non-zero LSB can only confuse others, nothing more!");
+  }
+  else if ( ! $4->IsConst() ) {
+     svwrapper.error(@4, "non-constant MSB in port declaration.");
+  }
+  else if (!$10->IsConst()) {
+      svwrapper.error(@10, "non-constant MSB in length declaration.");
+  }
+  else {
+     CSymbol* symb = svwrapper.symbol_table->Insert( (*$8) );
+     symb->io_fixed  = true;
+     symb->direction = $1;
+     symb->width_fixed = true;
+     symb->msb         = $4;
+     symb->lsb         = $6;
+     symb->is_2D       = true;
+     symb->length_msb  = $10;
+
+     if ( svwrapper.io_table->Exist((*$8)) ) {
+	svwrapper.error(@$, "port " + (*$8) + " has already been declared." );
+     }
+     else {
+	svwrapper.io_table->Insert(symb);
+     }
+  }
+  
 }
 ; 
 

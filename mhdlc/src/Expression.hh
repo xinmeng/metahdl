@@ -249,7 +249,10 @@ public:
       }
     
       PrintWidth(os, msb, lsb);
-      os << name << ";" << endl;
+      os << name;
+      if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+      os << ";" << endl;
+      
     }
     os.width(0);
   }

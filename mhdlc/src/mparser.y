@@ -1975,6 +1975,10 @@ parameter_rule instance_name connection_spec ";"
 	 CSymbol *original_symb = mwrapper.symbol_table->Insert( symb_got->name );
 	 if ( !LEGACY_VERILOG_MODE ) original_symb->Update(LOGIC);
 	 original_symb->Update( symb_got->msb );
+         if (symb_got->is_2D) {
+             original_symb->is_2D = symb_got->is_2D;
+             original_symb->length_msb = symb_got->length_msb->ValueExp();
+         }
 	 original_symb->Update( iter->first->direction );
 	 original_symb->reference = iter->first;
 	 original_symb->roccur.insert(original_symb->roccur.end(), symb_got->roccur.begin(), symb_got->roccur.end() );
@@ -1986,6 +1990,10 @@ parameter_rule instance_name connection_spec ";"
 	 CSymbol *symb = mwrapper.symbol_table->Insert(symb_got->name);
 	 if ( !LEGACY_VERILOG_MODE ) symb->Update(LOGIC);
 	 symb->Update(symb_got->msb);
+         if (symb_got->is_2D) {
+             symb->is_2D = symb_got->is_2D;
+             symb->length_msb = symb_got->length_msb->ValueExp();
+         }
 	 //       if ( !symb->Update(iter->second->msb) ) {
 	 // 	mwrapper.warning(@$, "net " + symb->name + ": width is fixed by user declaration, cannot apply instantiation inferred value, potential error!!");
 	 //       }

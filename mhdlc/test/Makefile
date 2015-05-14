@@ -6,7 +6,7 @@ mhdl_opt   += -lmhdlc.log
 mhdl_src    = $(wildcard mhdl/*.mhdl)
 mhdl_incdir = mhdl
 mhdl_mbase  = mhdl
-mhdl_ibase  = 
+mhdl_ibase  = ip
 mhdl_rtldir = rtl
 
 .PHONY: test

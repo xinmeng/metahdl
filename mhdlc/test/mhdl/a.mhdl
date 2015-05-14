@@ -1,13 +1,1 @@
-parameter A =3 ;
-always_comb
-  for (i=0; i<A; i=i+1)
-    a[i] = b;
-   
-
-   always @(posedge clk or negedge rst_n)
-     if (!rst_n)
-       for (i=0; i<100; i=i+1)
-         a[i] <= b[i];
-     else
-       for (j=0; j<100; j=j+1)
-         c[j] <= a[i];
+one_hot_mux_2d #(3, 6);

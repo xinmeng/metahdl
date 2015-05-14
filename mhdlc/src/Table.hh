@@ -114,6 +114,8 @@ public:
 
 	     symbol->Update( _port[iter->first]->direction );
 	     symbol->reference = _port[iter->first];
+             symbol->is_2D = _port[iter->first]->is_2D;
+             symbol->length_msb = _port[iter->first]->length_msb;
 
 	     exp = new CVariable(symbol, var->Msb(), var->Lsb());
 
