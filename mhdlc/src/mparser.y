@@ -981,7 +981,10 @@ balanced_stmt : ";"
   }
 
   if ( $1->Width() < $3->Width() ) {
-    mwrapper.warning(@$, "Width mismatch in non-blocking assignment.");
+      ostringstream msg;
+      msg << "Width mismatch in non-blocking assignment, "
+          << $1->Width() << " vs. " << $3->Width() << ".";
+      mwrapper.warning(@$, msg.str());
   }
   $$ = new CStmtSimple ($1, $3, false);
 }
@@ -999,7 +1002,10 @@ balanced_stmt : ";"
   }
 
   if ( $1->Width() < $3->Width() ) {
-    mwrapper.warning(@$, "Width mismatch in blocking assignment.");
+      ostringstream msg;
+      msg << "Width mismatch in blocking assignment, "
+          << $1->Width() << " vs. " << $3->Width() << ".";
+      mwrapper.warning(@$, msg.str());
   }
   $$ = new CStmtSimple ($1, $3);
 }
@@ -1446,7 +1452,10 @@ variable_type : "wire" {$$ = WIRE;}
 assign_block : "assign" net_lval "=" expression ";" 
 {
   if ( $2->Width() < $4->Width() ) {
-    mwrapper.warning(@$, "Width mismatch in assign statement.");
+      ostringstream msg;
+      msg << "Width mismatch in assign statement, "
+          << $2->Width() << " vs. " << $4->Width() << ".";
+      mwrapper.warning(@$, msg.str());
   }
 
   $4->Update(INPUT);
