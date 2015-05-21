@@ -1,6 +1,7 @@
 %p 6000
 %e 2000
 %option debug
+%option stack
 %option outfile="vpp.flex.cc"
 %{
 
@@ -34,6 +35,7 @@ using namespace std;
 #include <ctype.h>
 #include <math.h>
 
+extern int DebugPPLexer;
 extern int fileno(FILE *);
 extern char ttid[]; /* From vpp.y */
 
@@ -86,7 +88,7 @@ char current_line[MAXNAME];
 int RecursiveMacroLevel =0;
 char *current_file;
 int output_line_directive;
-int cmnt_saved_state;
+int cmnt_saved_state, rawcode_saved_state;
 int tick_saved_state = -1;
 int incl_saved_state = -1;
 int include_state[MAX_INCLUDE_DEPTH];
@@ -118,30 +120,28 @@ MEM		\[[^;\n\]]*\]
 %%
 
 <INITIAL>"/*"		{cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(CMNT);}
-<INITIAL>^{WHITE}*rawcode{WHITE}*$ {cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(RAWCODE);}
+<INITIAL>^{WHITE}*rawcode{WHITE}*$ {fprintf(yyout, "%s",yytext);yy_push_state(RAWCODE);}
 
 <COPY>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
-<COPY>^{WHITE}*rawcode{WHITE}*$	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(RAWCODE);}
+<COPY>^{WHITE}*rawcode{WHITE}*$	{store_it(yytext,FALSE,FALSE);yy_push_state(RAWCODE);}
 
 <MPP>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);return TTCOMMENT2;}
-<MPP>^{WHITE}*rawcode{WHITE}*$	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(RAWCODE);}
+<MPP>^{WHITE}*rawcode{WHITE}*$	{store_it(yytext,FALSE,FALSE);yy_push_state(RAWCODE);}
 
 
 <RAWCODE>{NEWLINE} {fprintf(yyout, "%s",yytext);nl_count++;}
-<RAWCODE>^{WHITE}*endrawcode{WHITE}*$ {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
+<RAWCODE>^{WHITE}*endrawcode{WHITE}*$ {fprintf(yyout, "%s",yytext);yy_pop_state();}
 <RAWCODE>.         {fprintf(yyout, "%s",yytext);}
 
 
 <CMNT>{NEWLINE} 	{fprintf(yyout, "%s",yytext);nl_count++;}
 <CMNT>"/*" 		{fprintf(yyout, "%s",yytext);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CMNT>"*/" 		{fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
- /* <CMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}*/
 <CMNT>. 		{fprintf(yyout, "%s",yytext);}
 
 <CCMNT>{NEWLINE}	{store_it(yytext,FALSE,FALSE);nl_count++;}
 <CCMNT>"/*" 		{store_it(yytext,FALSE,FALSE);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CCMNT>"*/" 		{store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}
- /* <CCMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}*/
 <CCMNT>. 		{store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>"//".*$	{fprintf(yyout, "%s",yytext);}
@@ -375,6 +375,11 @@ MEM		\[[^;\n\]]*\]
 <SKIP_TO_EOL>.*$	{BEGIN(incl_saved_state);incl_saved_state = -1;}
 
 <<EOF>>		{
+    if (YY_START != INITIAL) {
+        fprintf(stderr, "VPP Error:%s:EOF at start condition %d.\n",
+                current_file, YY_START);
+        exit(1);
+    }
 		  if (!include_stack_ptr) yyterminate();
 		  else {
 		    --include_stack_ptr;
@@ -1287,27 +1292,55 @@ void
 set_to_vpp_mode()
 {
     last_mode = YY_START;
-    BEGIN(MPP);
+    yy_push_state(MPP);
+    if (DebugPPLexer)
+        fprintf(stderr, "%s:%d:set_to_vpp_mode:%d from %d\n",
+                current_file, nl_count, YY_START, last_mode);
+    // BEGIN(MPP);
 }
 
 void
 set_to_initial_mode()
 {
     last_mode = YY_START;
-    BEGIN(INITIAL);
+    yy_push_state(INITIAL);
+    if (DebugPPLexer)
+        fprintf(stderr, "%s:%d:set_to_initial_mode:%d from %d\n",
+                current_file, nl_count, YY_START, last_mode);
+    // BEGIN(INITIAL);
 }
 
 void
 set_to_copy()
 {
     last_mode = YY_START;
-    BEGIN(COPY);
+    yy_push_state(COPY);
+    if (DebugPPLexer)
+        fprintf(stderr, "%s:%d:set_to_copy:%d from %d\n",
+                current_file, nl_count, YY_START, last_mode);
+    // BEGIN(COPY);
 }
 
 void
 set_to_last_mode()
 {
-    BEGIN(last_mode);
+    last_mode = YY_START;
+    yy_pop_state();
+    if (DebugPPLexer) {
+        fprintf(stderr, "%s:%d:set_to_last_mode: %d from %d\n",
+                current_file, nl_count, YY_START, last_mode);
+        fprintf(stderr, "  INITIAL:%d\n", INITIAL);
+        fprintf(stderr, "  DEFINE:%d\n", DEFINE);
+        fprintf(stderr, "  MACRO:%d\n", MACRO);
+        fprintf(stderr, "  CMNT:%d\n", CMNT);
+        fprintf(stderr, "  CCMNT:%d\n", CCMNT);
+        fprintf(stderr, "  MPP:%d\n", MPP);
+        fprintf(stderr, "  COPY:%d\n", COPY);
+        fprintf(stderr, "  INCL:%d\n", INCL);
+        fprintf(stderr, "  SKIP_TO_EOL:%d\n", SKIP_TO_EOL);
+        fprintf(stderr, "  RAWCODE:%d\n", RAWCODE);
+    }
+//    BEGIN(last_mode);
 }
 
 /**************************************************************************

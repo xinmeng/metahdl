@@ -338,7 +338,7 @@ for_declaration : TTFOR {set_to_vpp_mode();}
 		}
 	;
 
-endfor_declaration : TTENDFOR {set_to_vpp_mode();} vpp_line_termination_opt
+endfor_declaration : TTENDFOR {set_to_last_mode();} vpp_line_termination_opt
 		{
 		    if (code_pointer != NULL)
 		      cstack = push(cstack, create_generic_ll(CODE_POINTER,NULL,
