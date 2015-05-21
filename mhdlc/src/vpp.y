@@ -350,7 +350,8 @@ endfor_declaration : TTENDFOR {set_to_vpp_mode();} vpp_line_termination_opt
 							    NULL)
 				  );
  		    else {
-		      fprintf(stderr,"ERROR : got an endfor without matching for!!!\n");
+                        yyerror("Error: got an endfor without matching for!!!\n");
+                        // fprintf(stderr, "Error: got an endfor without matching for!!!\n");
 		      exit(1);
 		    }
 		    
