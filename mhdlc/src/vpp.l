@@ -106,6 +106,7 @@ int include_state[MAX_INCLUDE_DEPTH];
 %x COPY
 %x INCL
 %x SKIP_TO_EOL
+%x RAWCODE
 
 WHITE		[ \t]
 NEWLINE		[\n]
@@ -117,25 +118,30 @@ MEM		\[[^;\n\]]*\]
 %%
 
 <INITIAL>"/*"		{cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(CMNT);}
-<INITIAL>^{WHITE}*rawcode{WHITE}*{NEWLINE} {cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(CMNT);}
+<INITIAL>^{WHITE}*rawcode{WHITE}*$ {cmnt_saved_state = YYSTATE;fprintf(yyout, "%s",yytext);BEGIN(RAWCODE);}
 
 <COPY>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
-<COPY>^{WHITE}*rawcode{WHITE}*{NEWLINE}	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
+<COPY>^{WHITE}*rawcode{WHITE}*$	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(RAWCODE);}
 
 <MPP>"/*"		{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);return TTCOMMENT2;}
-<MPP>^{WHITE}*rawcode{WHITE}*{NEWLINE}	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(CCMNT);}
+<MPP>^{WHITE}*rawcode{WHITE}*$	{cmnt_saved_state = YYSTATE;store_it(yytext,FALSE,FALSE);BEGIN(RAWCODE);}
+
+
+<RAWCODE>{NEWLINE} {fprintf(yyout, "%s",yytext);nl_count++;}
+<RAWCODE>^{WHITE}*endrawcode{WHITE}*$ {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
+<RAWCODE>.         {fprintf(yyout, "%s",yytext);}
 
 
 <CMNT>{NEWLINE} 	{fprintf(yyout, "%s",yytext);nl_count++;}
 <CMNT>"/*" 		{fprintf(yyout, "%s",yytext);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CMNT>"*/" 		{fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
-<CMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}
+ /* <CMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {fprintf(yyout, "%s",yytext);BEGIN(cmnt_saved_state);}*/
 <CMNT>. 		{fprintf(yyout, "%s",yytext);}
 
 <CCMNT>{NEWLINE}	{store_it(yytext,FALSE,FALSE);nl_count++;}
 <CCMNT>"/*" 		{store_it(yytext,FALSE,FALSE);/* fprintf(stderr,"WARNING : `/\*' within comment\n"); */}
 <CCMNT>"*/" 		{store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}
-<CCMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}
+ /* <CCMNT>^{WHITE}*endrawcode{WHITE}*{NEWLINE} {store_it(yytext,FALSE,FALSE);BEGIN(cmnt_saved_state);}*/
 <CCMNT>. 		{store_it(yytext,FALSE,FALSE);}
 
 <INITIAL>"//".*$	{fprintf(yyout, "%s",yytext);}
