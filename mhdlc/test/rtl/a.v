@@ -10,7 +10,7 @@ output  [2   :0]  dout;
 output            err;
 input   [5   :0]  sel;
 
-reg     [2   :0]  aa[5   :0]  ;
+wire    [2   :0]  aa[5   :0]  ;
 `ifdef FSDB_MDA_ENABLE
 // synopsys translate_off
 `FSDB_DUMP_BEGIN
@@ -27,11 +27,77 @@ one_hot_mux_2d #(
                  .WIDTH( 3 ),
                  .CNT( 6 ),
                  .ONE_HOT_CHECK( 0 )	 
-                ) x_one_hot_mux_2d (
-                                    .din (aa),
-                                    .dout (dout),
-                                    .err (err),
-                                    .sel (sel)
-                                   );
+                ) x_one_hot_mux_2d_1 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_2 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_3 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_4 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_5 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_6 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
+
+one_hot_mux_2d #(
+                 .WIDTH( 3 ),
+                 .CNT( 6 ),
+                 .ONE_HOT_CHECK( 0 )	 
+                ) x_one_hot_mux_2d_7 (
+                                      .din (aa),
+                                      .dout (dout),
+                                      .err (err),
+                                      .sel (sel)
+                                     );
 
 endmodule

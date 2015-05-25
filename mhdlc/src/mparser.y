@@ -1877,6 +1877,11 @@ inst_block :  ID // 1
 {
   mwrapper.mod_template = G_ModuleTable.Exist(*$1);
   mwrapper.mod_template_name = *$1;
+  if (mwrapper.mod_inst_cnt.count(*$1) > 0) 
+      mwrapper.mod_inst_cnt[*$1]++;
+  else 
+      mwrapper.mod_inst_cnt[*$1] = 1;
+
   if ( !mwrapper.mod_template ) {
     if ( mwrapper.HierDepth() > mwrapper.mctrl["hierachydepth"]->num ) {
       ostringstream tmp;
@@ -2075,7 +2080,14 @@ parameter_rule instance_name connection_spec ";"
 }
 ;
 
-instance_name : {$$ = new string ("x_" + mwrapper.mod_template_name);}
+instance_name : {
+    ostringstream name; 
+    name << "x_" 
+         << mwrapper.mod_template_name
+         << "_" 
+         << mwrapper.mod_inst_cnt[mwrapper.mod_template_name];
+    $$ = new string (name.str());
+}
 | ID {$$ = $1;}
 ;
 

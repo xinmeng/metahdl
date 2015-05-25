@@ -213,6 +213,7 @@ public:
   vector<CCodeBlock*> *code_blocks;
   CModule *mod_template;
   string mod_template_name;
+  map<string, int> mod_inst_cnt;
   map<string, CCtrlValType*> mctrl;
   set<string> symbol_to_remove;
   set<string> for_iter_var;
