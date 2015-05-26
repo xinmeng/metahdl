@@ -1,8 +1,6 @@
+assign dcbarb_tcqs_pop[7:0] = a && b ? 
+                              dcbarb_grant[7:0] : 8'd0;
+assign dcbarb_pop        = (|dcbarb_grant[7:0]);
 
-one_hot_mux_2d #(3, 6) (.din (aa));
-one_hot_mux_2d #(3, 6) (.din (aa));
-one_hot_mux_2d #(3, 6) (.din (aa));
-one_hot_mux_2d #(3, 6) (.din (aa));
-one_hot_mux_2d #(3, 6) (.din (aa));
-one_hot_mux_2d #(3, 6) (.din (aa));
+
 one_hot_mux_2d #(3, 6) (.din (aa));

@@ -585,14 +585,20 @@ private:
   CExpression *_msb, *_lsb;
 
 public:
-  inline CVariable( CSymbol *symbol) : 
-    _is_2D (false), _addr (NULL), _symbol (symbol), _msb (NULL), _lsb (NULL) {};
-
-  inline CVariable( CSymbol *symbol, CExpression *msb) : 
-    _is_2D (false), _addr (NULL), _symbol (symbol), _msb (msb), _lsb (NULL) {};
-
-  inline CVariable( CSymbol *symbol, CExpression *msb, CExpression *lsb) : 
-    _is_2D (false), _addr (NULL), _symbol (symbol), _msb (msb), _lsb (lsb) {};
+    inline CVariable( CSymbol *symbol, 
+                      CExpression *addr=NULL, 
+                      CExpression *msb=NULL, CExpression *lsb=NULL) :
+        _is_2D (symbol->is_2D), _symbol (symbol) {
+        if (_is_2D) {
+            _addr = addr;
+            _msb  = msb;
+            _lsb  = lsb;
+        }
+        else {
+            _msb = addr;
+            _lsb = msb;
+        }
+    }
 
   inline CVariable( bool is_2D, CSymbol *symb, CExpression *addr, CExpression *msb) : 
     _is_2D (is_2D), _addr (addr), _symbol (symb), _msb (msb), _lsb (NULL)  {}
@@ -602,25 +608,15 @@ public:
 
   inline bool IsConst() {return _symbol->is_const;}
   inline ulonglong Width() {
-     if ( _is_2D ) {
-	if ( _msb && _lsb ) {
-	   return _msb->Value() - _lsb->Value() + 1;
-	}
-	else {
-	   return 1;
-	}
-     }
-     else {
-	if ( _symbol->is_2D || !_msb ) {
-	   return _symbol->msb->Value() + 1;
-	}
-	else {
-	   if ( _msb && _lsb ) 
-	      return _msb->Value() - _lsb->Value() + 1;
-	   else
-	      return 1;
-	}
-     }
+      if ( _msb && _lsb ) {
+          return _msb->Value() - _lsb->Value() + 1;
+      }
+      else if (_msb) {
+          return 1;
+      }
+      else {
+          return _symbol->msb->Value() +1 ;
+      }
   }
 
   inline virtual double DoubleValue() {return _symbol->value->DoubleValue();}
@@ -656,7 +652,7 @@ public:
   inline void Print(ostream& os=cout) {
     os << _symbol->name;
 
-    if (_is_2D) {
+    if (_is_2D && _addr) {
       os << "[";
       _addr->Print(os);
       os << "]";

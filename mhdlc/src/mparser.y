@@ -2053,12 +2053,16 @@ parameter_rule instance_name connection_spec ";"
     }
 
     if ( iter->second ) {
-       if ( iter->first->msb->Value()+1 != iter->second->Width() ) {
-	  ostringstream buf;
-	  buf << "width mismatch on port \"" + iter->first->name + "\" connection, " 
-	      << iter->first->msb->Value()+1 << " vs. " << iter->second->Width();
-	  mwrapper.warning(@$, buf.str());
-       }
+        if ( iter->first->msb->Value()+1 != iter->second->Width() ) {
+            ostringstream buf;
+            buf << "width mismatch on port CExpression connection: \"" + iter->first->name + "\" " 
+                << "(" << iter->first->msb->Value()+1 << ") " << " vs. " 
+                << "\"";
+            iter->second->Print(buf);
+            buf << "\" " 
+                << "(" << iter->second->Width() << ")";
+            mwrapper.warning(@$, buf.str());
+        }
     }
   }
 
