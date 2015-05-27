@@ -2,5 +2,4 @@
 *.log
 gmon.out
 mhdlc/src/*.o
-
-
+mhdlc/test/rtl/*.v
