@@ -1200,6 +1200,71 @@ port_declaration: port_direction net_names ";"
     }
   }
 }
+| port_direction "[" expression ":" expression "]" net_name "[" expression ":" expression "]" ";"
+{
+    ostringstream msg;
+    
+    if ( ! $3->IsConst() ) {
+        msg << "non-constant MSB \"";
+        $3->Print(msg);
+        msg << "\" in port declaration.";
+        mwrapper.error(@3, msg.str());
+    }
+    else if ( !$5->IsConst()  ) {
+        msg << "non-constant LSB \"";
+        $5->Print(msg);
+        msg << "\" in port declaration.";
+        mwrapper.error(@5, msg.str());
+    }
+    else if ( $5->Value() != 0 ) {
+        msg << "non-zero LSB \"";
+        $5->Print(msg);
+        msg << "\" in port declaration.";
+        mwrapper.error(@11, msg.str());
+    }
+    else if ( ! $9->IsConst() ) {
+        msg << "non-constant MSB \"";
+        $9->Print(msg);
+        msg << "\" in 2D port declaration.";
+        mwrapper.error(@9, msg.str());
+    }
+    else if ( !$11->IsConst()  ) {
+        msg << "non-constant LSB \"";
+        $11->Print(msg);
+        msg << "\" in 2D port declaration.";
+        mwrapper.error(@11, msg.str());
+    }
+    else if ( $11->Value() != 0 ) {
+        msg << "non-zero LSB \"";
+        $11->Print(msg);
+        msg << "\" in 2D port declaration.";
+        mwrapper.error(@11, msg.str());
+    }
+    else {
+        CSymbol* symb = mwrapper.symbol_table->Insert( *$7 );
+        symb->io_fixed  = true;
+        symb->length_msb = $9;
+        symb->direction = $1;
+        if ( !symb->Update( $3 ) ) {
+            mwrapper.error(@$, "port " + *$7 + "'s MSB is smaller than that in code, or MSB is locked.");
+        }
+        if ( !symb->UpdateLSB( $5 ) ) {
+            mwrapper.error(@$, "port " + *$7 + "'s LSB is larger than that in code, or LSB is fixed.");
+        }
+
+        symb->width_fixed = true;
+        symb->is_2D     = true;
+
+        if ( mwrapper.io_table->Exist(*$7) ) {
+            mwrapper.error(@$, "port " + *$7 + " has already been declared." );
+        }
+        else {
+            if ( $1 != NONPORT ) {
+                mwrapper.io_table->Insert(symb);
+            }
+        }
+    }
+}
 ; 
 
 net_names : net_name 
@@ -1382,7 +1447,7 @@ variable_declaration : variable_type net_names ";"
 | variable_type "[" expression ":" expression "]" net_names "[" expression ":" expression "]" ";" 
 {
   if ( ! $3->IsConst() ) {
-    mwrapper.error(@3, "non-constant MSB in varialbe declaration.");
+    mwrapper.error(@3, "non-constant MSB in variable declaration.");
   }
   else if ( !$5->IsConst()  ) {
     mwrapper.error(@5, "non-zero/non-constant LSB in variable declaration.");
