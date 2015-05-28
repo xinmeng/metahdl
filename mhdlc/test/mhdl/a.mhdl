@@ -1,3 +1,9 @@
+always_comb
+  a = b[3:0];
+
+   always @(posedge clk or negedge rst_n)
+     {c, d} <= dd[5:0];
+
 assign dcbarb_tcqs_pop[7:0] = a && b ? 
                               dcbarb_grant[7:0] : 8'd0;
 assign dcbarb_pop        = (|dcbarb_grant[7:0]);

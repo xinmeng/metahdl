@@ -982,8 +982,11 @@ balanced_stmt : ";"
 
   if ( $1->Width() < $3->Width() ) {
       ostringstream msg;
-      msg << "Width mismatch in non-blocking assignment, "
-          << $1->Width() << " vs. " << $3->Width() << ".";
+      msg << "Width mismatch in non-blocking assignment, \"";
+      $1->Print(msg);
+      msg << "\" (" << $1->Width() << ") vs. \"";
+      $3->Print(msg);
+      msg << "\" (" << $3->Width() << ").";
       mwrapper.warning(@$, msg.str());
   }
   $$ = new CStmtSimple ($1, $3, false);
@@ -1003,8 +1006,12 @@ balanced_stmt : ";"
 
   if ( $1->Width() < $3->Width() ) {
       ostringstream msg;
-      msg << "Width mismatch in blocking assignment, "
-          << $1->Width() << " vs. " << $3->Width() << ".";
+      msg << "Width mismatch in blocking assignment, ";
+      $1->Print(msg);
+      msg << "\" (" << $1->Width() << ") vs. \"";
+      $3->Print(msg);
+      msg << "\" (" << $3->Width() << ").";
+
       mwrapper.warning(@$, msg.str());
   }
   $$ = new CStmtSimple ($1, $3);
