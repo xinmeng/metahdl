@@ -2159,9 +2159,10 @@ parameter_rule instance_name connection_spec ";"
 instance_name : {
     ostringstream name; 
     name << "x_" 
-         << mwrapper.mod_template_name
-         << "_" 
-         << mwrapper.mod_inst_cnt[mwrapper.mod_template_name];
+         << mwrapper.mod_template_name;
+    if (mwrapper.mod_inst_cnt[mwrapper.mod_template_name] > 1) 
+        name << "_" 
+             << mwrapper.mod_inst_cnt[mwrapper.mod_template_name];
     $$ = new string (name.str());
 }
 | ID {$$ = $1;}
