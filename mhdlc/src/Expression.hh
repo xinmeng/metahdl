@@ -598,13 +598,18 @@ public:
             _msb = addr;
             _lsb = msb;
         }
+        // cout << "VAR: " << _symbol->name << " created" << endl
+        //      << _is_2D << " vs. " << _symbol->is_2D << endl
+        //      << _addr << endl;
+        // Print(cout);
+        // cout << endl;
     }
 
-  inline CVariable( bool is_2D, CSymbol *symb, CExpression *addr, CExpression *msb) : 
-    _is_2D (is_2D), _addr (addr), _symbol (symb), _msb (msb), _lsb (NULL)  {}
+  // inline CVariable( bool is_2D, CSymbol *symb, CExpression *addr, CExpression *msb) : 
+  //   _is_2D (is_2D), _addr (addr), _symbol (symb), _msb (msb), _lsb (NULL)  {}
 
-  inline CVariable( bool is_2D, CSymbol *symb, CExpression *addr, CExpression *msb, CExpression *lsb) : 
-    _is_2D (is_2D), _addr (addr), _symbol (symb), _msb (msb), _lsb (lsb)  {}
+  // inline CVariable( bool is_2D, CSymbol *symb, CExpression *addr, CExpression *msb, CExpression *lsb) : 
+  //   _is_2D (is_2D), _addr (addr), _symbol (symb), _msb (msb), _lsb (lsb)  {}
 
   inline bool IsConst() {return _symbol->is_const;}
   inline ulonglong Width() {
@@ -717,6 +722,7 @@ public:
   inline bool Update(CExpression *msb) {return _symbol->Update(msb);}
 
   inline CSymbol* Symb() {return _symbol;}
+  inline CExpression* Addr() {return _addr;}
   inline CExpression* Msb() {return _msb;}
   inline CExpression* Lsb() {return _lsb;}
   inline void GetSymbol(set<CSymbol*> *st) {

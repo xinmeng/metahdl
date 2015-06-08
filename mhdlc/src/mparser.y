@@ -639,7 +639,7 @@ net : net_name "[" expression ":" expression "]"
       if ( !LEGACY_VERILOG_MODE ) {
 	symb->Update(LOGIC);
       }
-      $$ = new CVariable (true, symb, $3, $6);
+      $$ = new CVariable (symb, $3, $6);
    }
 }
 
@@ -697,7 +697,7 @@ net : net_name "[" expression ":" expression "]"
       if ( !LEGACY_VERILOG_MODE ) {
 	symb->Update(LOGIC);
       }
-      $$ = new CVariable (true, symb, $3, $6, $8);
+      $$ = new CVariable (symb, $3, $6, $8);
    }
 }
 
@@ -712,7 +712,7 @@ net : net_name "[" expression ":" expression "]"
 
     if ( !LEGACY_VERILOG_MODE ) {
       symb->Update(LOGIC);
-    }
+    } 
     $$ = new CVariable ( symb );
   }
 }
@@ -2073,7 +2073,10 @@ parameter_rule instance_name connection_spec ";"
 	 original_symb->reference = iter->first;
 	 original_symb->roccur.insert(original_symb->roccur.end(), symb_got->roccur.begin(), symb_got->roccur.end() );
 	 original_symb->loccur.insert(original_symb->loccur.end(), symb_got->loccur.begin(), symb_got->loccur.end() );
-	 (*connect_map)[iter->first] = new CVariable (original_symb, var->Msb(), var->Lsb() );
+         if (original_symb->is_2D) 
+             (*connect_map)[iter->first] = new CVariable (original_symb, var->Addr(), var->Msb(), var->Lsb() );
+         else 
+             (*connect_map)[iter->first] = new CVariable (original_symb, var->Msb(), var->Lsb() );
 	 mwrapper.symbol_to_remove.erase(symb_got->name);
       }
       else {
@@ -2107,7 +2110,10 @@ parameter_rule instance_name connection_spec ";"
 	    mwrapper.error(@$, "port \"" + iter->first->name + "\" has no direction?!");
 	 }
 
-	 (*connect_map)[iter->first] = new CVariable (symb, var->Msb(), var->Lsb() );
+         if (symb->is_2D)
+             (*connect_map)[iter->first] = new CVariable (symb, var->Addr(), var->Msb(), var->Lsb() );
+         else 
+             (*connect_map)[iter->first] = new CVariable (symb, var->Msb(), var->Lsb() );
       }
     }
     else {

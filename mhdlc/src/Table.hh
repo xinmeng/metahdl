@@ -114,10 +114,22 @@ public:
 
 	     symbol->Update( _port[iter->first]->direction );
 	     symbol->reference = _port[iter->first];
-             symbol->is_2D = _port[iter->first]->is_2D;
-             symbol->length_msb = _port[iter->first]->length_msb;
+             // here is a potential problem, if port is 2D,
+             // and variable should be LARGER than 2D.
+             // Need further revise.
+             if (_port[iter->first]->is_2D) {
+                 symbol->is_2D = _port[iter->first]->is_2D;
+                 symbol->length_msb = _port[iter->first]->length_msb;
+             }
+             else if (var_symb->is_2D) {
+                 symbol->is_2D = var_symb->is_2D;
+                 symbol->length_msb = var_symb->length_msb;
+             }
 
-	     exp = new CVariable(symbol, var->Msb(), var->Lsb());
+             if (symbol->is_2D)
+                 exp = new CVariable(symbol, var->Addr(), var->Msb(), var->Lsb());
+             else 
+                 exp = new CVariable(symbol, var->Msb(), var->Lsb());
 
 	     if ( var_symb == _port[iter->first] ) 
 		delete var_symb;
