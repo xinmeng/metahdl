@@ -1525,8 +1525,12 @@ assign_block : "assign" net_lval "=" expression ";"
 {
   if ( $2->Width() < $4->Width() ) {
       ostringstream msg;
-      msg << "Width mismatch in assign statement, "
-          << $2->Width() << " vs. " << $4->Width() << ".";
+      msg << "Width mismatch in assign statement, \"";
+      $2->Print(msg);
+      msg << "\" ("
+          << $2->Width() << ") vs. \""; 
+      $4->Print(msg);
+      msg << "\" (" << $4->Width() << ").";
       mwrapper.warning(@$, msg.str());
   }
 
