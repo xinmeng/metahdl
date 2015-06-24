@@ -686,6 +686,9 @@ GetOpt(int argc, char *argv[])
 //  PATHS.insert(PATHS.end(), M_DIRS.begin(), M_DIRS.end());
   M_DIRS.insert(M_DIRS.end(), PATHS.begin(), PATHS.end());
   I_DIRS.insert(I_DIRS.end(), PATHS.begin(), PATHS.end());
+
+  for (map<string,string>::iterator iter=MIRROR.begin(); iter != MIRROR.end(); iter++)
+      I_DIRS.push_back( iter->second);
   
   // if (WORKDIR[0] != '/' ) {
   //   s = getenv("PWD");
