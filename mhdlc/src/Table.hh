@@ -153,19 +153,19 @@ public:
     for (map<string, CSymbol*>::iterator iter = _port.begin();
 	 iter != _port.end(); ++iter) {
       symbol = new CSymbol( iter->second->name, 
-        		    iter->second->msb->ValueExp(),
+        		    iter->second->msb,
         		    iter->second->direction,
         		    iter->second );
 
         if (iter->second->is_2D)
             _connect_map[iter->first] = new CVariable (symbol, 
-                                                       symbol->length_msb, 
+                                                       symbol->length_msb/*, 
                                                        symbol->msb, 
-                                                       symbol->lsb );
+                                                       symbol->lsb*/ );
         else
-            _connect_map[iter->first] = new CVariable (symbol, 
+            _connect_map[iter->first] = new CVariable (symbol/*, 
                                                        symbol->msb, 
-                                                       symbol->lsb );
+                                                       symbol->lsb*/ );
 
     }
   }

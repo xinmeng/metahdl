@@ -233,7 +233,7 @@ public:
     is_const (false), is_local (false), value (NULL),  reference (reference_)  {
       is_2D = reference_->is_2D;
       if (reference_->is_2D)
-          length_msb = reference_->length_msb->ValueExp();
+          length_msb = reference_->length_msb;
       else 
           length_msb = NULL;
   }    
