@@ -230,8 +230,13 @@ public:
   inline CSymbol(const string &name_, CExpression* msb_, tDirection direction_, CSymbol* reference_) :
     name (name_), msb (msb_), lsb (CONST_NUM_0), direction (direction_), type (WIRE),
     type_fixed (false), io_fixed (false), width_fixed (false), 
-    is_2D (false), length_msb (NULL),
-    is_const (false), is_local (false), value (NULL),  reference (reference_)  {}    
+    is_const (false), is_local (false), value (NULL),  reference (reference_)  {
+      is_2D = reference_->is_2D;
+      if (reference_->is_2D)
+          length_msb = reference_->length_msb->ValueExp();
+      else 
+          length_msb = NULL;
+  }    
 
 
 
