@@ -580,7 +580,7 @@ net : net_name "[" expression ":" expression "]"
 	      << "Non-constant first index of 2D array could be out of range, "
 	      << num->Value() << ">" << symb->length_msb->Value() << ", "
 	      << "check your declaration." << endl;
-	  mwrapper.warning(@3, msg.str());
+	  // mwrapper.warning(@3, msg.str());
 	}
       }
       else {
@@ -619,7 +619,7 @@ net : net_name "[" expression ":" expression "]"
 	      << ", Non constant for 1st index in 2-D arrary, could be out of range, " 
 	      << num->Value() << " > " << symb->length_msb->Value();
 	  
-	  mwrapper.warning( @3, msg.str() );
+	  // mwrapper.warning( @3, msg.str() );
 	}
       }
       else {
@@ -628,7 +628,7 @@ net : net_name "[" expression ":" expression "]"
 	 }
       }
       if ( ! $6->IsConst() ) {
-	 mwrapper.warning( @6, "Non constant for 2nd index in 2-D arrary, could be out of range." );
+          // mwrapper.warning( @6, "Non constant for 2nd index in 2-D arrary, could be out of range." );
       }
       else {
 	 if ( $6->Value() > symb->msb->Value() ) {
@@ -668,7 +668,7 @@ net : net_name "[" expression ":" expression "]"
 	      << ", Non constant for 1st index in 2-D arrary, could be out of range, " 
 	      << num->Value() << " > " << symb->length_msb->Value();
 	  
-	  mwrapper.warning( @3, msg.str() );
+	  // mwrapper.warning( @3, msg.str() );
 	}
       }
       else {
