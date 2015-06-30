@@ -487,51 +487,52 @@ net : net_name "[" expression ":" expression "]"
     mwrapper.error(@$, "segment selection from parameter is not supported.");
   }
   else {
-    if ( $3->IsConst() && $5->IsConst() ) {
-        if ($3->Value() < $5->Value()) {
-            ostringstream msg;
-            msg << "MSB (" << $3->Value() << ") "
-                << "LSB (" << $5->Value() << "), "
-                << "not allowed.";
-            mwrapper.error(@1, msg.str());
-        }
-
-       $3->Update(INPUT);
-       $3->AddRoccure(@3);
-       $5->Update(INPUT);
-       $5->AddRoccure(@5);
-
       CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
-      if ( $3->Value() >= symb->msb->Value() ) {
-	if ( !symb->Update($3) ) {
-            ostringstream msg;
-            msg << "MSB \"";
-            $3->Print(msg);
-            msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->msb->Value() 
-                << ", check your declaration.";
-            mwrapper.error(@3, msg.str());
-	}
-      }
+      if ( $3->IsConst() && $5->IsConst() ) {
+          if ($3->Value() < $5->Value()) {
+              ostringstream msg;
+              msg << "MSB (" << $3->Value() << ") "
+                  << "LSB (" << $5->Value() << "), "
+                  << "not allowed.";
+              mwrapper.error(@1, msg.str());
+          }
 
-      if ( $3->Value() < symb->lsb->Value() ) {
-	if ( !symb->UpdateLSB($3) ) {
-            ostringstream msg;
-            msg << "LSB \"";
-            $3->Print(msg);
-            msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->lsb->Value() 
-                << ", check your declaration.";
-            mwrapper.error(@3, msg.str());
-	}
-      }
+          $3->Update(INPUT);
+          $3->AddRoccure(@3);
+          $5->Update(INPUT);
+          $5->AddRoccure(@5);
 
-      if ( !LEGACY_VERILOG_MODE ) {
-	symb->Update(LOGIC);
+          // CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
+          if ( $3->Value() >= symb->msb->Value() ) {
+              if ( !symb->Update($3) ) {
+                  ostringstream msg;
+                  msg << "MSB \"";
+                  $3->Print(msg);
+                  msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->msb->Value() 
+                      << ", check your declaration.";
+                  mwrapper.error(@3, msg.str());
+              }
+          }
+
+          if ( $3->Value() < symb->lsb->Value() ) {
+              if ( !symb->UpdateLSB($3) ) {
+                  ostringstream msg;
+                  msg << "LSB \"";
+                  $3->Print(msg);
+                  msg << "\" of \"" << *$1 << "\" exceed fixed value " << symb->lsb->Value() 
+                      << ", check your declaration.";
+                  mwrapper.error(@3, msg.str());
+              }
+          }
+
+          if ( !LEGACY_VERILOG_MODE ) {
+              symb->Update(LOGIC);
+          }
+      }
+      else {
+          mwrapper.warning(@$, "non-constant segment selection boundary.");
       }
       $$ = new CVariable ( symb, $3, $5);
-    }
-    else {
-      mwrapper.error(@$, "non-constant segment selection boundary.");
-    }
   }
 }
 
@@ -648,7 +649,11 @@ net : net_name "[" expression ":" expression "]"
 {
    CSymbol *symb = mwrapper.symbol_table->Insert( *$1 );
    if ( ! symb->is_2D ) {
-      mwrapper.error(@$, "2-D array syntax used, but variable is ordinary net." );
+       ostringstream msg;
+       msg << "2-D array syntax used, but \"" 
+           << *$1 << "\" is oridnary net.";
+       
+       mwrapper.error(@$, msg.str() );
    }
    else {
       $3->Update(INPUT);

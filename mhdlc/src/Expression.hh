@@ -636,9 +636,10 @@ public:
       return _symbol->value->Value();
     }
     else {
-      cerr << "**MHDL Internal Error:Unable to get value from a variable:";
-      Print(cerr);
-      exit(1);
+        return 1;
+      // cerr << "**MHDL Internal Error:Unable to get value from a variable:";
+      // Print(cerr);
+      // exit(1);
     }
   }
   
