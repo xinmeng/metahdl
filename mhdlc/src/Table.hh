@@ -157,15 +157,16 @@ public:
         		    iter->second->direction,
         		    iter->second );
 
-        if (iter->second->is_2D)
-            _connect_map[iter->first] = new CVariable (symbol, 
-                                                       symbol->length_msb/*, 
-                                                       symbol->msb, 
-                                                       symbol->lsb*/ );
-        else
-            _connect_map[iter->first] = new CVariable (symbol/*, 
-                                                       symbol->msb, 
-                                                       symbol->lsb*/ );
+      _connect_map[iter->first] = new CVariable (symbol);
+        // if (iter->second->is_2D)
+        //     _connect_map[iter->first] = new CVariable (symbol/*, 
+        //                                                symbol->length_msb, 
+        //                                                symbol->msb, 
+        //                                                symbol->lsb*/ );
+        // else
+        //     _connect_map[iter->first] = new CVariable (symbol/*, 
+        //                                                symbol->msb, 
+        //                                                symbol->lsb*/ );
 
     }
   }
