@@ -1,0 +1,22 @@
+`include "b.mhdl"
+
+
+
+
+`ifndef XXXX
+xxxx
+`else
+  jiejgie
+`endif
+
+`define x b
+
+`define func1(a, b, c=23) a, b c `x `x "literal string" `"expand a b c" \
+                      a``_``b``_``c \
+                      `uve_debug(jiejg iejgi jeigjjeigj iejg)
+
+`xxx--
+
+`for (`i=0; `i<`cnt; `i++)
+ `let j = `i
+`endfor

@@ -1,0 +1,116 @@
+#+TITLE: MetaHDL Compiler Design (Python Implementation)
+
+* Motivation
+** Flex/Bison/C++ 
+  The original Flex/Bison/C++ implementation of ~mhdlc~ has following
+  drawbacks. And the python implemention is design to overcome 
+  these issues:
+  1. Preprocessor is integrated from 3rd, which doesn't support recursive
+     macro expansion. And ~`for~ support is poor (missing ~`endfor~ will 
+     always need pain debug).
+  2. Logging and message printing is not sophisticated enough. There are 
+     too many ~cout/cerr~ usages. It is tediou to replace all of them. 
+  3. ~generate~ block is not supported 
+  4. MDA more then 2 is not supported, ~[ A +: B]~ style syntax is
+     not supported.
+  5. Verilog function is not supported. 
+  6. ~mhdlc~ is one-pass architecture, but in some cases (such as 
+     function call support), two-pass is needed. 
+
+** ply/Python
+   This implementation use ~ply~ as parser generator. Major advantages
+   are:
+   1. Support multiple start-symbol, so multiple parser can be generated
+      from single file.
+   2. All parsing are done over string object. No input buffer is involved.
+      It is easier for module connections between pre-processor, lexer, and
+      parser. 
+   
+
+* Features
+** Preprocessor
+   Verilog ~generate~ can almost fit into all ~`for~ scenarios, but
+   for historical reason, designers want ~`for~ syntax to be reserved. 
+   On the other hand, ~`for~ can be a a fallback solution when ~generete~
+   can't be used. 
+
+   ~`foreach~ will be added to provide iteration in non-numeric items. 
+   It will be useful when instantiating different functional modules 
+   that have same interface. 
+
+*** Parse-Expand Mode
+    To support ~`for~ and ~`let~, the preprocessor directives should be 
+    treated as CFG. There should be a parser to process body of ~`for~ 
+    and expression of ~`let~. Value of ordinary macros (that are created 
+    by ~`define~) is flatterned in the same way as ~`let~ to support 
+    recursive expansion. In such implementation, macro body are not allowed
+    to contain perimitive directives (~`if~, ~`for~, etc) that can change 
+    the structure of source code. For example, 
+    #+BEGIN_SRC verilog
+   `define a `ifdef XX \
+               0       \
+             `else     \
+               1       \
+             `endif
+   `a
+    #+END_SRC
+    In this example, expansion of ~`a~ will add a conditional statement into
+    current source which will change the existing Abstract Syntax Tree in 
+    parser. Since parse works in parse-expand order, the newly expanded 
+    conditional statement will not be parsed again.
+
+*** Inline Expand Mode   
+    To support above style, preprocessor works in inline expand mode. The
+    macro the expanded macros are expand immediately after read, the expanded
+    text are pushed back to input data buffer, for recursive expansion. 
+    In this mode, ~`for~ and ~`let~ are not supported. 
+    
+** Debug and Log system
+   Both ~ply.lex()~ and ~ply.yacc()~ support debug switch and logging 
+   object parsing. When command line option indicates debug on it, 
+   logging object is passed to it. Similar mechanism is used for 
+   ~parser.parse()~. 
+** Self-spawned Parsing is not supported
+   C++ version of mhdlc supports self-spawned parsing to create module 
+   from same mhdl source on the fly, as shown below:
+   #+BEGIN_SRC verilog
+     // - * CoS
+     // - Select command tag from 64 \gls{qe}s and
+     // - push into \gls{cdmgr} based on QoS policy.
+     metahdl parse -DCOS_Q_CNT=8 -DQ_OFFSET=0 -DCT=sk -DMETRIC=1 -F cosarb.mhdl;
+     skcosarb;
+
+     metahdl parse -DCOS_Q_CNT=4 -DQ_OFFSET=16 -DCT=pk -DMETRIC=0 -F cosarb.mhdl ;
+     pkcosarb;
+   #+END_SRC
+   Compared to parameter implementation, the only benefit is the generated module 
+   can have different ports. Other than that, it is replacable with parameter 
+   implementation. If such feature is really desired, it can be worked around by
+   adding extra dependency in makefile to build the module prior to the parsing. 
+
+* Architecture
+  In SVparser, only module header, IO ports and parameters are recoganized. 
+  IO ports and parameters are sub-sets of MHDLparser, module header can be 
+  handled with a different starting symbol. So SVparser and MHDLparser can 
+  share same CFG.
+  1. mhdlc
+     1. DirFile for searching and creating files 
+     3. MPPparser
+        1. mhdlc reference to access DirFile
+        2. plexMPP
+        3. pyaccMPP
+     4. MHDLparser
+        1. mhdlc reference to access DirFile and MPPparser
+        2. plexMHDL
+        3. pyaccMHDL
+     5. SVparser
+        1. mhdlc reference to access DirFile and MPPparser
+        2. plexSV
+        3. pyaccMHDL with different starting symbol
+* Formal Syntax 
+  #+BEGIN_SRC bnf
+    a ::= 
+          | ieg
+          | eigh
+          | "iieg"
+  #+END_SRC
