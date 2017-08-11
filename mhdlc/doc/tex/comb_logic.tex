@@ -1,0 +1,39 @@
+Tow code blocks can be used to describe combinational logic:
+\begin{itemize}
+\item \texttt{always\_comb} code block
+\item \texttt{assign} statement
+\end{itemize}
+Different from \vlog{} or \vlog{} 2000, \sv{} introduces \texttt{always\_comb}
+keywords and eliminates sensitivity list, which simplifies combinational logic 
+coding a lot. \mhdl{} \emph{only} supports \texttt{always\_comb} style procedure
+assignment, legacy \vlog{} or \vlog{} 2000 with sensitivity list are not recognized. 
+\mhdl{} also supports \texttt{assign} continuous assignment to describe simple combinational
+logic. \autoref{lst:comb example} demonstrates legal and illegal combinational logic code
+in \mhdl{}.
+\begin{lstlisting}[caption={Combinational logic examples}, label={lst:comb example}]
+// /*\textcolor{green}{OK, accepted} */
+always_comb 
+  if ( enabled ) 
+    o1 = i1 | i2 | i3;
+  else 
+    o1 = 1'b0;
+
+// /*\textcolor{green}{OK, accepted}*/
+assign o2 = cond ? i1 : i2;
+
+// /*\textcolor{red}{Illegal, wrong!!}*/
+// /*\textcolor{red}{conventional Verilog}*/
+always @( i1 or i2 or i3 )
+  if ( enabled ) 
+    o1 = i1 | i2 | i3;
+  else 
+    o1 = 1'b0;
+
+// /*\textcolor{red}{Illegal, wrong!!}*/
+// /*\textcolor{red}{Verilog 2000 is not accepted, neither}*/
+always @(*)
+  if ( enabled ) 
+    o1 = i1 | i2 | i3;
+  else 
+    o1 = 1'b0;
+\end{lstlisting}

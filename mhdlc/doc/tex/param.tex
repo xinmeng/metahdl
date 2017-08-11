@@ -1,0 +1,161 @@
+\mhdl{} enables designers to creates parameterized module in two ways: 
+\begin{itemize}
+\item Write parameterized module from draft.
+\item Build parameterized module from existing parameterized modules. 
+\end{itemize}
+
+Designers declare parameters, and use them in ports or net index. \mhdlc{} 
+will automatically parameterize ports in generated declarations. If a module 
+to be instantiated is a parameterized module, \mhdlc{} can trace parameter usage
+in port connections and automatically parameterize wrapper module. 
+
+%% template part
+  \begin{minipage}[t]{.5\textwidth}
+    \vspace{0pt}
+    \begin{minipage}{\textwidth}
+      \begin{lstlisting}[caption={\texttt{modc} in \mhdl{}}, label={lst:modc in mhdl}]
+parameter A = 4;
+parameter B = 5; 
+parameter C = A + B;
+
+assign o1[C-1:0] = {~i1[A-1:0], i2[B-1:0]};
+      \end{lstlisting}
+    \end{minipage}
+
+    \begin{minipage}{\textwidth}
+      \begin{lstlisting}[caption={\texttt{modc} in \sv{}}, label={lst:modc in sv}]
+module modc (
+  i1, 
+  i2, 
+  o1);
+
+parameter A = 4;
+parameter B = 5;
+parameter C = 4 + 5;
+
+input [A - 1:0] i1;
+input [B - 1:0] i2;
+output [C - 1:0] o1;
+
+logic [A - 1:0] i1;
+logic [B - 1:0] i2;
+logic [C - 1:0] o1;
+
+// /tmp/xin_meng/mhdlc/test/modc.mhdl:5.0-42
+assign o1[C - 1:0] = {~i1[A - 1:0], i2[B - 1:0]};
+
+endmodule
+      \end{lstlisting}
+    \end{minipage}
+  \end{minipage}
+  \begin{minipage}[t]{.5\textwidth}
+    \vspace{2ex}
+    \autoref{lst:modc in mhdl} is a parameterized module to be instantiated. 
+    Three parameters are defined in it, in which \texttt{C} depends on other two.
+
+    \autoref{lst:modc in sv} is the generated \sv{} 
+    code, all ports are parameterized which fits designers' intend pretty well.
+  \end{minipage}
+
+
+%% instance part
+\autoref{lst:modd in mhdl} is a wrapper module named `modd' that 
+contains three instantiations of modc with different
+parameter settings. `modd' itself is parameterized by two parameters, this 
+example demonstrates the automatic parameterization through instantiation.
+
+First instance only overrides value of \texttt{A} via named override. 
+Second instance uses positioned override to set values of \texttt{A} and \texttt{B}, 
+parameters in wrapper module are used. 
+Third instance only overrides value of \texttt{A} via named override, 
+parameters in wrapper module are used. 
+
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={Instantiation}, label={lst:modd in mhdl}]
+parameter SETA = 8,
+          SETB = 9;
+
+
+modc #( A = 2 ) x0_modc ( x0_ + );
+
+modc #( SETA, SETB ) x1_modc ( x1_ + );
+
+modc #( A = SETA ) x2_modc (x2_ +,
+                           .o1 (x2_o1[10:0]));
+\end{lstlisting}
+
+\autoref{lst:modd in sv} is the generated \sv{} from \autoref{lst:modd in mhdl}.
+
+First instance is configured by constant, new nets created by prefix rule are not
+parameterized. 
+
+In second instance, \texttt{A} and \texttt{B} are override by parameters in wrapper
+module, \texttt{C} is untouched. To preserve the parameter dependency in \texttt{modc}, 
+compiler will record parameter usage and propagated the dependency to the wrapper module. 
+So port \verb|x1_o1| is parameterized to \verb|x1_o1[SETA+SETB-1]|, which captures designers'
+intent perfectly. 
+
+Third instance is a mixture of parameter override and constant override. Besides, port 
+\verb|o1| is explicitly connected to \verb|x2_o1[10:0]|. In this case, compiler will not 
+parameterize \verb|x2_o1|. 
+\end{minipage}
+\hspace{1ex}
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={SV Instantiation}, label={lst:modd in sv}]
+module modd ( 
+// port list...
+);
+
+parameter SETA = 8;
+parameter SETB = 9;
+
+input [1:0] x0_i1;
+input [4:0] x0_i2;
+output [6:0] x0_o1;
+input [SETA - 1:0] x1_i1;
+input [SETB - 1:0] x1_i2;
+output [SETA + SETB - 1:0] x1_o1;
+input [SETA - 1:0] x2_i1;
+input [4:0] x2_i2;
+output [10:0] x2_o1;
+
+// variable declarations...
+
+// /tmp/xin_meng/mhdlc/test/modd.mhdl:5.0-33
+modc #(
+       2,	// A
+       5,	// B
+       2 + 5	// C
+      ) x0_modc (
+                 .o1 (x0_o1),
+                 .i1 (x0_i1),
+                 .i2 (x0_i2)
+                );
+
+// /tmp/xin_meng/mhdlc/test/modd.mhdl:7.0-38
+modc #(
+       SETA,	// A
+       SETB,	// B
+       SETA + SETB	// C
+      ) x1_modc (
+                 .o1 (x1_o1),
+                 .i1 (x1_i1),
+                 .i2 (x1_i2)
+                );
+
+// /tmp/xin_meng/mhdlc/test/modd.mhdl:9.0-10.18
+modc #(
+       SETA,	// A
+       5,	// B
+       SETA + 5	// C
+      ) x2_modc (
+                 .o1 (x2_o1[10:0]),
+                 .i1 (x2_i1),
+                 .i2 (x2_i2)
+                );
+
+endmodule
+\end{lstlisting}
+\end{minipage}
+

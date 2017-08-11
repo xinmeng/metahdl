@@ -1,0 +1,16 @@
+// simplest instantiation
+moda;
+
+
+// prefix rule
+moda x1_moda ( x1_ +);
+
+// suffix rule
+// after prefix rule
+moda x2_moda ( x2_ + , /*\label{ln:inst 2}*/
+               + _22);
+
+
+// Perl compatible regexp
+moda x3_moda ( "s/o/out/g", 
+               "s/i/in/g" );

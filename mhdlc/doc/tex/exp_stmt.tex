@@ -1,0 +1,18 @@
+Just as \vlog{}, \sv{} or C/C++, \emph{expression}\index{expression}
+is the bottom level language elements, it
+constructs \emph{statement}\index{statement}, statement then
+constructs code blocks\index{code block} which ultimately constructs
+module. Expression is the same as that in synthesizable \vlog{}
+or \sv{}. Expression is recursively defined in BNF, prime expressions
+are net and constant, which leads out of the recursion.
+
+Statement is built upon expression through assignment, conditional
+control or repetition. Empty statement is also allowed in \mhdl{},
+since it does not make any sense, warning is popped when empty
+statement is encountered. `if-else', `case', `for' statements are
+supported, `goto' statement is newly added for state transition (refer
+to \autoref{sec:syntax.fsm}).
+
+Since \mhdl{} inherits \sv{} syntax, rules for expression and
+statements are same as that in \sv{}, refer to \autoref{sec:bnf} for
+complete rule list. 

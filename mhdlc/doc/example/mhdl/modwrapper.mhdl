@@ -1,0 +1,10 @@
+parameter SETA = 8,
+          SETB = 9;
+
+
+modc #( .A(2) ) x0_modc ( x0_ + );
+
+modc #( SETA, SETB ) x1_modc ( x1_ + );
+
+modc #( .A(SETA) ) x2_modc (x2_ +,
+                           .o1 (x2_o1[10:0]));

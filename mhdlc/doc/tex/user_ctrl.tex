@@ -1,0 +1,147 @@
+\mhdl{} provides control syntax start with keyword ``\texttt{metahdl}'', 
+which interfaces with \mhdlc{} and controls the runtime behavior of compiler. 
+Designers' controls are passed to compiler via variable assignments embedded 
+in RTL code, this variable settings are also preceded by keyword \texttt{metahdl}.
+Boolean variables inside compiler are set via $+$/$-$ preceded by variable name, 
+where $+$ means ``enable'' and $-$ means ``disable''. 
+There are two special form of control syntax: exit syntax, and echo syntax. 
+The former is used to command compiler exit when the statement is encountered. 
+The latter is used to print messages on \texttt{stderr}. They are usually used 
+with preprocessor to guarantee correct configuration settings. 
+Refer to \autoref{sec:bnf} for detailed formal syntax.
+
+Working scope of all variables can be \emph{Modular}\index{modular variable} or \emph{Effective}\index{effective variable}. 
+Modular variables (MVAR)\index{MVAR} take effect on entire module and are used when parsing is finished. 
+Designers can set MVAR anywhere in source code and get the same 
+effect. If an MVAR is assigned multiple times, last assignment wins. 
+MVAR can have different values in different files, so file is
+the minimum granularity of MVAR.
+
+Effective variables (EVAR)\index{EVAR} take effect from the point the variable is assigned
+and are used \emph{during} parsing. Designers can set different values for same EVAR in different
+sections of source code, and make compiler treat sections differently. So the minimum granularity 
+of EVAR is section divided by EVAR assignments.
+
+\section{Variable List}
+Following is the complete list of all compiler variables can be assigned by user control 
+syntax, variable type (boolean or string) and variable scope (MVAR or EVAR)  are listed
+with variable name. 
+
+\varline{modname}{MVAR}{string}{Base file name}{
+Set the generated module name. Often used with preprocessor to 
+distinguish modules with different configurations. 
+}
+
+\varline{outfile}{MVAR}{string}{Base file name}{
+Set the generated \sv{} file base name. Often used with preprocessor to 
+distinguish module definition files with different configurations. }
+
+\varline{portchk}{MVAR}{boolean}{false}{
+Enable/Disable port validation for module.
+}
+
+\varline{hierachydepth}{MVAR}{positive int}{300}{
+Maximum level of module instantiation. 
+}
+
+\varline{clock}{EVAR}{string}{clock}{
+Default clock name used for \texttt{ff\_block} and \texttt{fsm\_block}.
+}
+
+\varline{reset}{EVAR}{string}{reset\_n}{
+Default reset name used for \texttt{ff\_block} and \texttt{fsm\_block}.
+}
+
+\varline{multidriverchk}{MVAR}{boolean}{true}{
+Enable/Disable multiple driver checking for module. 
+}
+
+\varline{relexedfsm}{EVAR}{boolean}{true}{
+Set severity of connectivity/reachability error checked in FSM. 
+If it is true, relaxed FSM programming mode is enabled, 
+all dead states or unreachable states are acceptable, compiler
+only reports warning when such states are encountered, and continues processing.  
+if it is false, FSM programming is in strict mode, any dead state or
+unreachable state is considered to be fatal error, compiler will report error
+and stop processing if such state is checked. 
+}
+
+\varline{exitonwarning}{EVAR}{boolean}{false}{
+Set severity of \emph{normal parsing warning}, such as width mismatch. 
+If it is true, compiler exits on any warning. 
+}
+
+\varline{exitonlintwarning}{MVAR}{boolean}{false}{
+Warning from port validation, multiple driver checking are categorized 
+as lint warning. If this variable is set to true, compiler will exit
+on any lint warning. 
+}
+
+\section{Example}
+\autoref{lst:top wrapper} demonstrates  user control syntax with 
+code configuration. 
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={Demo Top Wrapper}, label={lst:top wrapper}]
+metahdl + portchk; /*\label{ln:portchk}*/
+
+/*\`{}\textcolor{purple}{if}*/ WIDTH > 64 /*\label{ln:chk width}*/
+metahdl ``width can not exceed 64!'';
+metahdl exit;
+/*\`{}\textcolor{purple}{endif}*/
+
+assign data[/*\`{}\textcolor{purple}{WIDTH}*/-1:0] = /*\`{}\textcolor{purple}{WIDTH}*/'d0;
+
+/*\`{}\textcolor{purple}{ifdef}*/ FPGA
+/*\`{}\textcolor{purple}{define}*/ target fpga
+/*\`{}\textcolor{purple}{else}*/
+/*\`{}\textcolor{purple}{define}*/ target asic
+/*\`{}\textcolor{purple}{endif}*/
+
+metahdl modname = top_/*\`{}\textcolor{purple}{target}*/; /*\label{ln:modname}*/
+metahdl outfile = top_/*\`{}\textcolor{purple}{target}*/; /*\label{ln:outfile}*/
+
+metahdl + exitonwarning; /*\label{ln:exitonwarning on}*/
+
+metahdl clock = clk_125M; 
+metahdl reset = pclk_rst_n; 
+ /*\label{ln:sec1 b}*/
+ff;
+  a_ff, a, 1'b0; 
+  b_ff[1:0], b, 1'b0;
+endff
+/*\label{ln:sec1 e}*/
+metahdl - exitonwarning; /*\label{ln:exitonwarning off}*/
+
+metahdl clock = clk_250M;
+metahdl reset = dclk_rst_n;
+/*\label{ln:sec2 b}*/
+ff; 
+  c_ff, c, 1'b0;
+  d_ff, d, 1'b0;
+endff
+
+ff; 
+  e_ff, e, 1'b0;
+  g_ff, g, 1'b0;
+endff /*\label{ln:sec2 e}*/
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{.5\textwidth}
+\vspace{2ex}
+Line \autoref{ln:portchk} enables port validation 
+in this module. 
+
+Line \autoref{ln:chk width} checks value of macro \texttt{WIDTH}, 
+forces compilation exit upon illegal values. 
+
+Line \autoref{ln:modname} and \autoref{ln:outfile} alter \sv{} module name and
+output file name according to target device. 
+
+Any warning between \autoref{ln:exitonwarning on} and \autoref{ln:exitonwarning off} makes 
+compiler exit. To be more specific, width mismatch between \verb|b_ff| and \verb|b| is considered
+to be fatal error. 
+
+Different clock and reset names are used for different code sections, section \autoref{ln:sec1 b}-\autoref{ln:sec1 e}, 
+section \autoref{ln:sec2 b}-\autoref{ln:sec2 e}.
+\end{minipage}

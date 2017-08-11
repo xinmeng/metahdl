@@ -1,0 +1,59 @@
+\gls{mhdl} is an \gls{hdl} aims at synthesizable digital VLSI designs (commonly 
+known as \gls{rtl} designs). \gls{mhdl} selectively inherits \gls{sv}
+syntax, eliminates unnecessary variants, extends existing
+synthesizable language structures and adds new grammars to simplify
+RTL coding. Designers will find it quite intuitive and flexible when
+using \gls{mhdl}. A compiler named \gls{mhdlc} is
+implemented to translate \gls{mhdl} to \gls{sv} or \gls{v}.  
+
+\section{Features}
+\begin{enumerate}
+\item Comprehensive Preprocessor
+\item Flexible declarations
+\item Port inference and automatic variable declarations
+\item Enhanced instantiation syntax
+\item New syntax for \gls{ff} and \gls{fsm}
+\item Parameter tracing
+\item Automatic dependency resolving
+\item Lightweight lint checking
+\item Independent Verilog Parser to support IP integration
+\item Rich user control syntax
+\item Re-indent the generated \gls{sv}/\gls{v}
+\end{enumerate}
+
+\section{Document Organization}
+In the reset of this manual, \gls{mhdl} syntax and usage will be
+documented in detail, following is the organization of this document:
+\begin{itemize}
+\item \autoref{sec:basic concepts} gives many basic and important concepts
+behind \gls{mhdl}. All readers are expected to read this chapter
+carefully, otherwise, later chapters are difficult to understand.
+\item \autoref{sec:syntax} gives major syntax explanations and sample codes. 
+After reading this chapter, readers can develop complex chips with
+powerful capabilities provided by \gls{mhdl}.
+\item \autoref{sec:pp} describes preprocessor in \gls{mhdlc} and
+  support directives. Designers can 
+achieve script-like code configurations by using this build-in
+preprocessor, instead of writing dozens of one-time scripts.
+\item \autoref{sec:user control} lists various user control
+  variables that alter compiler execution. 
+\item \autoref{sec:flow} describes mechanism and operation flow of \gls{mhdlc}.
+\item \autoref{sec:command line opt} documents all 
+  command line options accepted by \gls{mhdlc}.
+\item \autoref{sec:for vperl} provides additional information for those who originally use \gls{vperl}\cite{Yan2004}
+for daily coding. Differences with \gls{vperl} are summarized there.
+\item \autoref{sec:bnf} is the complete formal syntax of \gls{mhdl}.
+\end{itemize}
+
+\section{Download}
+\gls{mhdlc} is publically available at \url{http://metahdl.googlecode.com}.
+This document is built from \LaTeX{} sources which are distributed with \gls{mhdlc}
+source code. 
+
+\section{Bug Report}
+If you find any bug of \gls{mhdlc}, ambiguous contents or typo in this
+document, please contact author via
+\href{mailto:\DocAuthor}{\DocAuthor}, thanks!
+
+
+

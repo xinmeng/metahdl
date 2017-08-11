@@ -1,0 +1,56 @@
+\documentclass[10pt,oneside]{book}
+
+\usepackage[MXTheme]{MXBookEN}
+%% ------------------------------
+%%   Document Properties
+%% ------------------------------
+\renewcommand{\DocTitle}{MetaHDL Reference Manual}
+\renewcommand{\DocDescription}{A user guide to syntax and compiler usage}
+\renewcommand{\DocAuthor}{xinmeng@hotmail.com}
+\renewcommand{\DocRevision}{2.0}
+
+\makeglossaries
+\usepackage{glossary-mhdl}
+%%\loadglsentries[main]{glossary-mhdl.sty}
+
+
+%% ------------------------------
+%%   Document
+%% ------------------------------
+\begin{document}
+\input{MXCover.tex}
+\frontmatter
+\tableofcontents
+%% \listoftables
+%% \listoffigures
+%% \lstlistoflistings
+\mainmatter
+\chapter{Introduction}\label{sec:intro}\input{intro.tex}
+\part{Language Reference}
+\chapter{Basic Concepts}\label{sec:basic concepts}\input{concepts.tex}
+\chapter{Syntax}\label{sec:syntax}\input{syntax.tex}
+%% \chapter{Preprocessor}\label{sec:pp}\input{pp.tex}
+%% \chapter{User Control}\label{sec:user control}\input{user_ctrl.tex}
+
+\part{Compiler Usage}
+%% \chapter{Compilation Flow}\label{sec:flow}\input{flow.tex}
+%% \chapter{Command Line Options}\label{sec:command line opt}\input{cmd_opt.tex}
+
+\part{Appendix}
+\appendix
+\setglossarysection{chapter}
+\printglossary[nonumberlist=true, style=altlist, type=main]
+
+%% \chapter{For \vperl{} Designers}\label{sec:for vperl}\input{for_vperl.tex}
+
+\clearpage
+\refstepcounter{chapter}
+\addcontentsline{toc}{chapter}{Bibliography}  
+\label{sec:bib}\bibliography{library}
+\bibliographystyle{plainurl}
+
+\chapter{Formal Syntax}\label{sec:bnf}\input{formal_syntax.tex}
+\chapter{Change Log}\input{chg_log.tex}
+
+\refstepcounter{chapter}\printindex\addcontentsline{toc}{chapter}{Index} 
+\end{document}

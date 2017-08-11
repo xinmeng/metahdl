@@ -1,0 +1,82 @@
+parameter W_WIDTH = 32;
+parameter A_WIDTH = 16;
+
+parameter W_CNT          = 3;
+parameter WRITABLE_W_CNT = 1;
+
+
+slave_word_access #(A_WIDTH, 16'd0) 
+rd_wa_0 (.clk (clk), .rst_n (rst_n),
+	 .ack_comb (ack_comb), .abort (abort), 
+	 .address  (address),  .request (rd_req), 
+	 .external_ack (), 
+	 .qualified_req (rd_word_0), 
+	 .qualified_ack (rd_word_0_ack)
+	 );
+
+
+slave_word_access #(A_WIDTH, 16'd4, 1)
+rd_wa_4 (.clk (clk), .rst_n (rst_n),
+	 .ack_comb (ack_comb), .abort (abort), 
+	 .address  (address),  .request (rd_req), 
+	 .external_ack (ext_mem_rd_ack), 
+	 .qualified_req (rd_word_4), 
+	 .qualified_ack (rd_word_4_ack)
+	 );
+
+slave_word_access #(A_WIDTH, 16'd4, 1)
+wr_wa_4 (.clk (clk), .rst_n (rst_n),
+	 .ack_comb (ack_comb), .abort (abort), 
+	 .address  (address),  .request (wr_req), 
+	 .external_ack (ext_mem_wr_ack), 
+	 .qualified_req (sp0_wr_word_4), 
+	 .qualified_ack (wr_word_4_ack)
+	 );
+
+
+
+slave_word_access #(A_WIDTH, 16'd5, 1)
+rd_wa_5 (.clk (clk), .rst_n (rst_n),
+	 .ack_comb (ack_comb), .abort (abort), 
+	 .address  (address),  .request (rd_req), 
+	 .external_ack (ext_mem_rd_ack), 
+	 .qualified_req (rd_word_5), 
+	 .qualified_ack (rd_word_5_ack)
+	 );
+
+
+
+// aggregate all ack signal together
+assign all_acks[W_CNT+WRITABLE_W_CNT-1:0] = {rd_word_0_ack, rd_word_4_ack, wr_word_4_ack, rd_word_5_ack};
+slave_ack #(W_CNT+WRITABLE_W_CNT)
+slave_ack (.clk (clk), .rst_n (rst_n), 
+	   .all_acks (all_acks), 
+	   .ack_comb (ack_comb), .ack (ack)
+	   );
+
+
+// aggreates all rd_word_* and sp*_word_*
+assign all_words[W_WIDTH*W_CNT-1:0] = {sp0_word_5[W_WIDTH-1:0], 
+				       sp0_word_4[W_WIDTH-1:0], 
+				       sp0_word_0[W_WIDTH-1:0]};
+assign rd_words[W_CNT-1:0] = {rd_word_5, rd_word_4, rd_word_0};
+slave_mux #(W_WIDTH, W_CNT)
+slave_mux (.clk (clk), .rst_n (rst_n),
+	   .all_words (all_words), .rd_words (rd_words), 
+	   .rd_data (rd_data)
+	   );
+
+
+
+// flop out for field usage
+output sp0_wr_data, sp0_address;
+always_ff @(posedge clk or negedge rst_n)
+  if (!rst_n) begin
+     sp0_wr_data[W_WIDTH-1:0] <= {W_WIDTH{1'b0}};
+     sp0_address[A_WIDTH-1:0] <= {A_WIDTH{1'b0}};
+  end
+  else begin
+     sp0_wr_data[W_WIDTH-1:0] <= wr_req ? wr_data[W_WIDTH-1:0] : sp0_wr_data[W_WIDTH-1:0];
+     sp0_address[A_WIDTH-1:0] <= rd_req || wr_req ? address[A_WIDTH-1:0] : sp0_address[A_WIDTH-1:0];
+  end
+   

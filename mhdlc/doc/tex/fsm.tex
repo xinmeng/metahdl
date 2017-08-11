@@ -1,0 +1,122 @@
+FSM\index{FSM} in conventional RTL design requires many
+constant/parameter definitions to make code readable. But these
+definitions are hard to maintain during develop iteration, especially
+for one-hot encoded FSM. \mhdl{} introduces \emph{symbol based} FSM
+programming paradigm that liberates designers from such frustrated
+situation.
+
+fsm\_block\footnote{If you still don't know what is fsm\_block, I
+guess you need to print out
+\autoref{sec:bnf} and look up non-terminals in it when spotted.}
+is enclosed by keywords `fsm' and `endfsm'. Note that `fsm'
+line \emph{must} end with semi-colon, just as \sv{} `sequence' or
+`property' blocks. `fsm' is followed by three identifiers: FSM name,
+clock name, and reset name. FSM name is used as based name of state
+register, `\_cs' and `\_ns' suffix are appended to FSM name to create
+current state register and next state next state register,
+respectively. clock and reset names are used in sequential block of
+FSM, which resets state register and perform current state
+refreshing. clock and reset names can be omitted together, and default
+name `clock' and `reset\_n' will be used. State transition explicitly
+stated by `goto' keyword, instead of next state assignment.
+
+Symbol based FSM programming allows designers to code FSM using
+state names, one-hot state encodings are automatically generated
+by \mhdlc{}. Constant definitions are generated according to state
+names to improve code readability. To help designers eliminate state
+name typo, \mhdlc{} will build a directed graph representing state
+transition during parsing, to check the connectivity of every state. Dead
+states and unreachable states are reported to designers for
+confirmation. \autoref{lst:fsm in mhdl} is \mhdl{} FSM description,
+\autoref{lst:fsm in sv} is the corresponding \sv{} description, including
+constant definition. 
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[caption={FSM in \mhdl}, label={lst:fsm in mhdl}]
+fsm cmdrx, clk, rst_n;
+
+  cm_pim_ack = 1'b0;
+  
+  IDLE: begin
+    if ( pim_cm_req ) begin
+      cm_pim_ack = 1'b1;
+      goto DATA;
+    end
+    else begin
+      goto IDLE;
+    end
+  end
+
+  DATA: begin
+    cm_pim_ack = 1'b1;
+    if ( pim_cm_eof ) begin
+      cm_pim_ack = 1'b0;
+      goto IDLE;
+    end
+    else begin
+      goto DATA;
+    end
+  end
+
+endfsm
+\end{lstlisting}
+\end{minipage}
+\hspace{1ex}
+\begin{minipage}[t]{.5\textwidth}
+\begin{lstlisting}[caption={FSM in \sv}, label={lst:fsm in sv}]
+// other declarations...
+const logic [1:0] DATA = 2'b10;
+const logic [1:0] IDLE = 2'b01;
+const int _DATA_ = 1;
+const int _IDLE_ = 0;
+
+// Sequential part of 
+// FSM /tmp/xin_meng/mhdlc/test/a.mhdl:1.0-25.5
+// /tmp/xin_meng/mhdlc/test/a.mhdl:1.0-25.5
+always_ff @(posedge clk or negedge rst_n)
+  if (~rst_n) begin
+    cmdrx_cs <= IDLE;
+  end
+  else begin
+    cmdrx_cs <= cmdrx_ns;
+  end
+
+// Combnational part of
+// FSM /tmp/xin_meng/mhdlc/test/a.mhdl:1.0-25.5
+// /tmp/xin_meng/mhdlc/test/a.mhdl:1.0-25.5
+always_comb begin
+  cm_pim_ack = 1'b0;
+  unique case ( 1'b1 )
+    cmdrx_cs[_IDLE_] : begin
+      if ( pim_cm_req ) begin
+        cm_pim_ack = 1'b1;
+        cmdrx_ns = DATA;
+      end
+      else begin
+        cmdrx_ns = IDLE;
+      end
+    end
+
+    cmdrx_cs[_DATA_] : begin
+      cm_pim_ack = 1'b1;
+      if ( pim_cm_eof ) begin
+        cm_pim_ack = 1'b0;
+        cmdrx_ns = IDLE;
+      end
+      else begin
+        cmdrx_ns = DATA;
+      end
+    end
+
+    default: begin
+      cmdrx_ns = 2'hX;
+    end
+  endcase
+end
+\end{lstlisting}
+\end{minipage}
+
+As shown in \autoref{lst:fsm in sv}, `fsm\_block' is expanded to two blocks: sequential 
+and combinational. The former resets state register, the latter calculates next state and 
+controls output. Combinational part of FSM is implemented in `unique case' statement, a bunch 
+of constants are defined to hold state value and hot bit index. 
