@@ -1,9 +1,0 @@
-*~
-*.log
-*.out
-mhdlc/src/*.o
-mhdlc/test/rtl/*.v
-python/mhdlc/MPPyacc_table.py
-python/mhdlc/parsetab.py
-__pycache__/
-doc/UML/*.bak
