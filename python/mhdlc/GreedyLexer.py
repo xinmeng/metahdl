@@ -27,26 +27,26 @@ AP.add_argument('--debug-gl-lexer', '--dgll', action='append',
                 help='List regex pattern of lexer names to show debug information')
 
 
-enable_gl_debug = False
-dbg_tr    = []
-dbg_sc    = []
-dbg_lexer = []            
-dbg_ib    = []
+ENABLE_GL_DEBUG = False
+DBG_TR    = []
+DBG_SC    = []
+DBG_LEXER = []            
+DBG_IB    = []
 
 def Setup(args):
-    global enable_gl_debug
-    global dbg_tr
-    global dbg_sc
-    global dbg_lexer
-    global dbg_ib
-    enable_gl_debug = args.enable_gl_debug
-    dbg_tr    = args.dbg_tr
-    dbg_sc    = args.dbg_sc
-    dbg_lexer = args.dbg_lexer
-    dbg_ib    = args.dbg_ib
+    global ENABLE_GL_DEBUG
+    global DBG_TR
+    global DBG_SC
+    global DBG_LEXER
+    global DBG_IB
+    ENABLE_GL_DEBUG = args.enable_gl_debug
+    DBG_TR    = args.dbg_tr
+    DBG_SC    = args.dbg_sc
+    DBG_LEXER = args.dbg_lexer
+    DBG_IB    = args.dbg_ib
 
 def DebugEnabled(name, name_patterns):
-    if enable_gl_debug:
+    if ENABLE_GL_DEBUG:
         for p in name_patterns:
             mo = re.search(p, name, re.I)
             if mo:
@@ -101,7 +101,7 @@ class InputLine():
         
     def __str__(self):
         if self.EOF:
-            return "<EOF> on {}".format(self.text)
+            return "{}:<<EOF>>".format(self.pos)
         else:
             return "{}:'{}'".format(self.pos, self.text)
 
@@ -118,7 +118,7 @@ class InputBuffer:
         self.EOF      = False
 
     def __str__(self):
-        return self.name
+        return "{}".format(self.name)
 
     def GetLine(self):
         if not self.text:
@@ -141,7 +141,7 @@ class InputBuffer:
         self.column += length
 
         msg = "step {}, column:{}->{}, text:'{}' -> '{}'"
-        if DebugEnabled(self.name, dbg_ib):
+        if DebugEnabled(self.name, DBG_IB):
             self.logger.debug(msg.format(length,
                                          col_prev,  self.column,
                                          text_prev, self.text.replace('\n', r'\n')))
@@ -156,10 +156,7 @@ class FileInputBuffer(InputBuffer):
     def __init__(self, path):
         self.path   = path
         self.fh     = self.path.open()
-        InputBuffer.__init__(self, str(self.path), iter(self.fh))
-
-    def __str__(self):
-        return "{}".format(self.path)
+        InputBuffer.__init__(self, "FIB:"+str(self.path), iter(self.fh))
 
     def ReachEOF(self):
         pass
@@ -169,7 +166,7 @@ class StringInputBuffer(InputBuffer):
     def __init__(self, name, text):
         self.name  = name
         self.lines = text.splitlines()
-        InputBuffer.__init__(self, 'StringIB:'+name, iter(self.lines))
+        InputBuffer.__init__(self, 'SIB:'+name, iter(self.lines))
 
 
 class Token:
@@ -195,9 +192,9 @@ class Token:
     def __add__(self, token):
         if self.type is None:
             return Token(token.type,
-                                    token.value,
-                                    token.length,
-                                    token.location)
+                         token.value,
+                         token.length,
+                         token.location)
         else:
             if self.type == token.type:
                 if self.location.end + 1 == token.location.start:
@@ -241,7 +238,7 @@ class TokenRule:
             location = Location(line.pos, end_pos)
             token = Token(self.type, mo.group(0), length, location)
             token = self.PostAction(token)
-            if DebugEnabled(self.name, dbg_tr):
+            if DebugEnabled(self.name, DBG_TR):
                 self.logger.debug("'{}' -> '{}'".format(mo.group(0), token.value))
         else:
             token = Token()
@@ -293,7 +290,7 @@ class StartCondition:
             self.logger.error("No token rule matched at {}".format(line))
             raise NoTokenRuleMatched()
         else:
-            if DebugEnabled(self.name, dbg_sc):
+            if DebugEnabled(self.name, DBG_SC):
                 self.logger.debug('winner token:{}'.format(token))
             return token
 
@@ -332,13 +329,13 @@ class GLexer:
         sc_name_prev = self.curr_sc.name
         self.sc_stack.append(self.curr_sc)
         self.curr_sc = self.all_sc[sc_name]
-        if DebugEnabled(self.name, dbg_lexer):
+        if DebugEnabled(self.name, DBG_LEXER):
             self.logger.debug("push <{}>, switch to <{}>".format(sc_name_prev, sc_name))
 
     def PopSC(self):
         sc_name_prev = self.curr_sc.name
         self.curr_sc = self.sc_stack.pop()
-        if DebugEnabled(self.name, dbg_lexer):
+        if DebugEnabled(self.name, DBG_LEXER):
             self.logger.debug("pop <{}>, switch to <{}>".format(sc_name_prev, self.curr_sc.name))
 
     def SetInput(self, input_buffer):
@@ -347,10 +344,10 @@ class GLexer:
     def PushInput(self, input_buffer):
         if self.curr_input is not None:
             self.input_stack.append(self.curr_input)
-            if DebugEnabled(self.name, dbg_lexer):
+            if DebugEnabled(self.name, DBG_LEXER):
                 self.logger.debug("push current ib:{}".format(self.curr_input))
         self.curr_input = input_buffer
-        if DebugEnabled(self.name, dbg_lexer):
+        if DebugEnabled(self.name, DBG_LEXER):
             self.logger.debug("switch to ib:{}".format(input_buffer))
 
     def PopInput(self):
@@ -376,7 +373,7 @@ class GLexer:
                 self.curr_input.Step(token.length)
                 token = self.curr_sc.PostTokenAction(token)
                 break
-        if token is not None and DebugEnabled(self.name, dbg_lexer):
+        if token is not None and DebugEnabled(self.name, DBG_LEXER):
             self.logger.debug("return token:{}".format(token))
         return token
 
