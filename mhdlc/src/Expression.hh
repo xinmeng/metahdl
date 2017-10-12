@@ -280,19 +280,19 @@ public:
 	switch (type) {
 	case REG:
             os << "reg ";
-            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
             PrintWidth(os, msb, lsb);
             break;
 
 	case WIRE:
             os << "wire ";
-            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
             PrintWidth(os, msb, lsb);
             break;
 
 	case LOGIC:
             os << "logic ";
-            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+            if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
             PrintWidth(os, msb, lsb);
             break;
             
@@ -313,9 +313,24 @@ public:
       os.width(8);
       os << left;
       switch (type) {
-      case REG:     os << "reg "; PrintWidth(os, msb, lsb); break;
-      case WIRE:    os << "wire "; PrintWidth(os, msb, lsb); break;
-      case LOGIC:   os << "logic "; PrintWidth(os, msb, lsb); break;
+      case REG:
+          os << "reg ";
+          if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
+          PrintWidth(os, msb, lsb);
+          break;
+          
+      case WIRE:
+          os << "wire ";
+          if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
+          PrintWidth(os, msb, lsb);
+          break;
+
+      case LOGIC:
+          os << "logic ";
+          if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
+          PrintWidth(os, msb, lsb);
+          break;
+          
       case INT:     os << "int "; break;
       case INTEGER: os << "integer "; break; 
       }
@@ -323,7 +338,7 @@ public:
 
       os << name;
 
-      if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+      // if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
 
       if (is_const ) {
 	os << " = ";
@@ -432,9 +447,10 @@ public:
 
 
 private:
-  inline void PrintWidth(ostream &os, CExpression* msb_, CExpression* lsb_) {
+    inline void PrintWidth(ostream &os, CExpression* msb_, CExpression* lsb_,
+                           bool high_dimension=false) {
     // avoid declaring 1-bit signal in [0:0] style
-    if ( msb_->Value() == 0 && !msb_->HasParam() ) {
+    if ( msb_->Value() == 0 && !msb_->HasParam() && !high_dimension ) {
       os << "          ";
     }
     else {
