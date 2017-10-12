@@ -1,6 +1,6 @@
 release =
 
-ifeq ($(HOST),debian)
+ifeq ($(shell hostname),debian9)
 FLEX = flex
 BISON= bison
 else

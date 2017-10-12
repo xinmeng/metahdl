@@ -889,7 +889,7 @@ port_declaration: port_direction var_type_opt net_names ";"
     }
   }
 }
-| port_direction var_type_opt "[" expression ":" expression "]" "[" expression ":" expression "]" net_name  ";"
+| port_direction var_type_opt "[" expression ":" expression "]" "[" expression ":" expression "]" net_names  ";"
   // 1           2            3   4          5   6          7   8   9          10  11         12  13
 {
   if ( !$6->IsConst() ) {
@@ -905,23 +905,25 @@ port_declaration: port_direction var_type_opt net_names ";"
       svwrapper.error(@9, "non-constant MSB in length declaration.");
   }
   else {
-     CSymbol* symb = svwrapper.symbol_table->Insert( (*$13) );
-     symb->io_fixed  = true;
-     symb->direction = $1;
-     symb->width_fixed = true;
-     symb->msb         = $9;
-     symb->lsb         = $11;
-     symb->is_2D       = true;
-     symb->length_msb  = $4;
+      for (vector<string>::iterator iter = $13->begin();
+           iter != $13->end(); ++iter) {
+          CSymbol* symb = svwrapper.symbol_table->Insert( (*iter) );
+          symb->io_fixed  = true;
+          symb->direction = $1;
+          symb->width_fixed = true;
+          symb->msb         = $9;
+          symb->lsb         = $11;
+          symb->is_2D       = true;
+          symb->length_msb  = $4;
 
-     if ( svwrapper.io_table->Exist((*$13)) ) {
-	svwrapper.error(@$, "port " + (*$13) + " has already been declared." );
-     }
-     else {
-	svwrapper.io_table->Insert(symb);
-     }
+          if ( svwrapper.io_table->Exist((*iter)) ) {
+              svwrapper.error(@$, "port " + (*iter) + " has already been declared." );
+          }
+          else {
+              svwrapper.io_table->Insert(symb);
+          }
+      }           
   }
-  
 }
 ; 
 

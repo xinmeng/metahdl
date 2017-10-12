@@ -57,7 +57,7 @@ typedef struct names
    } names;
 
 void store_it(char *str, int subst, int expand_define);
-int hash(char *text);
+int vpphash(char *text);
 int delete_entry(names *table[], char *macro_name, int hashval);
 void add_macro(names *table[], char *macro_name, int hashval, char *text, char *parms);
 void store_lines();
@@ -409,7 +409,7 @@ MEM		\[[^;\n\]]*\]
 <MPP>"ODD"	{return TTODD;}
 
 <INITIAL,COPY>`{NAME}	{
-   int hashval = hash(yytext+1);
+   int hashval = vpphash(yytext+1);
    names *np = lookup_define(Defines_Table,yytext+1,hashval);
    if (np != 0 && np->parms != 0) {
       yyless(yyleng);
@@ -594,7 +594,7 @@ store_it(char *str1, int subst, int expand_define)
 	     * First check to see if it is a `define.  If it is,
 	     * then we DON'T convert it.  Otherwise, we do convert it.
 	     */
-	    if ((np = lookup_define(Defines_Table, str+1,hash(str+1)))) {
+	    if ((np = lookup_define(Defines_Table, str+1,vpphash(str+1)))) {
 		if (expand_define) {
 		    code_pointer->tail->ll_type = CODE_POINTER;
 		    code_pointer->tail->item =
@@ -662,7 +662,7 @@ store_define(char *def_text)
     txt_ptr = ptr;
     while (*txt_ptr == ' ' || *txt_ptr == '\t') ++txt_ptr;
 
-    hashval = hash(macro_name);
+    hashval = vpphash(macro_name);
 
     /*
      * First, see if the name has previously been stored.
@@ -680,7 +680,7 @@ store_define(char *def_text)
 
 /**************************************************************************
  *
- * Function Name : int hash()
+ * Function Name : int vpphash()
  * Parameters :
  *	char *text - text you wish to get hash value of
  * Purpose :
@@ -689,7 +689,7 @@ store_define(char *def_text)
  *
  **************************************************************************/
 int
-hash(char *text)
+vpphash(char *text)
 {
     int i, sum = 0;
     for(i=0; text[i] != '\0'; i++) sum += text[i];
@@ -971,7 +971,7 @@ get_macro_value(char *name)
    tmp = strpbrk(name, "(");
    if (tmp != 0)
       strg[tmp-name] = '\0';
-   np = lookup_define(Defines_Table, strg, hash(strg));
+   np = lookup_define(Defines_Table, strg, vpphash(strg));
    if (np != 0) {
       if (set_macro_values(np->parms, tmp) < 0) {
 	 fprintf(stderr,"ERROR : wrong number of parameters for `%s\n",np->macro_name);
@@ -1065,7 +1065,7 @@ print_variable(char *name, int expand_define)
     tmp = strpbrk(name, "(");
     if (tmp != 0)
 	strg[tmp-name] = '\0';
-    np = lookup_define(Defines_Table, strg, hash(strg));
+    np = lookup_define(Defines_Table, strg, vpphash(strg));
     if (np != 0) {
 	if (expand_define) {
 	    if (set_macro_values(np->parms, tmp) < 0) {
@@ -1218,7 +1218,7 @@ get_define_value(char *name, double *dval)
 {
     names *np;
 
-    if ((np=lookup_define(Defines_Table,name,hash(name)))) {
+    if ((np=lookup_define(Defines_Table,name,vpphash(name)))) {
 	*dval = np->value;
 	return 0;
     }
@@ -1278,7 +1278,7 @@ undef_macro(char *def_text)
     txt_ptr = (char *) (strstr(def_text, "undef") + strlen("undef"));
     sscanf(txt_ptr, "%s", macro_name);
 
-    hashval = hash(macro_name);
+    hashval = vpphash(macro_name);
 
     /*
      * First, see if the name has previously been stored.
