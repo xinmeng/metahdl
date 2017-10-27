@@ -13,3 +13,12 @@ class LexerRTError(Exception): pass
 class SyntaxError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
+
+
+# ==================================================
+#  Lint
+# ==================================================
+class EvaluateNonConst(Exception): pass
+class DimensionSubWithOther(Exception): pass
+class DimensionSubUnderflow(Exception): pass
+class OnlyLSLSupportRangeSel(Exception): pass

@@ -14,7 +14,7 @@ import DirFile
 import ParserFactory
 
 
-class Mhdlc:
+class mhdlc:
     total_count = 0
     compiler_id = 0
 
