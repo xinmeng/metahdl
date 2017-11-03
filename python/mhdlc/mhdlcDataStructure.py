@@ -2,52 +2,85 @@
 
 import logging
 
-class Width:
-    def __init__(self, width, level=1):
-        self.width = width
-        self.level = level
-
-    def __str__(self):
-        if self.level == 1:
-            s = "{}".format(self.width)
-        else:
-            s = "{}:{}".format(self.level,
-                               self.width)
-
-    def __lt__(self, x):
-        if type(self) == type(x):
-            if self.level == x.level and self.width < x.width:
-                return True
-            else:
-                return False
-        else:
-            if 
-
-class DimensionElement:
-    def __init__(self, msb, lsb=None):
+class Dimension:
+    def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+
+
+class DimensionBounded(Dimension):
+    def __init__(self, msb, lsb):
+        Dimension.__init__(self)
         self.msb = msb
         self.lsb = lsb
-
+        
     def __str__(self):
-        s = "[{}".format(self.msb)
-        if self.lsb is not None:
-            s += " : {}]".format(self.lsb)
-        else:
-            s += "]"
+        s = "[{0.msb} : {0.lsb}]".format(self)
         return s
 
     def IsBitIndex(self):
-        if self.lsb is None:
-            return True
-        else:
-            return False
+        return False
 
     def IsRange(self):
-        return not self.IsBitIndex()
+        return True
+
+    def InterpretSVDeclaration(self):
+        return self
 
 
-class Dimension:
+
+class DimensionBitIndex(Dimension):
+    def __init__(self, index):
+        Dimension.__init__(self):
+        self.index = index
+
+    def __str__(self):
+        s = "[{}]".format(self.index)
+        return s
+
+    def IsBitIndex(self):
+        return True
+
+    def IsRange(self):
+        return False
+
+    def InterpretSVDeclaration(self):
+        return DimensionBounded(self.index -1, 0)
+
+class DimensionRange(Dimension):
+    def __init__(self, base, width):
+        Dimension.__init__(self):
+        self.base  = base
+        self.width = width
+        if self.width < 0:
+            self.lsb = self.base - self.width + 1
+            self.msb = self.base
+        elif self.width > 0:
+            self.lsb = self.base
+            self.msb = self.base + self.width - 1
+        else:
+            raise ZeroWidthInRange()
+
+    def __str__(self):
+        s = "[{}".format(self.base)
+        if self.width < 0:
+            s += " -: {}]".format(abs(self.width))
+        else:
+            s += " +: {}]".format(abs(self.width))
+        return s
+
+    def IsBitIndex(self):
+        return False
+
+    def IsRange(self):
+        return True
+
+    def InterpretSVDeclaration(self):
+        raise RangeDimensionCantBeInDeclaration("")
+    
+
+
+
+class MultipleDimension:
     '''
     DimensionElement are place from left to right as in code, 
     [0] is the most-significant level
@@ -75,31 +108,31 @@ class Dimension:
         width of a[1][2] is [3:0][4:0][5:0] - [1][2]
         '''
         
+        
         if type(self) != type(x):
             raise DimensionSubWithOther
-        elif self.Levels() < x.Levels():
-            raise DimensionSubUnderflow
-        elif self.Levels() == x.Levels():
-            if x.LegalRangeSel():
-                return self.des[-1:]
-            else:
-                raise OnlyLSLSupportRangeSel
         else:
-            if x.LegalRangeSel():
-                return self.des[x.Levels():]
+            if x.IllegalRangeSel():
+                raise OnlyLeastSignificantLevelSupportRange()
+
+            if self.Levels() < x.Levels():
+                raise DimensionSubUnderflow
+            elif self.Levels() == x.Levels():
+                return self.des[-1]
             else:
-                raise OnlyLSLSupportRangeSel
+                return self.des[x.Levels():]
+
             
 
     def append(self, de):
         self.des.append(de)
 
-    def LegalRangeSel(self):
+    def IllegalRangeSel(self):
         for d in self.des[:-1]:
             if d.IsRange():
-                return False
+                return True
         else:
-            return True
+            return False
             
 
     def Levels(self):
@@ -119,8 +152,6 @@ class Dimension:
         '''
 
         for d in self.des:
-            if d.lsb is None:
-                d.msb = d.msb - 1
-                d.lsb = 0
+            d.InterpretSVDeclaration()
                 
             
