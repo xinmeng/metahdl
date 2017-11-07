@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
       if (fname = SearchFile(FILES[i])) 
           dir_file = fname;
       else {
-          fprintf(stderr, "**mhdlc:Can't find file '%s'.\n", fname);
+          fprintf(stderr, "**mhdlc:Can't find file '%s'.\n", FILES[i].c_str());
           exit(1);
       }
           
