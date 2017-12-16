@@ -85,10 +85,10 @@ for k in MHDL_KEYWORD:
 
 
 MACRO_KEYWORD = ['if', 'ifdef', 'ifndef', 
-               'else', 'elseif', 'elseifdef', 'elseifndef', 'endif', 
-               'define', 
-               'for', 'endfor', 'let',
-               'include', 'line', ]
+                 'else', 'elseif', 'elseifdef', 'elseifndef', 'endif', 
+                 'define', 
+                 'for', 'endfor', 'let',
+                 'include', 'line', ]
 
 MACRO_KEYWORD_TOKEN = list()
 for k in MACRO_KEYWORD:
