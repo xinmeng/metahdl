@@ -709,6 +709,43 @@ net : net_name "[" expression ":" expression "]"
    }
 }
 
+| net_name "[" expression "+" ":" expression "]"
+{
+    CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
+    if ($3->IsConst() && $6->IsConst() ) {
+        CExpression* msb = new CBinExpSUB(new CBinExpADD($3, $6), new CNumber(1));
+        if (msb->Value() > symb->msb->Value()) {
+            mwrapper.error(@$, "calculated MSB greater than derived MSB");
+        }
+        if ( !LEGACY_VERILOG_MODE ) {
+            symb->Update(LOGIC);
+        }
+        $$ = new CVariable(symb, msb, $3);
+    }
+    else {
+        mwrapper.error(@$, "Both index values must be constants");
+    }
+}
+
+| net_name "[" expression "-" ":" expression "]"
+{
+    CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
+    if ($3->IsConst() && $6->IsConst() ) {
+        CExpression* lsb = new CBinExpADD(new CBinExpSUB($3, $6),  new CNumber(1));
+        if (lsb->Value() < 0) {
+            mwrapper.error(@$, "negtive calculated LSB");
+        }
+        if ( !LEGACY_VERILOG_MODE ) {
+            symb->Update(LOGIC);
+        }
+        $$ = new CVariable(symb, $3, lsb);
+    }
+    else {
+        mwrapper.error(@$, "Both index values must be constants");
+    }
+}
+
+
 | net_name
 {  
   CParameter* param = mwrapper.param_table->Exist(*$1);
@@ -2152,7 +2189,8 @@ parameter_rule instance_name connection_spec ";"
 	 original_symb->Update( symb_got->msb );
          if (symb_got->is_2D) {
              original_symb->is_2D = symb_got->is_2D;
-             original_symb->length_msb = symb_got->length_msb->ValueExp();
+             // original_symb->length_msb = symb_got->length_msb->ValueExp();
+             original_symb->length_msb = symb_got->length_msb;
          }
 	 original_symb->Update( iter->first->direction );
 	 original_symb->reference = iter->first;
@@ -2170,7 +2208,8 @@ parameter_rule instance_name connection_spec ";"
 	 symb->Update(symb_got->msb);
          if (symb_got->is_2D) {
              symb->is_2D = symb_got->is_2D;
-             symb->length_msb = symb_got->length_msb->ValueExp();
+             // symb->length_msb = symb_got->length_msb->ValueExp();
+             symb->length_msb = symb_got->length_msb;
          }
 	 //       if ( !symb->Update(iter->second->msb) ) {
 	 // 	mwrapper.warning(@$, "net " + symb->name + ": width is fixed by user declaration, cannot apply instantiation inferred value, potential error!!");
