@@ -324,13 +324,12 @@ public:
           if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
           PrintWidth(os, msb, lsb);
           break;
-
+          
       case LOGIC:
           os << "logic ";
           if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
           PrintWidth(os, msb, lsb);
           break;
-          
       case INT:     os << "int "; break;
       case INTEGER: os << "integer "; break; 
       }
@@ -338,7 +337,7 @@ public:
 
       os << name;
 
-      // if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0);
+      // if (is_2D ) PrintWidth(os, length_msb, CONST_NUM_0, is_2D);
 
       if (is_const ) {
 	os << " = ";
@@ -450,7 +449,7 @@ private:
     inline void PrintWidth(ostream &os, CExpression* msb_, CExpression* lsb_,
                            bool high_dimension=false) {
     // avoid declaring 1-bit signal in [0:0] style
-    if ( msb_->Value() == 0 && !msb_->HasParam() && !high_dimension ) {
+    if ( msb_->Value() == 0 && !msb_->HasParam() && !high_dimension) {
       os << "          ";
     }
     else {
@@ -883,15 +882,15 @@ private:
 
 public:
   inline CFuncCallExp (const string &func_name, vector<CExpression*> *args) :
-    _func_name (func_name), _args (args) {}
+      _func_name (func_name), _args (args) {}
 
 public:
   inline bool         IsConst() {
-      if (_func_name == "log2") {
+      if (_func_name == "log2" || _func_name == "wx_ecc_width") {
           for (vector<CExpression*>::iterator iter=_args->begin(); iter!=_args->end();
                iter++)
               if (!(*iter)->IsConst()) {
-                  cerr << "log2 function called on non-constant argument: ";
+                  cerr << _func_name << " function called on non-constant argument: ";
                   (*iter)->Print(cerr);
                   return false;
               }
@@ -902,7 +901,7 @@ public:
   }
 
   inline ulonglong    Width() {
-      if (_func_name == "log2") 
+      if (_func_name == "log2" || _func_name == "wx_ecc_width") 
           return 32;
       else 
           return 1;
@@ -914,19 +913,35 @@ public:
           if (arg->IsConst())
               return log2(arg->DoubleValue());
           else {
-              cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call log2 on non-constant argument: ";
+              cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__
+                   << ":Try to call " << _func_name << " on non-constant argument: ";
               arg->Print(cerr);
               exit(1);
           }              
       }
+      else if (_func_name == "wx_ecc_width") {
+          return (double) this->Value();
+      }
       else {
-          cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call DoubleValue() from CFuncCallExp!"; 
+          cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__
+               << ":Try to call DoubleValue() from CFuncCallExp!"; 
           exit(1);
       }
   }
   inline ulonglong    Value() {
       if (_func_name == "log2")
-          return ceil(this->DoubleValue());
+          return (ulonglong) ceil(this->DoubleValue());
+      else if (_func_name == "wx_ecc_width") {
+          CExpression * arg = (*_args)[0];
+          if (arg->IsConst())
+              return wx_ecc_width(arg->Value());
+          else {
+              cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__
+                   << ":Try to call " << _func_name << " on non-constant argument: ";
+              arg->Print(cerr);
+              exit(1);
+          }
+      }
       else {
           cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Value() from CFuncCallExp!"; 
           exit(1);
@@ -941,9 +956,9 @@ public:
       return new CFuncCallExp(_func_name, val_exp_args);
   }
   inline CExpression*  Reduce() {
-      if (_func_name == "log2") {
+      if (_func_name == "log2" || _func_name == "wx_ecc_width") {
           return new CNumber(32, Value());          
-      }
+      }          
       else {
           cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__ << ":Try to call Reduce() from CFuncCallExp!"; 
           exit(1);

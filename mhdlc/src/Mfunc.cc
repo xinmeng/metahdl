@@ -975,3 +975,22 @@ StoI(const string &str, int base)
   }
   return (ulonglong) strtoll(s.c_str(), NULL, base);
 }
+
+ulonglong
+wx_ecc_width(const ulonglong num)
+{
+    if(num <= 4)
+        return 4;
+    else if(num <= 11)
+        return 5;
+    else if(num <= 26)
+        return 6;
+    else if(num <= 57)
+        return 7;
+    else if(num <= 120)
+        return 8;
+    else if(num <= 247)
+        return 9;
+    else
+        return 10;
+}

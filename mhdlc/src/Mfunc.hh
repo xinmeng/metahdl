@@ -79,5 +79,7 @@ int    regexp_match(const string &str, const string &pattern);
 string ItoS(ulonglong num, int width=-1, int base=2);
 ulonglong StoI(const string &str, int base=10);
 
+ulonglong wx_ecc_width(const ulonglong num);
+
 
 #endif
