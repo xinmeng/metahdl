@@ -2189,8 +2189,8 @@ parameter_rule instance_name connection_spec ";"
 	 original_symb->Update( symb_got->msb );
          if (symb_got->is_2D) {
              original_symb->is_2D = symb_got->is_2D;
-             // original_symb->length_msb = symb_got->length_msb->ValueExp();
-             original_symb->length_msb = symb_got->length_msb;
+             original_symb->length_msb = symb_got->length_msb->ValueExp();
+             // original_symb->length_msb = symb_got->length_msb;
          }
 	 original_symb->Update( iter->first->direction );
 	 original_symb->reference = iter->first;
@@ -2208,8 +2208,8 @@ parameter_rule instance_name connection_spec ";"
 	 symb->Update(symb_got->msb);
          if (symb_got->is_2D) {
              symb->is_2D = symb_got->is_2D;
-             // symb->length_msb = symb_got->length_msb->ValueExp();
-             symb->length_msb = symb_got->length_msb;
+             symb->length_msb = symb_got->length_msb->ValueExp();
+             // symb->length_msb = symb_got->length_msb;
          }
 	 //       if ( !symb->Update(iter->second->msb) ) {
 	 // 	mwrapper.warning(@$, "net " + symb->name + ": width is fixed by user declaration, cannot apply instantiation inferred value, potential error!!");
