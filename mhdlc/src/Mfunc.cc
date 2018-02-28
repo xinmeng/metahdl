@@ -994,3 +994,14 @@ wx_ecc_width(const ulonglong num)
     else
         return 10;
 }
+
+ulonglong
+log2_cnt(const ulonglong num) {
+    double v = log2(num);
+
+    if (ceil(v) == v)
+        return ceil(v)+1;
+    else 
+        return ceil(v);
+
+}

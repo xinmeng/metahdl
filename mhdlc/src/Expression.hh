@@ -886,7 +886,7 @@ public:
 
 public:
   inline bool         IsConst() {
-      if (_func_name == "log2" || _func_name == "wx_ecc_width") {
+      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
           for (vector<CExpression*>::iterator iter=_args->begin(); iter!=_args->end();
                iter++)
               if (!(*iter)->IsConst()) {
@@ -901,7 +901,7 @@ public:
   }
 
   inline ulonglong    Width() {
-      if (_func_name == "log2" || _func_name == "wx_ecc_width") 
+      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") 
           return 32;
       else 
           return 1;
@@ -919,6 +919,9 @@ public:
               exit(1);
           }              
       }
+      else if (_func_name == "log2_cnt" ) {
+          return (double) this->Value();
+      }
       else if (_func_name == "wx_ecc_width") {
           return (double) this->Value();
       }
@@ -931,6 +934,17 @@ public:
   inline ulonglong    Value() {
       if (_func_name == "log2")
           return (ulonglong) ceil(this->DoubleValue());
+      else if (_func_name == "log2_cnt") {
+          CExpression * arg = (*_args)[0];
+          if (arg->IsConst())
+              return log2_cnt(arg->Value());
+          else {
+              cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__
+                   << ":Try to call " << _func_name << " on non-constant argument: ";
+              arg->Print(cerr);
+              exit(1);
+          }
+      }
       else if (_func_name == "wx_ecc_width") {
           CExpression * arg = (*_args)[0];
           if (arg->IsConst())
@@ -956,7 +970,7 @@ public:
       return new CFuncCallExp(_func_name, val_exp_args);
   }
   inline CExpression*  Reduce() {
-      if (_func_name == "log2" || _func_name == "wx_ecc_width") {
+      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
           return new CNumber(32, Value());          
       }          
       else {
