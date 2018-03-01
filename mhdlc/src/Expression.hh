@@ -910,8 +910,13 @@ public:
   inline double       DoubleValue() {
       if (_func_name == "log2" ) {
           CExpression * arg = (*_args)[0];
-          if (arg->IsConst())
-              return log2(arg->DoubleValue());
+          if (arg->IsConst()) {
+              double v = log2(arg->DoubleValue());
+              if (v==0)
+                  return 1.;
+              else
+                  return v;
+          }
           else {
               cerr << "**Internal Error:"<< __FILE__ << ":" << __LINE__
                    << ":Try to call " << _func_name << " on non-constant argument: ";
