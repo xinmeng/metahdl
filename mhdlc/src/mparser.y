@@ -2185,11 +2185,17 @@ parameter_rule instance_name connection_spec ";"
       CSymbol *symb_got = var->Symb();
       if ( mwrapper.symbol_to_remove.count(symb_got->name) ) {
 	 CSymbol *original_symb = mwrapper.symbol_table->Insert( symb_got->name );
+         
+         if (original_symb->is_2D != symb_got->is_2D) {
+             mwrapper.error(@5, "connection net " + symb_got->name + " has different width with port!!");
+         }
+
 	 if ( !LEGACY_VERILOG_MODE ) original_symb->Update(LOGIC);
 	 original_symb->Update( symb_got->msb );
          if (symb_got->is_2D) {
              original_symb->is_2D = symb_got->is_2D;
-             original_symb->length_msb = symb_got->length_msb->ValueExp();
+             if (!original_symb->width_fixed) 
+                 original_symb->length_msb = symb_got->length_msb->ValueExp();
              // original_symb->length_msb = symb_got->length_msb;
          }
 	 original_symb->Update( iter->first->direction );
@@ -2204,11 +2210,17 @@ parameter_rule instance_name connection_spec ";"
       }
       else {
 	 CSymbol *symb = mwrapper.symbol_table->Insert(symb_got->name);
+
+         if (symb->is_2D != symb_got->is_2D) {
+             mwrapper.error(@5, "connection net " + symb_got->name + " has different width with port!!");
+         }
+
 	 if ( !LEGACY_VERILOG_MODE ) symb->Update(LOGIC);
 	 symb->Update(symb_got->msb);
          if (symb_got->is_2D) {
              symb->is_2D = symb_got->is_2D;
-             symb->length_msb = symb_got->length_msb->ValueExp();
+             if (!symb->width_fixed)
+                 symb->length_msb = symb_got->length_msb->ValueExp();
              // symb->length_msb = symb_got->length_msb;
          }
 	 //       if ( !symb->Update(iter->second->msb) ) {
