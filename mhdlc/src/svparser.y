@@ -829,6 +829,7 @@ ansi_port_declaration : port_direction var_type_opt net_name
 var_type_opt : 
 | "reg"
 | "wire"
+| "logic"
 ;
  
 
