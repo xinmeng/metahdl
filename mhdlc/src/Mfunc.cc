@@ -901,7 +901,7 @@ regexp_substitute(const string &str, const string &pattern)
 int
 regexp_match(const string &str, const string &pattern)
 {
-  string cmd_str = "$string = '" + str + "'; $string =~ " + pattern + ";";
+  string cmd_str = "$string = \"" + str + "\"; $string =~ " + pattern + ";";
 
   SV *cmd_sv = newSVpvf(cmd_str.c_str());
   SV *retval;
