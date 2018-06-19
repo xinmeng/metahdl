@@ -606,6 +606,7 @@ public:
     }
   }
   
+  inline CExpression* Override() {return _override;}
   inline bool HasParam() {return true;}
 
 };

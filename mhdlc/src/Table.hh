@@ -423,7 +423,7 @@ public:
     vector<pair<string, CExpression*> > *param_list = new vector<pair<string, CExpression*> >;
     for ( int i=0; i<_order.size(); ++i) {
       // param_list->push_back( pair<string, CExpression*>(_order[i],  _param[_order[i]]->ValueExp() ) );
-      if (_param[_order[i]]->global) {
+      if (_param[_order[i]]->global && _param[_order[i]]->Override()) {
 	param_list->push_back( pair<string, CExpression*>(_order[i],  _param[_order[i]]->ValueExp() ) );
       }
     }
