@@ -5,7 +5,10 @@
 void
 CMHDLwrapper::Parse()
 {
+  cout << "Before RunPP()" << endl;
   RunPP();
+  cout << "After RunPP()" << endl;
+
 
   yy::mParser *mparser = new yy::mParser (*this);
   OpenIO();
