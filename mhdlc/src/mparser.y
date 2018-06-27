@@ -533,7 +533,7 @@ net : net_name "[" expression ":" expression "]"
           }
       }
       else {
-          mwrapper.warning(@$, "non-constant segment selection boundary.");
+          mwrapper.error(@$, "non-constant segment selection boundary.");
       }
       $$ = new CVariable ( symb, $3, $5);
   }
