@@ -923,8 +923,9 @@ port_declaration: port_direction var_type_opt net_names ";"
           else {
               svwrapper.io_table->Insert(symb);
           }
-      }           
+      }
   }
+  
 }
 ; 
 
@@ -951,12 +952,15 @@ port_direction: "input" {$$ = INPUT;}
 /*******************************
      parameter_declaration
  ******************************/ 
-parameter_keywords : "parameter"
+parameter_keywords : "parameter" parameter_type_or_empty
 {svwrapper.is_global_param = true;}
 
-| "localparam"
+| "localparam" parameter_type_or_empty
 {svwrapper.is_global_param = false;}
 ;
+
+parameter_type_or_empty :
+| "reg" {};
 
 
 parameter_declaration : parameter_keywords parameter_assignments ";" 
