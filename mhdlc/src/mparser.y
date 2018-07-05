@@ -2187,7 +2187,7 @@ parameter_rule instance_name connection_spec ";"
 	 CSymbol *original_symb = mwrapper.symbol_table->Insert( symb_got->name );
          
          if (original_symb->is_2D != symb_got->is_2D) {
-             mwrapper.error(@5, "connection net " + symb_got->name + " has different width with port!!");
+             mwrapper.error(@5, "explicit connection net " + symb_got->name + " has different width with port!!");
          }
 
 	 if ( !LEGACY_VERILOG_MODE ) original_symb->Update(LOGIC);
@@ -2211,16 +2211,17 @@ parameter_rule instance_name connection_spec ";"
       else {
 	 CSymbol *symb = mwrapper.symbol_table->Insert(symb_got->name);
 
-         if (symb->is_2D != symb_got->is_2D) {
-             mwrapper.error(@5, "connection net " + symb_got->name + " has different width with port!!");
-         }
-
 	 if ( !LEGACY_VERILOG_MODE ) symb->Update(LOGIC);
 	 symb->Update(symb_got->msb);
          if (symb_got->is_2D) {
-             symb->is_2D = symb_got->is_2D;
-             if (!symb->width_fixed)
-                 symb->length_msb = symb_got->length_msb->ValueExp();
+             if (!symb->is_2D && symb->width_fixed) {
+                 mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA width with port!!");
+             }
+             else {
+                 symb->is_2D = symb_got->is_2D;
+                 if (!symb->width_fixed)
+                     symb->length_msb = symb_got->length_msb->ValueExp();
+             }
              // symb->length_msb = symb_got->length_msb;
          }
 	 //       if ( !symb->Update(iter->second->msb) ) {
