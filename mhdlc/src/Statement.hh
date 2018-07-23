@@ -31,25 +31,29 @@ class CStmtSimple : public CStatement
 private:
   CExpression *_lval, *_rval;
   string _assignment;
+  CExpression *_opt_delay;
 
 public:
   inline CStmtSimple() : 
-    CStatement(), _lval (NULL), _rval (NULL), _assignment ("") {}
+    CStatement(), _lval (NULL), _rval (NULL), _assignment (""), _opt_delay (NULL) {}
 
   inline CStmtSimple(int step_) : 
-    CStatement(step_), _lval (NULL), _rval (NULL), _assignment ("") {}
+    CStatement(step_), _lval (NULL), _rval (NULL), _assignment (""), _opt_delay (NULL) {}
 
   inline CStmtSimple(CExpression *lval, CExpression *rval) : 
-    CStatement(), _lval (lval), _rval (rval), _assignment (" = ") {}
+    CStatement(), _lval (lval), _rval (rval), _assignment (" = "), _opt_delay (NULL) {}
 
   inline CStmtSimple(CExpression *lval, CExpression *rval, int step_) : 
-    CStatement(step_), _lval (lval), _rval (rval), _assignment (" = ") {}
+    CStatement(step_), _lval (lval), _rval (rval), _assignment (" = "), _opt_delay (NULL) {}
  
   inline CStmtSimple(CExpression *lval, CExpression *rval, bool nonblk) : 
-    CStatement(), _lval (lval), _rval (rval), _assignment (" <= ") {}
+    CStatement(), _lval (lval), _rval (rval), _assignment (" <= "), _opt_delay (NULL) {}
+
+  inline CStmtSimple(CExpression *lval, CExpression *rval, bool nonblk, CExpression* opt_delay) : 
+    CStatement(), _lval (lval), _rval (rval), _assignment (" <= "), _opt_delay (opt_delay) {}
 
   inline CStmtSimple(CExpression *lval, CExpression *rval, int step_, bool nonblk) : 
-    CStatement(step_), _lval (lval), _rval (rval), _assignment (" <= ") {}
+    CStatement(step_), _lval (lval), _rval (rval), _assignment (" <= "), _opt_delay (NULL) {}
 
 
 public:
@@ -69,8 +73,13 @@ public:
   inline void Print(ostream&os=cout, int indent=0) {
     PUT_SPACE(indent);
     if ( _lval ) {
-      _lval->Print(os); 
+      _lval->Print(os);
       os << _assignment; 
+      if (_opt_delay) {
+          os << " #";
+          _opt_delay->Print(os);
+          os << " ";
+      }
       _rval->Print(os);
     }
     os << ";" << endl;

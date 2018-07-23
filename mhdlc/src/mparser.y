@@ -366,6 +366,7 @@ extern string WORKDIR;
 %token <str> BIN_BASED_NUM
 %token <str> DEC_BASED_NUM
 %token <str> HEX_BASED_NUM
+%token <str> FLOAT
 %token <str> VERBTIM
 %token       END 0 "end of file"
 
@@ -393,7 +394,7 @@ extern string WORKDIR;
 %type <raw_code_ptr> rawcode_block
 %type <param_rule_ptr> parameter_rule
 %type <port_declaration> port_declaration
-
+%type <expression_ptr> optional_delay
 
 
 %right "?" ":"
@@ -473,6 +474,11 @@ constant : STRING
 {
   try{ $$ = new CBasedNum(*$1, 16);}
   catch (string &str) {mwrapper.error(@1, str);}
+}
+
+| FLOAT
+{
+    $$ = new CFloatNum(*$1);
 }
 ;
 
@@ -1013,10 +1019,10 @@ balanced_stmt : ";"
    mwrapper.warning(@$, "Why do you write empty statment? You stupid asshole think it's funny?? I'll tell you, it's totally SHIT!!");
 }
 
-| net_lval "<=" expression ";" 
+| net_lval "<=" optional_delay expression ";" 
 {
-  $3->Update(INPUT);
-  $3->AddRoccure(@3);
+  $4->Update(INPUT);
+  $4->AddRoccure(@3);
   if ( LEGACY_VERILOG_MODE ) {
     $1->Update(REG);
   }
@@ -1025,16 +1031,16 @@ balanced_stmt : ";"
     mwrapper.error(@$, "Nonblocking assignment is NOT allowed in combnational block.");
   }
 
-  if ( $1->Width() < $3->Width() ) {
+  if ( $1->Width() < $4->Width() ) {
       ostringstream msg;
       msg << "Width mismatch in non-blocking assignment, \"";
       $1->Print(msg);
       msg << "\" (" << $1->Width() << ") vs. \"";
-      $3->Print(msg);
-      msg << "\" (" << $3->Width() << ").";
+      $4->Print(msg);
+      msg << "\" (" << $4->Width() << ").";
       mwrapper.warning(@$, msg.str());
   }
-  $$ = new CStmtSimple ($1, $3, false);
+  $$ = new CStmtSimple ($1, $4, false, $3);
 }
 
 | net_lval "=" expression ";"
@@ -1105,6 +1111,17 @@ balanced_stmt : ";"
   }
 }
 ;
+
+optional_delay :
+{$$ = NULL;}
+
+| "#" NUM
+{$$ = new CNumber(*$2);}
+
+| "#" FLOAT
+{$$ = new CFloatNum(*$2);}
+
+
 
 unbalanced_stmt : "if" "(" expression ")" statement
 {

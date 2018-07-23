@@ -132,6 +132,21 @@ public:
   inline CBasedNum* Reduce() {return this;}
 };
 
+class CFloatNum : public CConstant
+{
+private:
+    string _str;
+    float _float_value;
+
+public:
+    inline CFloatNum(const string &str): _str (str) {
+        _float_value = atof(_str.c_str());
+    }
+
+    inline void Print(ostream&os=cout) {os << _str;}
+    inline CFloatNum* Reduce() {return this;}
+
+};
 
 
 // ------------------------------
@@ -606,8 +621,9 @@ public:
     }
   }
   
-  inline CExpression* Override() {return _override;}
   inline bool HasParam() {return true;}
+
+    inline CExpression* Override() {return _override;}
 
 };
 

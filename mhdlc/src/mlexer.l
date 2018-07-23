@@ -318,6 +318,7 @@ CTRL_LINE "`line"
  /* other tokens */
 ID [[:alpha:]_][[:alnum:]_]*
 NUM [0-9]+
+FLOAT [0-9]+\.[0-9]*
 WS [ \t]+
 
 %%
@@ -642,6 +643,11 @@ WS [ \t]+
 {NUM} {
   yylval->str = new string (mhdltext);
   return mhdl_token::NUM;
+}
+
+{FLOAT} {
+  yylval->str = new string (mhdltext);
+  return mhdl_token::FLOAT;
 }
 
 {WS} yylloc->step();
