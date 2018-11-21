@@ -718,36 +718,36 @@ net : net_name "[" expression ":" expression "]"
 | net_name "[" expression "+" ":" expression "]"
 {
     CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
+    CExpression* msb = new CBinExpSUB(new CBinExpADD($3, $6), new CNumber(1));
+    $$ = new CVariable(symb, msb, $3);
     if ($3->IsConst() && $6->IsConst() ) {
-        CExpression* msb = new CBinExpSUB(new CBinExpADD($3, $6), new CNumber(1));
         if (msb->Value() > symb->msb->Value()) {
             mwrapper.error(@$, "calculated MSB greater than derived MSB");
         }
         if ( !LEGACY_VERILOG_MODE ) {
             symb->Update(LOGIC);
         }
-        $$ = new CVariable(symb, msb, $3);
     }
     else {
-        mwrapper.error(@$, "Both index values must be constants");
+        mwrapper.warning(@$, "Both index values should be constants");
     }
 }
 
 | net_name "[" expression "-" ":" expression "]"
 {
     CSymbol* symb = mwrapper.symbol_table->Insert(*$1);
+    CExpression* lsb = new CBinExpADD(new CBinExpSUB($3, $6),  new CNumber(1));
+    $$ = new CVariable(symb, $3, lsb);
     if ($3->IsConst() && $6->IsConst() ) {
-        CExpression* lsb = new CBinExpADD(new CBinExpSUB($3, $6),  new CNumber(1));
         if (lsb->Value() < 0) {
             mwrapper.error(@$, "negtive calculated LSB");
         }
         if ( !LEGACY_VERILOG_MODE ) {
             symb->Update(LOGIC);
         }
-        $$ = new CVariable(symb, $3, lsb);
     }
     else {
-        mwrapper.error(@$, "Both index values must be constants");
+        mwrapper.warning(@$, "Both index values should be constants");
     }
 }
 
