@@ -280,6 +280,7 @@ BINARY_MINUS "-"
 BINARY_MULT  "*"
 BINARY_DIV   "/"
 BINARY_MOD   "%"
+BINARY_PWR   "**"
 BINARY_LSH   "<<"
 BINARY_RSH   ">>"
 
@@ -594,6 +595,7 @@ WS [ \t]+
   {BINARY_MULT} return sv_token::BINARY_MULT;
   {BINARY_DIV} return sv_token::BINARY_DIV;
   {BINARY_MOD} return sv_token::BINARY_MOD;
+  {BINARY_PWR} return sv_token::BINARY_PWR;
   {BINARY_LSH} return sv_token::BINARY_LSH;
   {BINARY_RSH} return sv_token::BINARY_RSH;
 

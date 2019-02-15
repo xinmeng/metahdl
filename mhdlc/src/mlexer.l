@@ -279,6 +279,7 @@ BINARY_MINUS "-"
 BINARY_MULT  "*"
 BINARY_DIV   "/"
 BINARY_MOD   "%"
+BINARY_PWR   "**"
 BINARY_LSH   "<<"
 BINARY_RSH   ">>"
 
@@ -587,6 +588,7 @@ WS [ \t]+
 {BINARY_MULT} return mhdl_token::BINARY_MULT;
 {BINARY_DIV} return mhdl_token::BINARY_DIV;
 {BINARY_MOD} return mhdl_token::BINARY_MOD;
+{BINARY_PWR} return mhdl_token::BINARY_PWR;
 {BINARY_LSH} return mhdl_token::BINARY_LSH;
 {BINARY_RSH} return mhdl_token::BINARY_RSH;
 

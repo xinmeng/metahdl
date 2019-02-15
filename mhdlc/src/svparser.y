@@ -298,6 +298,7 @@ class CSVwrapper;
 %token BINARY_MULT  "*"
 %token BINARY_DIV   "/"
 %token BINARY_MOD   "%"
+%token BINARY_PWR   "**"
 %token BINARY_LSH   "<<"
 %token BINARY_RSH   ">>"
 
@@ -366,6 +367,7 @@ class CSVwrapper;
 %left  "<<" ">>"
 %left  "+" "-"
 %left  "*" "/" "%"
+%left  "**"
 %right "!" "~" UNARY_AND UNARY_OR UNARY_XOR
 
 
@@ -652,6 +654,11 @@ expression : constant
 | expression "%" expression
 {
   $$ = new CBinExpMOD ($1, $3);
+}
+
+| expression "**" expression
+{
+  $$ = new CBinExpPWR ($1, $3);
 }
 
 | expression "<<" expression 

@@ -1731,6 +1731,25 @@ public:
   inline CBinExpMOD* ValueExp() { return new CBinExpMOD (_exp_a->ValueExp(), _exp_b->ValueExp());}
 };
 
+class CBinExpPWR : public CBinaryExp
+{
+public:
+  inline CBinExpPWR(CExpression *exp_a, CExpression *exp_b) : 
+    CBinaryExp("**", exp_a, exp_b) {}
+
+  inline double    DoubleValue() {return (double) Value();}
+  inline ulonglong Value() {
+    ulonglong val_a = _exp_a->Value();
+    ulonglong val_b = _exp_b->Value();
+    ulonglong val = 1;
+    for (int i=0; i<val_b; i++)
+        val = val * val_a;
+    
+    return val;
+  }
+  inline CBinExpPWR* ValueExp() { return new CBinExpPWR (_exp_a->ValueExp(), _exp_b->ValueExp());}
+};
+
 class CBinExpRSHFT : public CBinaryExp
 {
 public:
