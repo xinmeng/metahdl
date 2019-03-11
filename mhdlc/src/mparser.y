@@ -1346,6 +1346,8 @@ port_declaration: port_direction net_names ";"
             symb->io_fixed  = true;
             symb->length_msb = $3;
             symb->direction = $1;
+            symb->msb = $8;
+            symb->lsb = $10;
             if ( !symb->Update( $8 ) ) {
                 mwrapper.error(@$, "port " + (*iter) + "'s MSB is smaller than that in code, or MSB is locked.");
             }
@@ -2233,48 +2235,52 @@ parameter_rule instance_name connection_spec ";"
 	 mwrapper.symbol_to_remove.erase(symb_got->name);
       }
       else {
-	 CSymbol *symb = mwrapper.symbol_table->Insert(symb_got->name);
+	 CSymbol *original_symb = mwrapper.symbol_table->Insert(symb_got->name);
 
-	 if ( !LEGACY_VERILOG_MODE ) symb->Update(LOGIC);
-	 symb->Update(symb_got->msb);
-         if (symb_got->is_2D) {
-             if (!symb->is_2D && symb->width_fixed) {
-                 mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA width with port!!");
-             }
-             else {
-                 symb->is_2D = symb_got->is_2D;
-                 if (!symb->width_fixed)
-                     symb->length_msb = symb_got->length_msb->ValueExp();
-             }
-             // symb->length_msb = symb_got->length_msb;
+         if (original_symb->is_2D != symb_got->is_2D) {
+             mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA with port!!");
          }
+
+	 if ( !LEGACY_VERILOG_MODE ) original_symb->Update(LOGIC);
+	 original_symb->Update(symb_got->msb);
+         // if (symb_got->is_2D) {
+         //     if (!symb->is_2D && symb->width_fixed) {
+         //         mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA width with port!!");
+         //     }
+         //     else {
+         //         symb->is_2D = symb_got->is_2D;
+         //         if (!symb->width_fixed)
+         //             symb->length_msb = symb_got->length_msb->ValueExp();
+         //     }
+         //     // symb->length_msb = symb_got->length_msb;
+         // }
 	 //       if ( !symb->Update(iter->second->msb) ) {
 	 // 	mwrapper.warning(@$, "net " + symb->name + ": width is fixed by user declaration, cannot apply instantiation inferred value, potential error!!");
 	 //       }
-	 symb->Update(iter->first->direction);
+	 original_symb->Update(iter->first->direction);
 	 //       if ( !symb->Update(iter->second->direction) ) {
 	 // 	mwrapper.warning(@$, "net " + symb->name + ": IO direction is fixed by user declaration, cannot apply instantiation inferred value, potential error!!");
 	 //       }
-	 symb->reference = iter->first;
+	 original_symb->reference = iter->first;
 
 	 if ( iter->first->direction == INPUT ) {
-	    symb->roccur.push_back( @4 );
+	    original_symb->roccur.push_back( @4 );
 	 }
 	 else if ( iter->first->direction == OUTPUT  ) {
-	    symb->loccur.push_back( @4 );
+	    original_symb->loccur.push_back( @4 );
 	 }
 	 else if ( iter->first->direction == INOUT ) {
-	    symb->loccur.push_back( @4 );
-	    symb->roccur.push_back( @4 );
+	    original_symb->loccur.push_back( @4 );
+	    original_symb->roccur.push_back( @4 );
 	 }
 	 else {
 	    mwrapper.error(@$, "port \"" + iter->first->name + "\" has no direction?!");
 	 }
 
-         if (symb->is_2D)
-             (*connect_map)[iter->first] = new CVariable (symb, var->Addr(), var->Msb(), var->Lsb() );
+         if (original_symb->is_2D)
+             (*connect_map)[iter->first] = new CVariable (original_symb, var->Addr(), var->Msb(), var->Lsb() );
          else 
-             (*connect_map)[iter->first] = new CVariable (symb, var->Msb(), var->Lsb() );
+             (*connect_map)[iter->first] = new CVariable (original_symb, var->Msb(), var->Lsb() );
       }
     }
     else {
