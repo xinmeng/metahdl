@@ -2236,15 +2236,25 @@ parameter_rule instance_name connection_spec ";"
       }
       else {
 	 CSymbol *original_symb = mwrapper.symbol_table->Insert(symb_got->name);
-
-         if (original_symb->is_2D != symb_got->is_2D) {
-             mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA with port!!");
-         }
+	 original_symb->Update(symb_got->msb);
 
 	 if ( !LEGACY_VERILOG_MODE ) original_symb->Update(LOGIC);
-	 original_symb->Update(symb_got->msb);
+
+         if (original_symb->is_2D != symb_got->is_2D) {
+             // Dimension is different, begin to check...
+             if (original_symb->is_2D && !symb_got->is_2D) {
+                 mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA with port.  Infered from port is not 2D, but the closing context has a 2D signal with same name!");
+             }
+             else {
+                 mwrapper.warning(@5, "implicit connection net " + symb_got->name + " has different MDA with port.  Infered from port is 2D, so I'll upgrade same name signal to 2D in the closing context, which might break you existing code!");
+                 original_symb->is_2D = symb_got->is_2D;
+                 if (!original_symb->width_fixed)
+                     original_symb->length_msb = symb_got->length_msb->ValueExp();
+             }
+         }
+
          // if (symb_got->is_2D) {
-         //     if (!symb->is_2D && symb->width_fixed) {
+         //     if (!original_symb->is_2D && original_symb->width_fixed) {
          //         mwrapper.error(@5, "implicit connection net " + symb_got->name + " has different MDA width with port!!");
          //     }
          //     else {
