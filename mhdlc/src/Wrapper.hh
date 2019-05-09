@@ -172,9 +172,9 @@ public:
   }
   
   virtual inline void warning(const yy::location &loc, const string &msg)  {
-    CWarningLocMessage *warningmsg = new CWarningLocMessage(loc, msg);
-    _warning_msg.push_back(warningmsg);
-    // cerr << "\033[00;35m\n**" << _my_name << " Parser WARNING:" << loc << ":" << msg << "\033[00m" << endl;
+    // CWarningLocMessage *warningmsg = new CWarningLocMessage(loc, msg);
+    // _warning_msg.push_back(warningmsg);
+    cerr << "\033[00;35m\n**" << _my_name << " Parser WARNING:" << loc << ":" << msg << "\033[00m" << endl;
   }
 };
 
