@@ -464,7 +464,7 @@ private:
     inline void PrintWidth(ostream &os, CExpression* msb_, CExpression* lsb_,
                            bool high_dimension=false) {
     // avoid declaring 1-bit signal in [0:0] style
-    if ( msb_->Value() == 0 && !msb_->HasParam() && !high_dimension) {
+    if ( msb_->Value() == 0 && !msb_->HasParam() && !high_dimension && !width_fixed) {
       os << "          ";
     }
     else {
