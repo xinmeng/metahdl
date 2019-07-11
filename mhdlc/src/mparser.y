@@ -1486,7 +1486,7 @@ variable_declaration : variable_type net_names ";"
     CSymbol *symb = mwrapper.symbol_table->Insert( (*iter) );
     symb->type = $1;
     symb->type_fixed = true;
-    symb->width_fixed = true;
+    symb->width_fixed = false;
     symb->msb         = CONST_NUM_0;
   }
 }
