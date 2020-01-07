@@ -1,0 +1,216 @@
+#+TITLE: MetaHDL Compiler Python3 Implementation
+
+* Motivation
+** Flex/Bison/C++ 
+  The original Flex/Bison/C++ implementation of ~mhdlc~ has following
+  drawbacks. And the python implemention is design to overcome 
+  these issues:
+  1. Preprocessor is integrated from 3rd party source code, which
+     doesn't support recursive macro expansion. And ~`for~ support is
+     poor (missing ~`endfor~ will always need painful debug).
+  2. Logging and message printing is not sophisticated enough. There are 
+     too many ~cout/cerr~ usages. It is tedious to replace all of them. 
+  3. ~generate~ block is not supported, but it is heavily used in a
+     parameterized design.
+  4. MDA more then 2 level of dimension is not supported, ~[ A +: B]~
+     style syntax is not supported.
+  5. Evaluation on Verilog function is not supported. 
+  6. ~mhdlc~ is one-pass architecture, but in some cases (such as 
+     function call support), two-pass is needed. 
+
+** ply/Python
+   This implementation use ~ply~ as parser generator. Major advantages
+   are:
+   1. Support multiple start-symbol, so multiple parser can be generated
+      from single BNF file.
+   2. All parsing are done over string object. No input buffer is
+      involved.  It is easier for compiler internal data structure
+      passing among pre-processor, lexer, and parser.
+   
+* Features
+** Preprocessor
+   Verilog ~generate~ can almost fit into all ~`for~ scenarios, but
+   for historical reason, designers want ~`for~ syntax to be reserved. 
+   On the other hand, ~`for~ can be a a fallback solution when ~generete~
+   can't be used. 
+
+   ~`foreach~ will be added to provide iteration in non-numeric items. 
+   It will be useful when instantiating different functional modules 
+   that have same interface. 
+
+*** Parse-Expand Mode
+    To support ~`for~ and ~`let~, the preprocessor directives should
+    be treated as CFG. There should be a parser to process body of
+    ~`for~ and expression of ~`let~. Value of ordinary macros (that
+    are created by ~`define~) is flatterned in the same way as ~`let~
+    to support recursive expansion. In such implementation, macro body
+    are not allowed to contain perimitive directives (~`if~, ~`for~,
+    etc) that can change the structure of source code. For example,
+    #+BEGIN_SRC verilog
+`define a `ifdef XX \
+            0       \
+          `else     \
+            1       \
+          `endif
+`a
+    #+END_SRC
+    In this example, expansion of ~`a~ will add a conditional
+    statement into current source which will change the existing
+    Abstract Syntax Tree in parser. Since parse works in parse-expand
+    order, the newly expanded conditional statement will not be parsed
+    again.
+
+*** Inline Expand Mode   
+    To support above style, preprocessor works in inline expand
+    mode. The macro are expand immediately after read, the expanded
+    text are pushed back to input data buffer, for recursive
+    expansion.  But in this mode, ~`for~ and ~`let~ are not supported.
+    
+** Inference-Checking Compilation
+   In C++ implemented version, compilation is one-pass.  Code checking
+   is performed along with inference.  It can't check width mismatch
+   after symbol's attribute is updated.  e.g.,
+   #+BEGIN_SRC verilog
+assign a[3:0] = b[3:0];         // infer wire [3:0] a
+...
+...
+...
+
+assign a[3][3:0] = c[3:0];      // infer wire [3:0] [3:0] a
+                                // previous width mismatch is not
+                                // reported   
+   #+END_SRC
+
+   In python version, checking is independent from inference.
+   Compilation is in two-pass style:
+   1. In first pass, compiler only do inference
+   2. In second pass, compiler check code structure (a lightweight
+      lint).
+   
+** Dimension
+   In order to support MDA of any dimension, /Dimension/ concept is
+   introduced.  For example, 
+   #+BEGIN_SRC verilog
+a[3][4][5][7:0] = 8'd0; // [3][4][5][7:0] is a dimension.
+
+output  [A:B] [C:D] [E:F] xx;   // [A:B] [C:D] [E:F] is dimension
+
+output [A:B] [C:D] xx [E:F];    // [E:F] [A:B] [C:D] is dimension,
+                                // note the most-significant dimension is [E:F]
+   
+   #+END_SRC
+
+   Dimension has *level* and *width* attributes.  
+   1. Level is the number of hierarchies, e.g.:
+      1. ~a[3][4][5][7:0]~ has level=4
+      2. ~output [A:B] [C:D] xx [E:F]~ has level=3.   
+   2. Width is the the width of least-significant dimension, e.g.:
+      1. ~a[3][4][5][7:0]~ has width=8
+      2.  ~output [A:B] [C:D] xx [E:F]~ has width=(C-D+1).
+
+   Dimensions with same level can be compared for width.  e.g., 
+   If we have ~xx~ declared as below:
+   #+BEGIN_SRC verilog
+wire [15:0] [31:0] [63:0] xx;
+   #+END_SRC
+
+   For synthesizable RTL, only least-significant level can have range
+   selection, such as ~[MSB:LSB]~, ~[LSB +: width]~, ~[MSB -: width]~.
+   Other levels can only have bit index.  MetaHDL implement this
+   dimension rule in checking and inference:
+   1. When ~xx~ is referenced without any dimension, compiler knows
+      whole dimension is referenced.
+   2. When ~xx~ is referenced with dimension of same level as in
+      declaration, e.g., ~xx[A][B][C]~ (that is 3 level dimension), 
+      compiler checkes dimension rule: 
+      1. ~A~ and ~B~ must be bit index, and must be in delcared range 
+      2. ~C~ can be bit index or range selection, and must be in
+         declaration range
+   3. When ~xx~ is referenced with less dimension levels than that in
+      declaration, e.g., ~xx[D][E]~, compiler aligns the dimension
+      from most-significant level, and checks dimension rule.
+
+   For dimension inference, compiler treats first level (from left to
+   right) as most-significant level, dimension update is done
+   accordingly.  e.g., 
+   #+BEGIN_SRC verilog
+assign a[3] = 1'd0;             // stmt#1: infer wire [3:0] a;
+
+assign a[3][4] = 1'd0;          // stmt#2: infer wire [3:0] [4:0] a;
+                                // so stmt#1 has width mismatch
+
+assign a[3][4] = 4'd0;          // stmt#3: infer width [3:0] [4:0] [4:0] a;
+                                // so both stmt#1 and stmt#2 have width mismatch
+   #+END_SRC
+   
+   In Inference-Checking compilation, stmt#2 and stmt#1 have width
+   mismatch when stmt#3 is reached.  Largest inference result
+   dominates symbol dimension. 
+
+   
+   
+
+** Debug and Log system
+   Both ~ply.lex()~ and ~ply.yacc()~ support debug switch and logging 
+   object parsing. When command line option indicates debug on it, 
+   logging object is passed to it. Similar mechanism is used for 
+   ~parser.parse()~. 
+** Self-spawned Parsing is not supported
+   C++ version of mhdlc supports self-spawned parsing to create module 
+   from same mhdl source on the fly, as shown below:
+   #+BEGIN_SRC verilog
+     // - * CoS
+     // - Select command tag from 64 \gls{qe}s and
+     // - push into \gls{cdmgr} based on QoS policy.
+     metahdl parse -DCOS_Q_CNT=8 -DQ_OFFSET=0 -DCT=sk -DMETRIC=1 -F cosarb.mhdl;
+     skcosarb;
+
+     metahdl parse -DCOS_Q_CNT=4 -DQ_OFFSET=16 -DCT=pk -DMETRIC=0 -F cosarb.mhdl ;
+     pkcosarb;
+   #+END_SRC
+   Compared to parameter implementation, the only benefit is the generated module 
+   can have different ports. Other than that, it is replacable with parameter 
+   implementation. If such feature is really desired, it can be worked around by
+   adding extra dependency in makefile to build the module prior to the parsing. 
+
+* Architecture
+  In SVparser, only module header, IO ports and parameters are recoganized. 
+  IO ports and parameters are sub-sets of MHDLparser, module header can be 
+  handled with a different starting symbol. So SVparser and MHDLparser can 
+  share same CFG.
+  1. mhdlc
+     1. DirFile for searching and creating files 
+     3. MPPparser
+        1. mhdlc reference to access DirFile
+        2. plexMPP
+        3. pyaccMPP
+     4. MHDLparser
+        1. mhdlc reference to access DirFile and MPPparser
+        2. plexMHDL
+        3. pyaccMHDL
+     5. SVparser
+        1. mhdlc reference to access DirFile and MPPparser
+        2. plexSV
+        3. pyaccMHDL with different starting symbol
+* Lexer
+  Lexer generated by ply works in "first win" mode.  All token rules
+  are matched one by one, the first matched token rule is selected.
+  Token produced by this rule is returned.  But mhdlc needs a "longest
+  match win" mode, which leads to the design of ~GreedyLexer.py~.  
+  
+  Each GreedyLexer has one or more start condition, each start
+  condition has token rules.  When matching, GreedyLexer pass an
+  InputBuffer to current active start condition, start condition
+  queries all token rules and return token produced from the longest
+  match rule. 
+
+* Formal Syntax 
+  #+BEGIN_SRC bnf
+    a ::= 
+          | ieg
+          | eigh
+          | "iieg"
+  #+END_SRC
+
+
+  

@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-11-28 Tue 16:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MetaHDL Compiler Python3 Implementation</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Xin Meng" />
+<link rel="stylesheet" type="text/css" href="../../css/my-worg-spec.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<p>Xin Meng | Modified:2017-11-28 Tue 16:30 | Exported:2017-11-28 Tue 16:30</p>
+</div>
+<div id="content">
+<h1 class="title">MetaHDL Compiler Python3 Implementation</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org32fb5c7">1. Motivation</a>
+<ul>
+<li><a href="#orgf0e3939">1.1. Flex/Bison/C++</a></li>
+<li><a href="#org3b97ee8">1.2. ply/Python</a></li>
+</ul>
+</li>
+<li><a href="#orgc5c4368">2. Features</a>
+<ul>
+<li><a href="#orgbde6cf5">2.1. Preprocessor</a>
+<ul>
+<li><a href="#org7a35934">2.1.1. Parse-Expand Mode</a></li>
+<li><a href="#orgf67f7d9">2.1.2. Inline Expand Mode</a></li>
+</ul>
+</li>
+<li><a href="#org84b74a8">2.2. Inference-Checking Compilation</a></li>
+<li><a href="#org52fe47a">2.3. Dimension</a></li>
+<li><a href="#org9b5884c">2.4. Debug and Log system</a></li>
+<li><a href="#orgb8ef4cb">2.5. Self-spawned Parsing is not supported</a></li>
+</ul>
+</li>
+<li><a href="#org8d49c83">3. Architecture</a></li>
+<li><a href="#org927edf0">4. Lexer</a></li>
+<li><a href="#orgd86503c">5. Formal Syntax</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org32fb5c7" class="outline-2">
+<h2 id="org32fb5c7"><span class="section-number-2">1</span> Motivation</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orgf0e3939" class="outline-3">
+<h3 id="orgf0e3939"><span class="section-number-3">1.1</span> Flex/Bison/C++</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+The original Flex/Bison/C++ implementation of <code>mhdlc</code> has following
+drawbacks. And the python implemention is design to overcome 
+these issues:
+</p>
+<ol class="org-ol">
+<li>Preprocessor is integrated from 3rd party source code, which
+doesn't support recursive macro expansion. And <code>`for</code> support is
+poor (missing <code>`endfor</code> will always need painful debug).</li>
+<li>Logging and message printing is not sophisticated enough. There are 
+too many <code>cout/cerr</code> usages. It is tedious to replace all of them.</li>
+<li><code>generate</code> block is not supported, but it is heavily used in a
+parameterized design.</li>
+<li>MDA more then 2 level of dimension is not supported, <code>[ A +: B]</code>
+style syntax is not supported.</li>
+<li>Evaluation on Verilog function is not supported.</li>
+<li><code>mhdlc</code> is one-pass architecture, but in some cases (such as 
+function call support), two-pass is needed.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org3b97ee8" class="outline-3">
+<h3 id="org3b97ee8"><span class="section-number-3">1.2</span> ply/Python</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+This implementation use <code>ply</code> as parser generator. Major advantages
+are:
+</p>
+<ol class="org-ol">
+<li>Support multiple start-symbol, so multiple parser can be generated
+from single BNF file.</li>
+<li>All parsing are done over string object. No input buffer is
+involved.  It is easier for compiler internal data structure
+passing among pre-processor, lexer, and parser.</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc5c4368" class="outline-2">
+<h2 id="orgc5c4368"><span class="section-number-2">2</span> Features</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgbde6cf5" class="outline-3">
+<h3 id="orgbde6cf5"><span class="section-number-3">2.1</span> Preprocessor</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Verilog <code>generate</code> can almost fit into all <code>`for</code> scenarios, but
+for historical reason, designers want <code>`for</code> syntax to be reserved. 
+On the other hand, <code>`for</code> can be a a fallback solution when <code>generete</code>
+can't be used. 
+</p>
+
+<p>
+<code>`foreach</code> will be added to provide iteration in non-numeric items. 
+It will be useful when instantiating different functional modules 
+that have same interface. 
+</p>
+</div>
+
+<div id="outline-container-org7a35934" class="outline-4">
+<h4 id="org7a35934"><span class="section-number-4">2.1.1</span> Parse-Expand Mode</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<p>
+To support <code>`for</code> and <code>`let</code>, the preprocessor directives should
+be treated as CFG. There should be a parser to process body of
+<code>`for</code> and expression of <code>`let</code>. Value of ordinary macros (that
+are created by <code>`define</code>) is flatterned in the same way as <code>`let</code>
+to support recursive expansion. In such implementation, macro body
+are not allowed to contain perimitive directives (<code>`if</code>, <code>`for</code>,
+etc) that can change the structure of source code. For example,
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog"><span style="color: #729fcf;">`define</span> a <span style="color: #729fcf;">`ifdef</span> XX <span style="color: #edd400; font-weight: bold;">\</span>
+<span style="color: #edd400; font-weight: bold;"> </span>           0       <span style="color: #edd400; font-weight: bold;">\</span>
+<span style="color: #edd400; font-weight: bold;"> </span>         <span style="color: #729fcf;">`else</span>     <span style="color: #edd400; font-weight: bold;">\</span>
+<span style="color: #edd400; font-weight: bold;"> </span>           1       <span style="color: #edd400; font-weight: bold;">\</span>
+<span style="color: #edd400; font-weight: bold;"> </span>         <span style="color: #729fcf;">`endif</span>
+<span style="color: #729fcf;">`a</span>
+</pre>
+</div>
+<p>
+In this example, expansion of <code>`a</code> will add a conditional
+statement into current source which will change the existing
+Abstract Syntax Tree in parser. Since parse works in parse-expand
+order, the newly expanded conditional statement will not be parsed
+again.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf67f7d9" class="outline-4">
+<h4 id="orgf67f7d9"><span class="section-number-4">2.1.2</span> Inline Expand Mode</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<p>
+To support above style, preprocessor works in inline expand
+mode. The macro are expand immediately after read, the expanded
+text are pushed back to input data buffer, for recursive
+expansion.  But in this mode, <code>`for</code> and <code>`let</code> are not supported.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org84b74a8" class="outline-3">
+<h3 id="org84b74a8"><span class="section-number-3">2.2</span> Inference-Checking Compilation</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+In C++ implemented version, compilation is one-pass.  Code checking
+is performed along with inference.  It can't check width mismatch
+after symbol's attribute is updated.  e.g.,
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog"><span style="color: #729fcf; font-weight: bold;">assign</span> a[3:0] = b[3:0];         <span style="color: #595951;">// </span><span style="color: #595951;">infer wire [3:0] a</span>
+...
+...
+...
+
+<span style="color: #729fcf; font-weight: bold;">assign</span> a[3][3:0] = c[3:0];      <span style="color: #595951;">// </span><span style="color: #595951;">infer wire [3:0] [3:0] a</span>
+                                <span style="color: #595951;">// </span><span style="color: #595951;">previous width mismatch is not</span>
+                                <span style="color: #595951;">// </span><span style="color: #595951;">reported   </span>
+</pre>
+</div>
+
+<p>
+In python version, checking is independent from inference.
+Compilation is in two-pass style:
+</p>
+<ol class="org-ol">
+<li>In first pass, compiler only do inference</li>
+<li>In second pass, compiler check code structure (a lightweight
+lint).</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org52fe47a" class="outline-3">
+<h3 id="org52fe47a"><span class="section-number-3">2.3</span> Dimension</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+In order to support MDA of any dimension, <i>Dimension</i> concept is
+introduced.  For example, 
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog">a[3][4][5][7:0] = 8'd0; <span style="color: #595951;">// </span><span style="color: #595951;">[3][4][5][7:0] is a dimension.</span>
+
+<span style="color: #8ae234; font-weight: bold;">output</span>  [A:B] [C:D] [E:F] xx;   <span style="color: #595951;">// </span><span style="color: #595951;">[A:B] [C:D] [E:F] is dimension</span>
+
+<span style="color: #8ae234; font-weight: bold;">output</span> [A:B] [C:D] xx [E:F];    <span style="color: #595951;">// </span><span style="color: #595951;">[E:F] [A:B] [C:D] is dimension,</span>
+                                <span style="color: #595951;">// </span><span style="color: #595951;">note the most-significant dimension is [E:F]</span>
+   
+</pre>
+</div>
+
+<p>
+Dimension has <b>level</b> and <b>width</b> attributes.  
+</p>
+<ol class="org-ol">
+<li>Level is the number of hierarchies, e.g.:
+<ol class="org-ol">
+<li><code>a[3][4][5][7:0]</code> has level=4</li>
+<li><code>output [A:B] [C:D] xx [E:F]</code> has level=3.</li>
+</ol></li>
+<li>Width is the the width of least-significant dimension, e.g.:
+<ol class="org-ol">
+<li><code>a[3][4][5][7:0]</code> has width=8</li>
+<li><code>output [A:B] [C:D] xx [E:F]</code> has width=(C-D+1).</li>
+</ol></li>
+</ol>
+
+<p>
+Dimensions with same level can be compared for width.  e.g., 
+If we have <code>xx</code> declared as below:
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog"><span style="color: #8ae234; font-weight: bold;">wire</span> [15:0] [31:0] [63:0] xx;
+</pre>
+</div>
+
+<p>
+For synthesizable RTL, only least-significant level can have range
+selection, such as <code>[MSB:LSB]</code>, <code>[LSB +: width]</code>, <code>[MSB -: width]</code>.
+Other levels can only have bit index.  MetaHDL implement this
+dimension rule in checking and inference:
+</p>
+<ol class="org-ol">
+<li>When <code>xx</code> is referenced without any dimension, compiler knows
+whole dimension is referenced.</li>
+<li>When <code>xx</code> is referenced with dimension of same level as in
+declaration, e.g., <code>xx[A][B][C]</code> (that is 3 level dimension), 
+compiler checkes dimension rule: 
+<ol class="org-ol">
+<li><code>A</code> and <code>B</code> must be bit index, and must be in delcared range</li>
+<li><code>C</code> can be bit index or range selection, and must be in
+declaration range</li>
+</ol></li>
+<li>When <code>xx</code> is referenced with less dimension levels than that in
+declaration, e.g., <code>xx[D][E]</code>, compiler aligns the dimension
+from most-significant level, and checks dimension rule.</li>
+</ol>
+
+<p>
+For dimension inference, compiler treats first level (from left to
+right) as most-significant level, dimension update is done
+accordingly.  e.g., 
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog"><span style="color: #729fcf; font-weight: bold;">assign</span> a[3] = 1'd0;             <span style="color: #595951;">// </span><span style="color: #595951;">stmt</span><span style="color: #595951; font-weight: bold;">#1</span><span style="color: #595951;">: infer wire [3:0] a;</span>
+
+<span style="color: #729fcf; font-weight: bold;">assign</span> a[3][4] = 1'd0;          <span style="color: #595951;">// </span><span style="color: #595951;">stmt</span><span style="color: #595951; font-weight: bold;">#2</span><span style="color: #595951;">: infer wire [3:0] [4:0] a;</span>
+                                <span style="color: #595951;">// </span><span style="color: #595951;">so stmt</span><span style="color: #595951; font-weight: bold;">#1</span><span style="color: #595951;"> has width mismatch</span>
+
+<span style="color: #729fcf; font-weight: bold;">assign</span> a[3][4] = 4'd0;          <span style="color: #595951;">// </span><span style="color: #595951;">stmt</span><span style="color: #595951; font-weight: bold;">#3</span><span style="color: #595951;">: infer width [3:0] [4:0] [4:0] a;</span>
+                                <span style="color: #595951;">// </span><span style="color: #595951;">so both stmt</span><span style="color: #595951; font-weight: bold;">#1</span><span style="color: #595951;"> and stmt</span><span style="color: #595951; font-weight: bold;">#2</span><span style="color: #595951;"> have width mismatch</span>
+</pre>
+</div>
+
+<p>
+In Inference-Checking compilation, stmt#2 and stmt#1 have width
+mismatch when stmt#3 is reached.  Largest inference result
+dominates symbol dimension. 
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org9b5884c" class="outline-3">
+<h3 id="org9b5884c"><span class="section-number-3">2.4</span> Debug and Log system</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Both <code>ply.lex()</code> and <code>ply.yacc()</code> support debug switch and logging 
+object parsing. When command line option indicates debug on it, 
+logging object is passed to it. Similar mechanism is used for 
+<code>parser.parse()</code>. 
+</p>
+</div>
+</div>
+<div id="outline-container-orgb8ef4cb" class="outline-3">
+<h3 id="orgb8ef4cb"><span class="section-number-3">2.5</span> Self-spawned Parsing is not supported</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+C++ version of mhdlc supports self-spawned parsing to create module 
+from same mhdl source on the fly, as shown below:
+</p>
+<div class="org-src-container">
+<pre class="src src-verilog">     <span style="color: #595951;">// </span><span style="color: #595951;">- * CoS</span>
+     <span style="color: #595951;">// </span><span style="color: #595951;">- Select command tag from 64 \gls{qe}s and</span>
+     <span style="color: #595951;">// </span><span style="color: #595951;">- push into \gls{cdmgr} based on QoS policy.</span>
+     metahdl parse -DCOS_Q_CNT=8 -DQ_OFFSET=0 -DCT=sk -DMETRIC=1 -F cosarb.mhdl;
+     skcosarb;
+
+     metahdl parse -DCOS_Q_CNT=4 -DQ_OFFSET=16 -DCT=pk -DMETRIC=0 -F cosarb.mhdl ;
+     pkcosarb;
+</pre>
+</div>
+<p>
+Compared to parameter implementation, the only benefit is the generated module 
+can have different ports. Other than that, it is replacable with parameter 
+implementation. If such feature is really desired, it can be worked around by
+adding extra dependency in makefile to build the module prior to the parsing. 
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8d49c83" class="outline-2">
+<h2 id="org8d49c83"><span class="section-number-2">3</span> Architecture</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+In SVparser, only module header, IO ports and parameters are recoganized. 
+IO ports and parameters are sub-sets of MHDLparser, module header can be 
+handled with a different starting symbol. So SVparser and MHDLparser can 
+share same CFG.
+</p>
+<ol class="org-ol">
+<li>mhdlc
+<ol class="org-ol">
+<li>DirFile for searching and creating files</li>
+<li>MPPparser
+<ol class="org-ol">
+<li>mhdlc reference to access DirFile</li>
+<li>plexMPP</li>
+<li>pyaccMPP</li>
+</ol></li>
+<li>MHDLparser
+<ol class="org-ol">
+<li>mhdlc reference to access DirFile and MPPparser</li>
+<li>plexMHDL</li>
+<li>pyaccMHDL</li>
+</ol></li>
+<li>SVparser
+<ol class="org-ol">
+<li>mhdlc reference to access DirFile and MPPparser</li>
+<li>plexSV</li>
+<li>pyaccMHDL with different starting symbol</li>
+</ol></li>
+</ol></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org927edf0" class="outline-2">
+<h2 id="org927edf0"><span class="section-number-2">4</span> Lexer</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Lexer generated by ply works in "first win" mode.  All token rules
+are matched one by one, the first matched token rule is selected.
+Token produced by this rule is returned.  But mhdlc needs a "longest
+match win" mode, which leads to the design of <code>GreedyLexer.py</code>.  
+</p>
+</div>
+</div>
+<div id="outline-container-orgd86503c" class="outline-2">
+<h2 id="orgd86503c"><span class="section-number-2">5</span> Formal Syntax</h2>
+<div class="outline-text-2" id="text-5">
+<div class="org-src-container">
+<pre class="src src-bnf"><span style="color: #edd400; font-weight: bold;">    a</span> <span style="color: #8ae234;">::=</span> 
+          <span style="color: #f57900; font-weight: bold;">|</span> ieg
+          <span style="color: #f57900; font-weight: bold;">|</span> eigh
+          <span style="color: #f57900; font-weight: bold;">|</span> <span style="color: #ad7fa8;">"iieg"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
