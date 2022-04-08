@@ -286,6 +286,10 @@ class CSVwrapper;
 %token K_XOR			  "xor"		         
 
 
+ /* System Calls*/
+%token K_CLOG2			  "$clog2"
+
+
  /* operators */
 %token OR  "|"
 %token AND "&" 
@@ -433,6 +437,7 @@ module_parameter_port_list : module_parameter_assignment
 ;
 
 module_parameter_assignment : parameter_keywords parameter_assignment
+| parameter_keywords "[" expression ":" expression "]" parameter_assignment
 ;
 
 
@@ -584,6 +589,11 @@ expression : constant
 | "{" expression concatenation "}"
 {
   $$ = new CDupConcat ($2, $3);
+}
+
+| "$clog2" "(" expressions ")"
+{
+   $$ = new CFuncCallExp ( "$clog2", $3);
 }
 
 | net_name "(" expressions ")" 
@@ -974,7 +984,7 @@ parameter_type_or_empty :
 
 
 parameter_declaration : parameter_keywords parameter_assignments ";" 
-| parameter_keywords "[" expression ":" expression "]" parameter_assignments ";" 
+| parameter_keywords parameter_assignments ";" 
 ;
 
 parameter_assignments : parameter_assignment
@@ -999,6 +1009,25 @@ parameter_assignment : ID "=" expression
     svwrapper.param_table->Insert(param);
   }
 }
+|
+"[" expression ":" expression "]"  ID "=" expression
+{
+  if ( svwrapper.param_table->Exist(*$6) ) {
+    svwrapper.error(@6, "redefinition of parameter " + *$6);
+  }
+  else if ( svwrapper.symbol_table->Exist(*$6) ) {
+    svwrapper.error(@6, *$6 + " has already been used as variable in your code.");
+  }
+  else if (!$8->IsConst()) {
+      if (typeid(*$8) == typeid(CString) ) 
+          cout << "CString" << endl;
+    svwrapper.error(@8, "non-constant expression cannot be value of parameter.");
+  }
+  else {
+    CParameter *param = new CParameter (*$6, $8, svwrapper.is_global_param);
+    svwrapper.param_table->Insert(param);
+  }
+}
 ;
 
 
@@ -1008,9 +1037,9 @@ parameter_assignment : ID "=" expression
 ******************************/
 line_directive: "`line" NUM STRING NL {
   CNumber *num = new CNumber (*$2);
-  yylloc.begin.filename = yylloc.end.filename = $3;
-  yylloc.end.lines( -yylloc.end.line + num->Value() );
-  yylloc.step();
+  yyla.location.begin.filename = yyla.location.end.filename = $3;
+  yyla.location.end.lines( -yyla.location.end.line + num->Value() );
+  yyla.location.step();
  }
 ;
 

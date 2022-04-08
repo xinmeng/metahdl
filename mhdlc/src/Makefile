@@ -1,12 +1,7 @@
 release =
 
-ifeq ($(shell hostname),debian9)
 FLEX = flex
 BISON= bison
-else
-FLEX = /home/xinmeng/tools/bin/flex
-BISON= /tools/bison/2.5.0/bin/bison
-endif
 
 CXX = g++
 TOP_EXE = mhdlc

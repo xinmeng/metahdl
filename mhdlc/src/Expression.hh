@@ -903,7 +903,7 @@ public:
 
 public:
   inline bool         IsConst() {
-      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
+      if (_func_name == "$clog2" || _func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
           for (vector<CExpression*>::iterator iter=_args->begin(); iter!=_args->end();
                iter++)
               if (!(*iter)->IsConst()) {
@@ -918,14 +918,14 @@ public:
   }
 
   inline ulonglong    Width() {
-      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") 
+      if (_func_name == "$clog2" || _func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width")
           return 32;
       else 
           return 1;
   }
 
   inline double       DoubleValue() {
-      if (_func_name == "log2" ) {
+      if (_func_name == "$clog2" || _func_name == "log2" ) {
           CExpression * arg = (*_args)[0];
           if (arg->IsConst()) {
               double v = log2(arg->DoubleValue());
@@ -954,7 +954,7 @@ public:
       }
   }
   inline ulonglong    Value() {
-      if (_func_name == "log2")
+      if (_func_name == "$clog2" || _func_name == "log2")
           return (ulonglong) ceil(this->DoubleValue());
       else if (_func_name == "log2_cnt") {
           CExpression * arg = (*_args)[0];
@@ -992,7 +992,7 @@ public:
       return new CFuncCallExp(_func_name, val_exp_args);
   }
   inline CExpression*  Reduce() {
-      if (_func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
+      if (_func_name == "$clog2" || _func_name == "log2" || _func_name == "log2_cnt" || _func_name == "wx_ecc_width") {
           return new CNumber(32, Value());          
       }          
       else {

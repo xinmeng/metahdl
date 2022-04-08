@@ -254,6 +254,9 @@ K_WOR                     "wor"
 K_XNOR                    "xnor"                         
 K_XOR                     "xor"                  
 
+ /* System Calls*/
+K_CLOG2			  "$clog2"
+
  /* MetaHDL keywords */
 K_METAHDL       "metahdl"
 K_NONPORT       "nonport"
@@ -582,6 +585,10 @@ WS [ \t]+
   {K_WOR} return sv_token::K_WOR;
   {K_XNOR} return sv_token::K_XNOR;
   {K_XOR} return sv_token::K_XOR;
+
+  /* System Call */
+  {K_CLOG2} return sv_token::K_CLOG2;
+
 
   /* operators */
   {OR} return sv_token::OR;
