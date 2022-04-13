@@ -62,7 +62,7 @@ string V_BASE = "../rtl";
 //string WORKDIR = "workdir";
 
 string LOGFILE = "";
-string mhdlversion = "3.0";
+string mhdlversion = "2022-04-13";
 
 
 int IsDir(const char *s)

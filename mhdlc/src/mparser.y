@@ -294,6 +294,11 @@ extern string WORKDIR;
 %token K_XNOR			  "xnor"		  	 
 %token K_XOR			  "xor"		         
 
+
+ /* System Calls*/
+%token K_CLOG2			  "$clog2"
+
+
  /* MetaHDL keywords */
 %token K_METAHDL       "metahdl"
 %token K_NONPORT       "nonport"
@@ -820,6 +825,11 @@ expression : constant
 | concatenation
 {
   $$ = $1;
+}
+
+| "$clog2" "(" expressions ")"
+{
+   $$ = new CFuncCallExp ( "$clog2", $3);
 }
 
 | net_name "(" expressions ")" 
