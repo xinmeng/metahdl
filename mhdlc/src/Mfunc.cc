@@ -56,7 +56,7 @@ string COMMAND = "";
 vector<string> FILES;
 list<string>   PATHS, M_DIRS, I_DIRS;
 map<string, string> MIRROR;
-string M_BASE = ".";
+string M_BASE = "";
 set<string> I_BASE; // = ""; 
 string V_BASE = "../rtl";
 //string WORKDIR = "workdir";
@@ -524,10 +524,16 @@ GetOpt(int argc, char *argv[])
             exit(1);
         }
         else {
-            M_BASE = argv[++i];
-            if ( !IsDir(M_BASE.c_str()) ) {
-                fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -mb in argument %d.\n", M_BASE.c_str(), i);
+            if (M_BASE != "") {
+                fprintf(stderr, "**mhdlc error: -mb can only be specified once, its value is: \"%s\"\n", M_BASE.c_str());
                 exit(1);
+            }
+            else {
+                M_BASE = argv[++i];
+                if ( !IsDir(M_BASE.c_str()) ) {
+                    fprintf(stderr, "**mhdlc error: Invalid path \"%s\" for -mb in argument %d.\n", M_BASE.c_str(), i);
+                    exit(1);
+                }
             }
         }
     }
@@ -690,7 +696,13 @@ GetOpt(int argc, char *argv[])
       }
 
   // M_BASE = GetRealpath(M_BASE);
-  M_DIRS = GetSubdir(M_BASE);
+  if (M_BASE == "") {
+      fprintf(stderr, "**mhdlc error: -mb must be specified.\n");
+      exit(1);
+  }
+  else {
+      M_DIRS = GetSubdir(M_BASE);
+  }
 
   // V_BASE = GetRealpath(V_BASE);
   MIRROR = CreateMirrorDir(M_BASE, V_BASE, M_DIRS);

@@ -2,9 +2,11 @@
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-start $::=$\hspace{1ex} /* empty */
+start $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \mbox{$|$ start port\_declaration}
+
+\mbox{$|$ start force\_port\_declaration}
 
 \mbox{$|$ start parameter\_declaration}
 
@@ -28,6 +30,8 @@ start $::=$\hspace{1ex} /* empty */
 
 \mbox{$|$ start metahdl\_constrol}
 
+\mbox{$|$ start generate\_block}
+
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
@@ -40,6 +44,8 @@ constant $::=$\hspace{1ex} \textbf{\textcolor{red}{STRING}}
 \mbox{$|$ \textbf{\textcolor{red}{DEC\_BASED\_NUM}}}
 
 \mbox{$|$ \textbf{\textcolor{red}{HEX\_BASED\_NUM}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{FLOAT}}}
 
 \vspace{1em}
 \noindent
@@ -56,6 +62,10 @@ net $::=$\hspace{1ex} net\_name \textbf{\textcolor{red}{[}} expression \textbf{\
 \mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}}}
 
 \mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}}}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{$+$}} \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}}}
+
+\mbox{$|$ net\_name \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{$-$}} \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}}}
 
 \mbox{$|$ net\_name}
 
@@ -81,6 +91,8 @@ expression $::=$\hspace{1ex} constant
 \mbox{$|$ net}
 
 \mbox{$|$ concatenation}
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\$}}clog2}} \textbf{\textcolor{red}{(}} expressions \textbf{\textcolor{red}{)}}}
 
 \mbox{$|$ net\_name \textbf{\textcolor{red}{(}} expressions \textbf{\textcolor{red}{)}}}
 
@@ -111,6 +123,8 @@ expression $::=$\hspace{1ex} constant
 \mbox{$|$ expression \textbf{\textcolor{red}{/}} expression}
 
 \mbox{$|$ expression \textbf{\textcolor{red}{\textbf{\textcolor{red}{\%}}}} expression}
+
+\mbox{$|$ expression \textbf{\textcolor{red}{**}} expression}
 
 \mbox{$|$ expression \textbf{\textcolor{red}{$<$$<$}} expression}
 
@@ -164,7 +178,7 @@ balanced\_stmt $::=$\hspace{1ex} \textbf{\textcolor{red}{;}}
 
 \mbox{$|$ \textbf{\textcolor{red}{begin}} \textbf{\textcolor{red}{end}}}
 
-\mbox{$|$ net\_lval \textbf{\textcolor{red}{$<$=}} expression \textbf{\textcolor{red}{;}}}
+\mbox{$|$ net\_lval \textbf{\textcolor{red}{$<$=}} optional\_delay expression \textbf{\textcolor{red}{;}}}
 
 \mbox{$|$ net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}}}
 
@@ -177,6 +191,15 @@ balanced\_stmt $::=$\hspace{1ex} \textbf{\textcolor{red}{;}}
 \mbox{$|$ case\_statement}
 
 \mbox{$|$ \textbf{\textcolor{red}{goto}} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{;}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+optional\_delay $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\#}}}} \textbf{\textcolor{red}{NUM}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\#}}}} \textbf{\textcolor{red}{FLOAT}}}
 
 \vspace{1em}
 \noindent
@@ -229,9 +252,16 @@ case\_item $::=$\hspace{1ex} expressions \textbf{\textcolor{red}{:}} statement
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+force\_port\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{force}} port\_declaration
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 port\_declaration $::=$\hspace{1ex} port\_direction net\_names \textbf{\textcolor{red}{;}}
 
 \mbox{$|$ port\_direction \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{;}}}
+
+\mbox{$|$ port\_direction \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{;}}}
 
 \vspace{1em}
 \noindent
@@ -254,7 +284,17 @@ port\_direction $::=$\hspace{1ex} \textbf{\textcolor{red}{input}}
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@1 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 parameter\_declaration $::=$\hspace{1ex} \textbf{\textcolor{red}{parameter}} parameter\_assignments \textbf{\textcolor{red}{;}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@2 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \vspace{1em}
 \noindent
@@ -289,6 +329,8 @@ variable\_declaration $::=$\hspace{1ex} variable\_type net\_names \textbf{\textc
 
 \mbox{$|$ variable\_type net\_names \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{;}}}
 
+\mbox{$|$ variable\_type \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{;}}}
+
 \mbox{$|$ variable\_type \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} net\_names \textbf{\textcolor{red}{[}} expression \textbf{\textcolor{red}{:}} expression \textbf{\textcolor{red}{]}} \textbf{\textcolor{red}{;}}}
 
 \vspace{1em}
@@ -319,7 +361,17 @@ always\_keyword $::=$\hspace{1ex} \textbf{\textcolor{red}{always}}
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@3 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 legacyff\_block $::=$\hspace{1ex} always\_keyword \textbf{\textcolor{red}{@}} \textbf{\textcolor{red}{(}} \textbf{\textcolor{red}{posedge}} net\_name \textbf{\textcolor{red}{or}} \textbf{\textcolor{red}{negedge}} net\_name \textbf{\textcolor{red}{)}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@4 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \vspace{1em}
 \noindent
@@ -371,6 +423,11 @@ fsm\_header $::=$\hspace{1ex} fsm\_keyword \textbf{\textcolor{red}{ID}} \textbf{
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@5 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 fsm\_block $::=$\hspace{1ex} fsm\_header statements fsm\_items \textbf{\textcolor{red}{endfsm}}
 
 \vspace{1em}
@@ -383,7 +440,17 @@ fsm\_items $::=$\hspace{1ex} fsm\_item
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@6 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
 fsm\_item $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{:}} statement
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+\textbf{\textcolor{red}{\$}}@7 $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \vspace{1em}
 \noindent
@@ -393,14 +460,14 @@ inst\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{ID}} parameter\_rule insta
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-instance\_name $::=$\hspace{1ex} /* empty */
+instance\_name $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \mbox{$|$ \textbf{\textcolor{red}{ID}}}
 
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-parameter\_rule $::=$\hspace{1ex} /* empty */
+parameter\_rule $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \mbox{$|$ \textbf{\textcolor{red}{\textbf{\textcolor{red}{\#}}}} \textbf{\textcolor{red}{(}} parameter\_override \textbf{\textcolor{red}{)}}}
 
@@ -428,7 +495,7 @@ parameter\_name\_override $::=$\hspace{1ex} \textbf{\textcolor{red}{.}} \textbf{
 \vspace{1em}
 \noindent
 \settowidth{\parindent}{\hspace{4ex}}
-connection\_spec $::=$\hspace{1ex} /* empty */
+connection\_spec $::=$\hspace{1ex} \textbf{\textcolor{red}{\%}}empty
 
 \mbox{$|$ \textbf{\textcolor{red}{(}} connection\_rules \textbf{\textcolor{red}{)}}}
 
@@ -451,6 +518,67 @@ connection\_rule $::=$\hspace{1ex} \textbf{\textcolor{red}{.}} net\_name \textbf
 \mbox{$|$ \textbf{\textcolor{red}{$+$}} \textbf{\textcolor{red}{ID}}}
 
 \mbox{$|$ \textbf{\textcolor{red}{ID}} \textbf{\textcolor{red}{$+$}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_block $::=$\hspace{1ex} \textbf{\textcolor{red}{generate}} generate\_statements \textbf{\textcolor{red}{endgenerate}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_statements $::=$\hspace{1ex} generate\_statement
+
+\mbox{$|$ generate\_statements generate\_statement}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_statement $::=$\hspace{1ex} generate\_balanced\_statement
+
+\mbox{$|$ generate\_unbalanced\_statement}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_balanced\_statement $::=$\hspace{1ex} assign\_block
+
+\mbox{$|$ combinational\_block}
+
+\mbox{$|$ ff\_block}
+
+\mbox{$|$ legacyff\_block}
+
+\mbox{$|$ inst\_block}
+
+\mbox{$|$ \textbf{\textcolor{red}{begin}} \textbf{\textcolor{red}{:}} \textbf{\textcolor{red}{ID}} generate\_statements \textbf{\textcolor{red}{end}}}
+
+\mbox{$|$ \textbf{\textcolor{red}{for}} \textbf{\textcolor{red}{(}} net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{;}} expression \textbf{\textcolor{red}{;}} net\_lval \textbf{\textcolor{red}{=}} expression \textbf{\textcolor{red}{)}} generate\_statement}
+
+\mbox{$|$ \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} generate\_balanced\_statement \textbf{\textcolor{red}{else}} generate\_balanced\_statement}
+
+\mbox{$|$ \textbf{\textcolor{red}{case}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} generate\_case\_items \textbf{\textcolor{red}{endcase}}}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_unbalanced\_statement $::=$\hspace{1ex} \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} generate\_statement
+
+\mbox{$|$ \textbf{\textcolor{red}{if}} \textbf{\textcolor{red}{(}} expression \textbf{\textcolor{red}{)}} generate\_balanced\_statement \textbf{\textcolor{red}{else}} generate\_unbalanced\_statement}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_case\_items $::=$\hspace{1ex} generate\_case\_item
+
+\mbox{$|$ generate\_case\_items generate\_case\_item}
+
+\vspace{1em}
+\noindent
+\settowidth{\parindent}{\hspace{4ex}}
+generate\_case\_item $::=$\hspace{1ex} expressions \textbf{\textcolor{red}{:}} generate\_statement
+
+\mbox{$|$ \textbf{\textcolor{red}{default}} \textbf{\textcolor{red}{:}} generate\_statement}
 
 \vspace{1em}
 \noindent
