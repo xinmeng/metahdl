@@ -38,37 +38,102 @@ public:
     }
   }
 
-  inline void Connect(const string & regexp) {
-    for (map<string, CExpression*>::iterator iter = _connect_map.begin(); 
-	 iter != _connect_map.end(); ++iter) {
-      if ( iter->second && typeid( *(iter->second) ) == typeid( CVariable ) ) {
-	CVariable *var = dynamic_cast<CVariable*> (iter->second);
-	CSymbol *tmp_symb = var->Symb();
-	tmp_symb->name = regexp_substitute(tmp_symb->name, regexp);
-	
-	CExpression *exp;
-	if (regexp_match(tmp_symb->name, "/^$/") ) {
-	  iter->second = NULL; // _connect_map[iter->first] = NULL;
-	}
-	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[dD][0-9_]+$/")) {
-	  exp = new CBasedNum(tmp_symb->name, 10);
-	  iter->second = exp; // _connect_map[iter->first] = exp;
-	}
-	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[hH][0-9a-fA-F_]+$/")) {
-	  exp = new CBasedNum(tmp_symb->name, 16);
-	  iter->second = exp; // _connect_map[iter->first] = exp;
-	}
-	else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[bB][01_]+$/")) {
-	  exp = new CBasedNum(tmp_symb->name, 2);
-	  iter->second = exp; // _connect_map[iter->first] = exp;
-	}
-	else if (regexp_match(tmp_symb->name, "/^[0-9_]+$/")) {
-	  exp = new CNumber(tmp_symb->name);
-	  iter->second = exp; // _connect_map[iter->first] = exp;
-	}
+  inline vector<string> SplitRegexSub(const string & cmd, char delim) {
+      vector<string> tokens;
+      size_t pos=0;
+      size_t pos_nxt;
+
+      while ((pos_nxt=cmd.find(delim, pos)) != string::npos) {
+          tokens.push_back(cmd.substr(pos, pos_nxt-pos));
+          pos = pos_nxt+1;
       }
-    }
+
+      if (tokens[0] != "s" || tokens[1] == "" || tokens[2] == "") {
+          cerr << "\033[00;31m\n**"
+               << "Error:Bad regex:"
+               << cmd << "\033[00m" << endl;
+          exit(1);                    
+      }
+
+      if (pos != cmd.length()) {
+          // if pos_nxt reaches end, pos=pos_nxt+1 make pos go beyond
+          // string end
+          tokens.push_back(cmd.substr(pos));
+          cerr << "\033[00;35m\n**"
+               << "Warning:incomplete regex: missing trailing \"/\": "
+               << cmd << "\033[00m" << endl;
+      }
+
+      return tokens;
   }
+
+  inline void Connect(const string & regexp) {
+      vector<string> tokens = this->SplitRegexSub(regexp, '/');
+      regex conn_rule (tokens[1]);
+
+      for (map<string, CExpression*>::iterator iter = _connect_map.begin(); 
+           iter != _connect_map.end(); ++iter) {
+          if ( iter->second && typeid( *(iter->second) ) == typeid( CVariable ) ) {
+              CVariable *var = dynamic_cast<CVariable*> (iter->second);
+              CSymbol *tmp_symb = var->Symb();
+              tmp_symb->name = regex_replace(tmp_symb->name, conn_rule, tokens[2]);
+	
+              CExpression *exp;
+              if (regex_match(tmp_symb->name, regex_empty_net) ) {
+                  iter->second = NULL; // _connect_map[iter->first] = NULL;
+              }
+              else if (regex_match(tmp_symb->name, regex_dec_num)) {
+                  exp = new CBasedNum(tmp_symb->name, 10);
+                  iter->second = exp; // _connect_map[iter->first] = exp;
+              }
+              else if (regex_match(tmp_symb->name, regex_hex_num)) {
+                  exp = new CBasedNum(tmp_symb->name, 16);
+                  iter->second = exp; // _connect_map[iter->first] = exp;
+              }
+              else if (regex_match(tmp_symb->name, regex_bin_num)) {
+                  exp = new CBasedNum(tmp_symb->name, 2);
+                  iter->second = exp; // _connect_map[iter->first] = exp;
+              }
+              else if (regex_match(tmp_symb->name, regex_int_num)) {
+                  exp = new CNumber(tmp_symb->name);
+                  iter->second = exp; // _connect_map[iter->first] = exp;
+              }
+          }
+      }
+  }
+      
+
+  // inline void Connect(const string & regexp) {
+  //   for (map<string, CExpression*>::iterator iter = _connect_map.begin(); 
+  //        iter != _connect_map.end(); ++iter) {
+  //     if ( iter->second && typeid( *(iter->second) ) == typeid( CVariable ) ) {
+  //       CVariable *var = dynamic_cast<CVariable*> (iter->second);
+  //       CSymbol *tmp_symb = var->Symb();
+  //       tmp_symb->name = regexp_substitute(tmp_symb->name, regexp);
+	
+  //       CExpression *exp;
+  //       if (regexp_match(tmp_symb->name, "/^$/") ) {
+  //         iter->second = NULL; // _connect_map[iter->first] = NULL;
+  //       }
+  //       else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[dD][0-9_]+$/")) {
+  //         exp = new CBasedNum(tmp_symb->name, 10);
+  //         iter->second = exp; // _connect_map[iter->first] = exp;
+  //       }
+  //       else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[hH][0-9a-fA-F_]+$/")) {
+  //         exp = new CBasedNum(tmp_symb->name, 16);
+  //         iter->second = exp; // _connect_map[iter->first] = exp;
+  //       }
+  //       else if (regexp_match(tmp_symb->name, "/^([0-9]+)?'[bB][01_]+$/")) {
+  //         exp = new CBasedNum(tmp_symb->name, 2);
+  //         iter->second = exp; // _connect_map[iter->first] = exp;
+  //       }
+  //       else if (regexp_match(tmp_symb->name, "/^[0-9_]+$/")) {
+  //         exp = new CNumber(tmp_symb->name);
+  //         iter->second = exp; // _connect_map[iter->first] = exp;
+  //       }
+  //     }
+  //   }
+  // }
 
   inline void Connect(tXXFix xxfix, const string &str) {
     for (map<string, CExpression*>::iterator iter = _connect_map.begin() ;

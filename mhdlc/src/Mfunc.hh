@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <regex>
 using namespace std;
 
 typedef struct {
@@ -48,6 +49,12 @@ extern list<string>   PATHS, M_DIRS, I_DIRS;
 extern string M_BASE, V_BASE;
 extern set<string> I_BASE;
 extern map<string, string> MIRROR;
+
+extern regex regex_empty_net;
+extern regex regex_bin_num; 
+extern regex regex_dec_num;
+extern regex regex_hex_num;
+extern regex regex_int_num;
 
 //extern string WORKDIR;
 

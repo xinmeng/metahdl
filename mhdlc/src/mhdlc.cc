@@ -6,8 +6,8 @@ using namespace std;
 #include <sys/times.h>
 #include <sys/time.h>
 
-#include <EXTERN.h>
-#include <perl.h>
+// #include <EXTERN.h>
+// #include <perl.h>
 
 
 CModTab G_ModuleTable;
@@ -17,7 +17,7 @@ CNumber* CONST_NUM_0 = new CNumber(32, 0);
 
 extern string LOGFILE;
 
-PerlInterpreter *my_perl;
+// PerlInterpreter *my_perl;
 
 int main(int argc, char *argv[])
 {
@@ -30,13 +30,13 @@ int main(int argc, char *argv[])
   RptOpt(); // report option if "-log" is presented
   
 
-  // for embeded perl
-  char *embedding[] = { "", "-e", "0" };
-  PERL_SYS_INIT3(NULL,NULL,NULL);
-  my_perl = perl_alloc();
-  perl_construct(my_perl);
-  perl_parse(my_perl, NULL, 3, embedding, NULL);
-  PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+  // // for embeded perl
+  // char *embedding[] = { "", "-e", "0" };
+  // PERL_SYS_INIT3(NULL,NULL,NULL);
+  // my_perl = perl_alloc();
+  // perl_construct(my_perl);
+  // perl_parse(my_perl, NULL, 3, embedding, NULL);
+  // PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
 
 
@@ -84,11 +84,11 @@ int main(int argc, char *argv[])
       os.close();
   }
 
-  // free perl
-  PL_perl_destruct_level = 1;
-  perl_destruct(my_perl);
-  perl_free(my_perl);
-  PERL_SYS_TERM();
+  // // free perl
+  // PL_perl_destruct_level = 1;
+  // perl_destruct(my_perl);
+  // perl_free(my_perl);
+  // PERL_SYS_TERM();
 
 
 

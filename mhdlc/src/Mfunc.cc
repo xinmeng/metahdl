@@ -13,8 +13,8 @@
 
 #include "Mfunc.hh"
 
-#include <EXTERN.h>
-#include <perl.h>
+// #include <EXTERN.h>
+// #include <perl.h>
 
 // vpp.l 
 extern int output_line_directive;
@@ -62,7 +62,15 @@ string V_BASE = "../rtl";
 //string WORKDIR = "workdir";
 
 string LOGFILE = "";
-string mhdlversion = "2022-04-13";
+string mhdlversion = "2022-05-14";
+
+
+regex regex_empty_net ("^$");
+regex regex_bin_num   ("^([0-9]+)?'[bB][01_]+$");
+regex regex_dec_num   ("^([0-9]+)?'[dD][0-9_]+$");
+regex regex_hex_num   ("^([0-9]+)?'[hH][0-9a-fA-F_]+$");
+regex regex_int_num   ("^[0-9_]+$");
+
 
 
 int IsDir(const char *s)
@@ -865,64 +873,64 @@ DecomposeName(const string &name)
   return f;
 }
 
-/** my_eval_sv(code, error_check)
- ** kinda like eval_sv(), 
- ** but we pop the return value off the stack 
- **/
-extern PerlInterpreter *my_perl;
+// /** my_eval_sv(code, error_check)
+//  ** kinda like eval_sv(), 
+//  ** but we pop the return value off the stack 
+//  **/
+// extern PerlInterpreter *my_perl;
 
-SV* 
-my_eval_sv(SV *sv, I32 croak_on_error)
-{
-  dSP;
-  SV* retval;
-  STRLEN n_a;
+// SV* 
+// my_eval_sv(SV *sv, I32 croak_on_error)
+// {
+//   dSP;
+//   SV* retval;
+//   STRLEN n_a;
 
-  PUSHMARK(SP);
-  eval_sv(sv, G_SCALAR);
+//   PUSHMARK(SP);
+//   eval_sv(sv, G_SCALAR);
 
-  SPAGAIN;
-  retval = POPs;
-  PUTBACK;
+//   SPAGAIN;
+//   retval = POPs;
+//   PUTBACK;
 
-  if (croak_on_error && SvTRUE(ERRSV))
-    croak(SvPVx(ERRSV, n_a));
+//   if (croak_on_error && SvTRUE(ERRSV))
+//     croak(SvPVx(ERRSV, n_a));
 
-  return retval;
-}
+//   return retval;
+// }
 
-string 
-regexp_substitute(const string &str, const string &pattern)
-{
+// string 
+// regexp_substitute(const string &str, const string &pattern)
+// {
 
-  string cmd_str = "$string = '" + str + "'; ($string =~ " + pattern + ");";
+//   string cmd_str = "$string = '" + str + "'; ($string =~ " + pattern + ");";
 
-  STRLEN n_a;
-  SV *cmd_sv = newSVpvf(cmd_str.c_str());
+//   STRLEN n_a;
+//   SV *cmd_sv = newSVpvf(cmd_str.c_str());
   
-  SV *retval;
+//   SV *retval;
 
-  retval = my_eval_sv(cmd_sv, TRUE);
-  SvREFCNT_dec(cmd_sv);
+//   retval = my_eval_sv(cmd_sv, TRUE);
+//   SvREFCNT_dec(cmd_sv);
 
-  string result_str;
-  result_str = SvPV(get_sv("string", FALSE), n_a);
-  return result_str;
-}
+//   string result_str;
+//   result_str = SvPV(get_sv("string", FALSE), n_a);
+//   return result_str;
+// }
 
-int
-regexp_match(const string &str, const string &pattern)
-{
-  string cmd_str = "$string = \"" + str + "\"; $string =~ " + pattern + ";";
+// int
+// regexp_match(const string &str, const string &pattern)
+// {
+//   string cmd_str = "$string = \"" + str + "\"; $string =~ " + pattern + ";";
 
-  SV *cmd_sv = newSVpvf(cmd_str.c_str());
-  SV *retval;
+//   SV *cmd_sv = newSVpvf(cmd_str.c_str());
+//   SV *retval;
  
-  retval = my_eval_sv(cmd_sv, TRUE);
-  SvREFCNT_dec(cmd_sv);
+//   retval = my_eval_sv(cmd_sv, TRUE);
+//   SvREFCNT_dec(cmd_sv);
  
-  return SvIV(retval);
-}
+//   return SvIV(retval);
+// }
 
 
 string

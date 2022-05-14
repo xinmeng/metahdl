@@ -7,10 +7,12 @@ CXX = g++
 TOP_EXE = mhdlc
 
 
-SUPPRESS_ERR = -Wno-write-strings -Wno-format-security
+SUPPRESS_ERR = -Wno-write-strings -Wno-format-security -Wno-return-type
 PROFLAGS = -pg
-CPPFLAGS = -g `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
-LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
+# CPPFLAGS = -g `perl -MExtUtils::Embed -e ccopts` $(PROFLAGS) $(SUPPRESS_ERR)
+# LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` $(PROFLAGS)
+CPPFLAGS = -g $(PROFLAGS) $(SUPPRESS_ERR)
+LIBFLAGS = $(PROFLAGS)
 
 
 BISON_AUX_INC = location.hh position.hh stack.hh
@@ -73,8 +75,8 @@ CC_SRC = $(M_ALL_CC_SRC) $(SV_ALL_CC_SRC) $(PP_ALL_CC_SRC) $(UTIL_ALL_CC_SRC) $(
 $(TOP_EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(LIBFLAGS)
 
-release : CPPFLAGS = -O3 `perl -MExtUtils::Embed -e ccopts` $(SUPPRESS_ERR)
-release : LIBFLAGS = `perl -MExtUtils::Embed -e ldopts` 
+release : CPPFLAGS = -O3 $(SUPPRESS_ERR)
+release : LIBFLAGS = 
 release : $(TOP_EXE)
 
 
