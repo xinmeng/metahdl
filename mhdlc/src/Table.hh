@@ -55,14 +55,14 @@ public:
           exit(1);                    
       }
 
-      if (pos != cmd.length()) {
-          // if pos_nxt reaches end, pos=pos_nxt+1 make pos go beyond
-          // string end
-          tokens.push_back(cmd.substr(pos));
-          cerr << "\033[00;35m\n**"
-               << "Warning:incomplete regex: missing trailing \"/\": "
-               << cmd << "\033[00m" << endl;
-      }
+      // if (pos != cmd.length()) {
+      //     // if pos_nxt reaches end, pos=pos_nxt+1 make pos go beyond
+      //     // string end
+      //     tokens.push_back(cmd.substr(pos));
+      //     cerr << "\033[00;35m\n**"
+      //          << "Warning:incomplete regex: missing trailing \"/\": "
+      //          << cmd << "\033[00m" << endl;
+      // }
 
       return tokens;
   }
@@ -76,7 +76,9 @@ public:
           if ( iter->second && typeid( *(iter->second) ) == typeid( CVariable ) ) {
               CVariable *var = dynamic_cast<CVariable*> (iter->second);
               CSymbol *tmp_symb = var->Symb();
-              tmp_symb->name = regex_replace(tmp_symb->name, conn_rule, tokens[2]);
+              tmp_symb->name = regex_replace(tmp_symb->name,
+                                             conn_rule, tokens[2],
+                                             regex_constants::match_not_null);
 	
               CExpression *exp;
               if (regex_match(tmp_symb->name, regex_empty_net) ) {

@@ -1,0 +1,1307 @@
+** Introduction
+   :PROPERTIES:
+   :CUSTOM_ID: sec:intro
+   :END:
+mhdl is an hdl aims at synthesizable digital VLSI designs (commonly
+known as rtl designs). mhdl selectively inherits sv syntax, eliminates
+unnecessary variants, extends existing synthesizable language structures
+and adds new grammars to simplify RTL coding. Designers will find it
+quite intuitive and flexible when using mhdl. A compiler named mhdlc is
+implemented to translate mhdl to sv or v.
+
+*** Features
+    :PROPERTIES:
+    :CUSTOM_ID: features
+    :END:
+1. Comprehensive Preprocessor
+
+2. Flexible declarations
+
+3. Port inference and automatic variable declarations
+
+4. Enhanced instantiation syntax
+
+5. New syntax for ff and fsm
+
+6. Parameter tracing
+
+7. Automatic dependency resolving
+
+8. Lightweight lint checking
+
+9. Independent Verilog Parser to support IP integration
+
+10. Rich user control syntax
+
+11. Re-indent the generated sv/v
+
+*** Document Organization
+    :PROPERTIES:
+    :CUSTOM_ID: document-organization
+    :END:
+In the reset of this manual, mhdl syntax and usage will be documented in
+detail, following is the organization of this document:
+
+- [[#sec:basic concepts][[sec:basic concepts]]] gives many basic and
+  important concepts behind mhdl. All readers are expected to read this
+  chapter carefully, otherwise, later chapters are difficult to
+  understand.
+
+- [[#sec:syntax][[sec:syntax]]] gives major syntax explanations and
+  sample codes. After reading this chapter, readers can develop complex
+  chips with powerful capabilities provided by mhdl.
+
+- [[#sec:pp][[sec:pp]]] describes preprocessor in mhdlc and support
+  directives. Designers can achieve script-like code configurations by
+  using this build-in preprocessor, instead of writing dozens of
+  one-time scripts.
+
+- [[#sec:user control][[sec:user control]]] lists various user control
+  variables that alter compiler execution.
+
+- [[#sec:flow][[sec:flow]]] describes mechanism and operation flow of
+  mhdlc.
+
+- [[#sec:command line opt][[sec:command line opt]]] documents all
+  command line options accepted by mhdlc.
+
+- [[#sec:for vperl][[sec:for vperl]]] provides additional information
+  for those who originally use vperl[cite:@Yan2004] for daily coding.
+  Differences with vperl are summarized there.
+
+- [[#sec:bnf][[sec:bnf]]] is the complete formal syntax of mhdl.
+
+*** Download
+    :PROPERTIES:
+    :CUSTOM_ID: download
+    :END:
+mhdlc is publically available at [[http://metahdl.googlecode.com]]. This
+document is built from LaTeX sources which are distributed with mhdlc
+source code.
+
+*** Bug Report
+    :PROPERTIES:
+    :CUSTOM_ID: bug-report
+    :END:
+If you find any bug of mhdlc, ambiguous contents or typo in this
+document, please contact author via
+[[mailto:xinmeng@hotmail.com][xinmeng@hotmail.com]], thanks!
+
+* Language Reference
+  :PROPERTIES:
+  :CUSTOM_ID: language-reference
+  :END:
+** Basic Concepts
+   :PROPERTIES:
+   :CUSTOM_ID: sec:basic concepts
+   :END:
+RTL designs are not like other programming, there are few local
+variables. In addition to physical resources occupation semantics, RTL
+variables also represent nets or connections. Physical elements are
+connected via variables. Normally, there is no floating net inside
+modules, which means every net should have sources and sink. If a net
+has no source, it should be module input port, which will be fed by
+external drivers. If it has no sink, it should be output port, which
+will talk to external modules or chips. If it has both sources and sink,
+it is most probably an internal net. These are basic rules of port
+inference in mhdlc. Designers can override these rules by adding
+explicit port declarations.
+
+Module ports is automatically inferred by compiler, and designers can
+ask compiler to perform port validation (or port checking) against
+designers' explicit declaration. In this situation, golden ports are
+declared by designers, compiler compares the ports inferred and ports
+declared by designers, any missing or newly emerging ports are reported
+via warning.
+
+In mhdl world, there are /only/ four types of building block in
+synthesizable RTL designs:
+
+1. combinational logic
+
+2. sequential logic (mostly Flip-Flop)
+
+3. module instantiation
+
+4. fsm. Technically, FSM is essentially a mixture of combinational and
+   sequential logic, Because it is so commonly used, we promote it to
+   basic structure.
+
+They are called /code block/ (code block) in the rest of this document.
+Any modules -- no matter how complex it is -- can be decomposed to these
+four structures. Module is only a physical resources wrapper with
+parameters to be overridden upon instantiation.
+
+mhdl RTL design is a process in which designers describe functionalities
+using code block; mhdlc connects nets with same name and infers ports
+according to designers' declarations. Parameters are recognized and
+ports/nets are parameterized automatically.
+
+mhdl also allows designers to embed script like flexible code
+configuration settings in RTL description in a reuse oriented design.
+Module logic can be fine-grain tuned before translating mhdl to sv.
+Ports and variable declarations are /dynamically/ updated according to
+logic configuration.
+
+** Syntax
+   :PROPERTIES:
+   :CUSTOM_ID: sec:syntax
+   :END:
+mhdl syntax borns from sv. It selectively inherits synthesizable syntax
+of sv, eliminates unnecessary variants, extends module instantiation
+syntax, add new syntax for Flip-Flop and FSM. v or sv designers will
+find it quite intuitive to use mhdl syntax. In the rest of this chapter,
+major syntax are presented with examples, refer to
+[[#sec:bnf][[sec:bnf]]] for complete syntax.
+
+*** Combinational Logic
+    :PROPERTIES:
+    :CUSTOM_ID: combinational-logic
+    :END:
+There are two and only two types of code block in mhdl for coding
+combinational logic:
+
+1. statement
+
+2. statement
+
+Both syntax are same in sv.
+
+*** Sequential Logic
+    :PROPERTIES:
+    :CUSTOM_ID: sequential-logic
+    :END:
+There are two types of code block in mhdl for coding sequential logic:
+
+1. statement, which is same in sv
+
+2. - block, which is introduec by mhdl
+
+The troditional sv syntax is good except its redundancy: ff variable
+appears twice (even more) in different clause of - branches. For a
+multi-bit vector variable, such redundancy could lead to typo and width
+mismatch among all branches.
+
+For well-coded ff, combinational part of the ff sources should be coded
+in a separate code block, so the - branches can be reduced. mhdl
+provides a new - code block to such reduced ff coding. Such new syntax
+can eliminate redundancy. ff code in follow two forms are equivalent.
+
+// troditional sequential block always_ff @ (posedge clk or negedge
+rst_n) if (!rst_n) a_ff <= 1'b0; else a_ff <= a;
+
+// MetaHDL new sequential block ff; a_ff, a, 1'b0; endff
+
+block can specify clock and reset signal name, however, they are usually
+ommitted to further reduce redundancy. Each line in block describes a
+ff. A line has three element:
+
+1. ff variable name, here.
+
+2. An expression containing the logic to update the ff, here. Any
+   expression defined in [[#sec:bnf][[sec:bnf]]] are allowed here.
+
+3. An constant as reset value. It is optional. If not reset value
+   provided, ff variable will not be reset.
+
+Here is example:
+
+ff clk_a, clk_a_rst_n; a_ff, a, 1'b0; b_ff, b; c_ff, a_ff & b_ff, 1'b0;
+endff
+
+always_ff @(posedge clk_a or negedge clk_a_rst_n) if (clk_a_rst_n) a_ff
+<= 1'b0; c_ff <= 1'b0; else begin a_ff <= a; b_ff <= b; c_ff <= a_ff &
+b_ff; end
+
+*** FSM
+    :PROPERTIES:
+    :CUSTOM_ID: fsm
+    :END:
+fsm in conventional RTL design requires many constant/parameter
+definitions to improve code readability. But these definitions are hard
+to maintain during develop iteration, especially for one-hot encoded
+FSM. mhdl introduces /symbol based/ FSM programming paradigm that
+liberates designers from such frustrated situation.
+
+fsm code block is enclosed by keywords / and . is followed by three
+identifiers:
+
+1. FSM name, which is mandatory.
+
+2. clock signal name, which is optional.
+
+3. reset signal name, which is optional, too.
+
+FSM name is used as based name of state register, and suffix are
+appended to FSM name to create current state register and next state
+next state register, respectively. clock and reset signal names are used
+in sequential block of FSM, which resets state register and perform
+current state refreshing. clock and reset names can be omitted together,
+and default name and will be used. State transition is explicitly stated
+by keyword, instead of next state assignment.
+
+Symbol based FSM programming allows designers to code FSM using state
+names, one-hot state encodings are automatically generated by mhdlc.
+Constant definitions are generated according to state names to improve
+code readability. To help designers eliminate state name typo, mhdlc
+will build a /Directed Graph/ representing state transition during
+parsing, to check the connectivity of every state. Dead states and
+unreachable states are reported to designers for confirmation.
+[[#lst:fsm in mhdl][[lst:fsm in mhdl]]] is mhdl FSM description,
+[[#lst:fsm in sv][[lst:fsm in sv]]] is the corresponding sv description,
+including constant definition.
+
+fsm cmdrx, clk, rst_n; cm_pim_ack = 1'b0;
+
+IDLE: begin if ( pim_cm_req ) begin cm_pim_ack = 1'b1; goto DATA; end
+else begin goto IDLE; end end
+
+DATA: begin cm_pim_ack = 1'b1; if ( pim_cm_eof ) begin cm_pim_ack =
+1'b0; goto IDLE; end else begin goto DATA; end end
+
+endfsm
+
+// other declarations... const logic [1:0] DATA = 2'b10; const logic
+[1:0] IDLE = 2'b01; const int _DATA_ = 1; const int _IDLE_ = 0;
+
+// Sequential part of cmdrx always_ff @(posedge clk or negedge rst_n) if
+( rst_n) begin cmdrx_cs <= IDLE; end else begin cmdrx_cs <= cmdrx_ns;
+end
+
+// Combnational part of cmdrx always_comb begin cm_pim_ack = 1'b0;
+unique case ( 1'b1 ) cmdrx_cs[_IDLE_] : begin if ( pim_cm_req ) begin
+cm_pim_ack = 1'b1; cmdrx_ns = DATA; end else begin cmdrx_ns = IDLE; end
+end
+
+cmdrx_cs[_DATA_] : begin cm_pim_ack = 1'b1; if ( pim_cm_eof ) begin
+cm_pim_ack = 1'b0; cmdrx_ns = IDLE; end else begin cmdrx_ns = DATA; end
+end
+
+default: begin cmdrx_ns = 2'hX; end endcase end
+
+Different of and is Verilog generated from block will not contain the
+sequential block. That means designers have to manually code the
+sequential block. This is expecially designed for FSM with synchronous
+reset. *Note* that the manual crafted sequential block /must/ come after
+the block, because and signals are only accessible after block is
+parsed.
+
+*** Module Instantiation
+    :PROPERTIES:
+    :CUSTOM_ID: module-instantiation
+    :END:
+sv module instantiation syntax is extended in mhdl, BNF is shown in
+[[#sec:bnf][[sec:bnf]]], start from non-terminal "inst_block". Features
+of mhdl instantiation syntax are highlighted below:
+
+1. Instance name is optional. Default instance name is prefix
+   concatenate with module name.
+
+2. Port connection is optional. Default behavior is to connect ports to
+   net with identical name.
+
+3. Prefix and/or Suffix rule is allowed in port connection (see example
+   below).
+
+4. Regular expression rule is allowed in port connection (see example
+   below).
+
+input i1; input i2; output o1; output [1:0] o2;
+
+// simplest instantiation moda;
+
+// prefix rule moda x1_moda ( x1_ +);
+
+// suffix rule // after prefix rule moda x2_moda ( x2_ + , /**/ + _22);
+
+// Perl compatible regexp moda x3_moda ( "s/o/out/g", "s/i/in/g" );
+
+moda x_moda ( .i1 (i1), .i2 (i2), .o1 (o1), .o2 (o2) );
+
+moda x1_moda ( .i1 (x1_i1), .i2 (x1_i2), .o1 (x1_o1), .o2 (x1_o2) );
+
+moda x2_moda ( .i1 (x2_i1_22), .i2 (x2_i2_22), .o1 (x2_o1_22), .o2
+(x2_o2_22) );
+
+moda x3_moda ( .i1 (in1), .i2 (in2), .o1 (out1), .o2 (out2) );
+
+*** Parameter Tracing
+    :PROPERTIES:
+    :CUSTOM_ID: parameter-tracing
+    :END:
+mhdl enables designers to creates parameterized module in two ways:
+
+- Write parameterized module from draft.
+
+- Build parameterized module from existing parameterized modules.
+
+Designers declare parameters, and use them in ports or net index. will
+automatically parameterize ports in generated declarations. If a module
+to be instantiated is a parameterized module, can trace parameter usage
+in port connections and automatically parameterize wrapper module.
+[[#lst:modc in mhdl][[lst:modc in mhdl]]],
+[[#lst:modc in sv][[lst:modc in sv]]],
+[[#lst:wrapper in mhdl][[lst:wrapper in mhdl]]] and
+[[#lst:wrapper in sv][[lst:wrapper in sv]]] demonstrate a example
+parameter tracing.
+
+parameter A = 4; parameter B = 5; parameter C = A + B;
+
+assign o1[C-1:0] =  i1[A-1:0], i2[B-1:0];
+
+module modc ( i1, i2, o1);
+
+parameter A = 4; parameter B = 5; parameter C = 4 + 5;
+
+input [A - 1:0] i1; input [B - 1:0] i2; output [C - 1:0] o1;
+
+logic [A - 1:0] i1; logic [B - 1:0] i2; logic [C - 1:0] o1;
+
+assign o1[C - 1:0] =  i1[A - 1:0], i2[B - 1:0]; endmodule
+
+parameter SETA = 8, SETB = 9;
+
+modc #( .A(2) ) x0_modc ( x0_ + );
+
+modc #( SETA, SETB ) x1_modc ( x1_ + );
+
+modc #( .A(SETA) ) x2_modc (x2_ +, .o1 (x2_o1[10:0]));
+
+module modwrapper ( x0_i1, x0_i2, x0_o1, x1_i1, x1_i2, x1_o1, x2_i1,
+x2_i2, x2_o1);
+
+parameter SETA = 8; parameter SETB = 9;
+
+input [1 :0] x0_i1; input [4 :0] x0_i2; output [6 :0] x0_o1; input
+[SETA - 1:0] x1_i1; input [SETB - 1:0] x1_i2; output [SETA + SETB - 1:0]
+x1_o1; input [SETA - 1:0] x2_i1; input [4 :0] x2_i2; output [10 :0]
+x2_o1;
+
+logic [1 :0] x0_i1; logic [4 :0] x0_i2; logic [6 :0] x0_o1; logic
+[SETA - 1:0] x1_i1; logic [SETB - 1:0] x1_i2; logic [SETA + SETB - 1:0]
+x1_o1; logic [SETA - 1:0] x2_i1; logic [4 :0] x2_i2; logic [10 :0]
+x2_o1;
+
+modc #( .A( 2 ), .B( 5 ), .C( 2 + 5 ) ) x0_modc ( .i1 (x0_i1), .i2
+(x0_i2), .o1 (x0_o1) );
+
+modc #( .A( SETA ), .B( SETB ), .C( SETA + SETB ) ) x1_modc ( .i1
+(x1_i1), .i2 (x1_i2), .o1 (x1_o1) );
+
+modc #( .A( SETA ), .B( 5 ), .C( SETA + 5 ) ) x2_modc ( .i1 (x2_i1), .i2
+(x2_i2), .o1 (x2_o1[10:0]) );
+
+endmodule
+
+*** Optional Declaration
+    :PROPERTIES:
+    :CUSTOM_ID: optional-declaration
+    :END:
+Declaration in v and sv is mandatory, but in mhdl is optional. mhdlc can
+automatcially infer width, port direction, and variable type from a well
+designed synthesizable RTL code. But in some cases, designers want to
+override the inference results. This can be done by declaration
+statements. Usually, declaration is used in follow sceanrios:
+
+1. A parameterized port/net/reg, such as
+
+2. Force port direction, such as
+
+3. 2 dimensional array, such as
+
+4. Integer iteration variable used in statement, such as
+
+*** Runtime Compiler Control
+    :PROPERTIES:
+    :CUSTOM_ID: runtime-compiler-control
+    :END:
+** Preprocessor
+   :PROPERTIES:
+   :CUSTOM_ID: sec:pp
+   :END:
+Preprocessor helps designers to embed script like code configuration
+directives into RTL code for reuse oriented designs to improve code
+integrity. Conventionally, designers are used to write one-time scripts
+(Perl/sed/awk/csh) to preprocess their RTL for similar project usage.
+This methodology is not clean enough. Verification engineers have to
+create additional steps in =Makefile= to preprocess code. 's
+preprocessor uses style macro syntax, introduces more flow control
+directives that help designers perform conditional and repetitive
+configuration on RTL.
+
+In addition to conventional `=ifdef=, `=ifndef=, `=else=, `=define= and
+`=include= macro directives, introduces `=for=, `=if= and `=let= to
+enlarge the power of preprocessor (see following examples).
+
+[[#lst:arb in pp][[lst:arb in pp]]] is a simple Round Robin Arbiter FSM
+implemented in with facilitating preprocessor. This arbiter can respond
+to a configurable number of slaves, which is controlled by macro
+=SLV_NUM=. Once the code is finished, various arbiters can be generated
+in with giving different values to =SLV_NUM= when invoke .
+
+#+begin_example
+fsm arb; 
+
+/*-\`{}\textcolor{purple}{for}-*/ (i=1; /*-\`{}\textcolor{purple}{i}-*/<=/*-\`{}\textcolor{purple}{SLV\_NUM}-*/; i++) /*-\label{ln:default output}-*/
+slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
+/*-\`{}\textcolor{purple}{endfor}-*/
+
+/*-\`{}\textcolor{purple}{for}-*/ (i=1; /*-\`{}\textcolor{purple}{i}-*/<=/*-\`{}\textcolor{purple}{SLV\_NUM}-*/; i++) /*-\label{ln:body}-*/
+ /*-\`{}\textcolor{purple}{let}-*/ j = /*-\`{}\textcolor{purple}{i}-*/ + 1 /*-\label{ln:let}-*/
+
+ /*-\`{}\textcolor{purple}{if}-*/ /*-\`{}\textcolor{purple}{i}-*/ != /*-\`{}\textcolor{purple}{SLV\_NUM}-*/ /*-\label{ln:if}-*/
+SLAVE_/*-\`{}\textcolor{purple}{i}-*/: begin
+   if ( slave_req_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+      slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b1;
+      if ( slave_eof_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+	 slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
+	 goto SLAVE_/*-\`{}\textcolor{purple}{j}-*/;
+      end
+      else begin
+	 goto SLAVE_/*-\`{}\textcolor{purple}{i}-*/;
+      end
+   end
+   else 
+     goto SLAVE_/*-\`{}\textcolor{purple}{j}-*/;
+end
+
+ /*-\`{}\textcolor{purple}{else} \label{ln:else}-*/ 
+SLAVE_/*-\`{}\textcolor{purple}{i}-*/: begin 
+   if ( slave_req_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+      slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b1;
+      if ( slave_eof_/*-\`{}\textcolor{purple}{i}-*/ ) begin
+	 slave_grnt_/*-\`{}\textcolor{purple}{i}-*/ = 1'b0;
+	 goto SLAVE_1;
+      end
+      else 
+	goto SLAVE_/*-\`{}\textcolor{purple}{i}-*/;
+   end
+   else 
+     goto SLAVE_1;
+end  
+ /*-\`{}\textcolor{purple}{endif} \label{ln:endif}-*/
+/*-\`{}\textcolor{purple}{endfor}-*/
+endfsm
+#+end_example
+
+Line [[#ln:default output][[ln:default output]]] starts a `=for=
+directive to repetitively "write" code with slight difference. Default
+values of FSM output are set within this block.
+
+Line [[#ln:body][[ln:body]]] starts another `=for= directive to write
+slave handling code, one state for each slave. Since it is a Round Robin
+arbiter, every states perform same task: grant slave access if has
+request, move to next slave when current one has no request or
+transaction is done, roll back to the first slave when a arbitration
+round finishes. Line [[#ln:if][[ln:if]]], [[#ln:else][[ln:else]]] and
+[[#ln:endif][[ln:endif]]] compose an `=if= block to check whether
+current state is for last slave.
+
+Line [[#ln:let][[ln:let]]] is `=let= directive used to perform
+arithmetic operation and calculate value of `=j=, which is the number of
+next slave.
+
+[[#lst:arb in sv][[lst:arb in sv]]] is the generated with =SLV_NUM= set
+to \(4\).
+
+#+begin_example
+module arbiter (
+  clock, 
+  reset_n, 
+  slave_eof_1, 
+  slave_eof_2, 
+  slave_eof_3, 
+  slave_eof_4, 
+  slave_grnt_1, 
+  slave_grnt_2, 
+  slave_grnt_3, 
+  slave_grnt_4, 
+  slave_req_1, 
+  slave_req_2, 
+  slave_req_3, 
+  slave_req_4);
+
+
+input clock;
+input reset_n;
+input slave_eof_1;
+input slave_eof_2;
+input slave_eof_3;
+input slave_eof_4;
+output slave_grnt_1;
+output slave_grnt_2;
+output slave_grnt_3;
+output slave_grnt_4;
+input slave_req_1;
+input slave_req_2;
+input slave_req_3;
+input slave_req_4;
+
+const logic [3:0] SLAVE_1 = 4'b0001;
+const logic [3:0] SLAVE_2 = 4'b0010;
+const logic [3:0] SLAVE_3 = 4'b0100;
+const logic [3:0] SLAVE_4 = 4'b1000;
+const int _SLAVE_1_ = 0;
+const int _SLAVE_2_ = 1;
+const int _SLAVE_3_ = 2;
+const int _SLAVE_4_ = 3;
+logic [3:0] arb_cs;
+logic [3:0] arb_ns;
+logic clock;
+logic reset_n;
+logic slave_eof_1;
+logic slave_eof_2;
+logic slave_eof_3;
+logic slave_eof_4;
+logic slave_grnt_1;
+logic slave_grnt_2;
+logic slave_grnt_3;
+logic slave_grnt_4;
+logic slave_req_1;
+logic slave_req_2;
+logic slave_req_3;
+logic slave_req_4;
+
+// Sequential part of FSM /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+// /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+always_ff @(posedge clock or negedge reset_n)
+  if (~reset_n) begin
+    arb_cs <= SLAVE_1;
+  end
+  else begin
+    arb_cs <= arb_ns;
+  end
+
+// Combnational part of FSM /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+// /tmp/xin_meng/mhdlc/test/arbiter.mhdl:1.0-42.5
+always_comb begin
+  slave_grnt_1 = 1'b0;
+  slave_grnt_2 = 1'b0;
+  slave_grnt_3 = 1'b0;
+  slave_grnt_4 = 1'b0;
+  unique case ( 1'b1 )
+    arb_cs[_SLAVE_1_] : begin
+      if ( slave_req_1 ) begin
+        slave_grnt_1 = 1'b1;
+        if ( slave_eof_1 ) begin
+          slave_grnt_1 = 1'b0;
+          arb_ns = SLAVE_2;
+        end
+        else begin
+          arb_ns = SLAVE_1;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_2;
+      end
+    end
+
+    arb_cs[_SLAVE_2_] : begin
+      if ( slave_req_2 ) begin
+        slave_grnt_2 = 1'b1;
+        if ( slave_eof_2 ) begin
+          slave_grnt_2 = 1'b0;
+          arb_ns = SLAVE_3;
+        end
+        else begin
+          arb_ns = SLAVE_2;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_3;
+      end
+    end
+
+    arb_cs[_SLAVE_3_] : begin
+      if ( slave_req_3 ) begin
+        slave_grnt_3 = 1'b1;
+        if ( slave_eof_3 ) begin
+          slave_grnt_3 = 1'b0;
+          arb_ns = SLAVE_4;
+        end
+        else begin
+          arb_ns = SLAVE_3;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_4;
+      end
+    end
+
+    arb_cs[_SLAVE_4_] : begin
+      if ( slave_req_4 ) begin
+        slave_grnt_4 = 1'b1;
+        if ( slave_eof_4 ) begin
+          slave_grnt_4 = 1'b0;
+          arb_ns = SLAVE_1;
+        end
+        else begin
+          arb_ns = SLAVE_4;
+        end
+      end
+      else begin
+        arb_ns = SLAVE_1;
+      end
+    end
+
+    default: begin
+      arb_ns = 4'hX;
+    end
+  endcase
+end
+
+
+endmodule
+#+end_example
+
+`=let= directive supports sufficient operators and a bunch of common
+used functions:
+
+- Numeric operators: addition (+), subtraction (\(-\)), multiplication
+  (\(*\)), division (\(/\)), modulus (%), power (\(**\)).
+
+- Logical operators: logical AND (&&), logical OR (\(||\)), logical NOT
+  (\(!\)).
+
+- Bit operators: bitwise XOR (^), bitwise AND (&), bitwise OR (\(|\)),
+  shift right (\(>>\)), shift left (\(<<\)).
+
+- Functions: log 2 (LOG2()), round up (CEIL()), round down (FLOOR()),
+  round to nearest value (ROUND()), max of two numbers (MAX()), min of
+  two numbers (MIN()), odd (ODD()), even (EVEN()), absolute value
+  (ABS()).
+
+#+begin_example
+/*-\`{}\textcolor{purple}{define}-*/ x 2
+
+// NOTE /*-\`{}\textcolor{purple}{let}-*/ need "="
+/*-\`{}\textcolor{purple}{let}-*/ y = /*-\`{}\textcolor{purple}{x}-*/ ** 10 // now /*-\`{}\textcolor{purple}{y}-*/ is 1024
+
+/*-\`{}\textcolor{purple}{let}-*/ z = LOG2(/*-\`{}\textcolor{purple}{y}-*/) // /*-\`{}\textcolor{purple}{z}-*/ is 10
+/*-\`{}\textcolor{purple}{let}-*/ a = LOG2(/*-\`{}\textcolor{purple}{z}-*/) // /*-\`{}\textcolor{purple}{a}-*/ is 3.321928
+/*-\`{}\textcolor{purple}{let}-*/ c = CEIL(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{c}-*/ is 4
+/*-\`{}\textcolor{purple}{let}-*/ f = FLOOR(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{f}-*/ is 3
+/*-\`{}\textcolor{purple}{let}-*/ r = ROUND(/*-\`{}\textcolor{purple}{a}-*/) // /*-\`{}\textcolor{purple}{r}-*/ is 3
+
+
+// we can concatenate macro value with other strings
+// using "::" operator
+assign cat_/*-\`{}\textcolor{purple}{f}-*/::k = 1'b0; // expand to ``assign cat_3k = 1'b0;''
+assign cat_/*-\`{}\textcolor{purple}{fk}-*/ = 1'b0; // /*-\textcolor{red}{Error!!}-*/ macro ``fk'' is not defined 
+#+end_example
+
+[[#lst:let example][[lst:let example]]] demonstrates some usages of
+`=let= directive. Operators and functions supported by `=let= directive
+constructs macro variables to /macro expression/, such as =`a + `b=,
+=ODD(`f)=, =`a >> 2=, =`f <= `d && `f != 0=, which can further be
+evaluated by `=if= directive for flow controlling, just as shown in
+[[#lst:arb in pp][[lst:arb in pp]]] line [[#ln:if][[ln:if]]] .
+
+** User Control
+   :PROPERTIES:
+   :CUSTOM_ID: sec:user control
+   :END:
+provides control syntax start with keyword "=metahdl=", which interfaces
+with and controls the runtime behavior of compiler. Designers' controls
+are passed to compiler via variable assignments embedded in RTL code,
+this variable settings are also preceded by keyword =metahdl=. Boolean
+variables inside compiler are set via \(+\)/\(-\) preceded by variable
+name, where \(+\) means "enable" and \(-\) means "disable". There are
+two special form of control syntax: exit syntax, and echo syntax. The
+former is used to command compiler exit when the statement is
+encountered. The latter is used to print messages on =stderr=. They are
+usually used with preprocessor to guarantee correct configuration
+settings. Refer to [[#sec:bnf][[sec:bnf]]] for detailed formal syntax.
+
+Working scope of all variables can be /Modular/ or /Effective/. Modular
+variables (MVAR) take effect on entire module and are used when parsing
+is finished. Designers can set MVAR anywhere in source code and get the
+same effect. If an MVAR is assigned multiple times, last assignment
+wins. MVAR can have different values in different files, so file is the
+minimum granularity of MVAR.
+
+Effective variables (EVAR) take effect from the point the variable is
+assigned and are used /during/ parsing. Designers can set different
+values for same EVAR in different sections of source code, and make
+compiler treat sections differently. So the minimum granularity of EVAR
+is section divided by EVAR assignments.
+
+*** Variable List
+    :PROPERTIES:
+    :CUSTOM_ID: variable-list
+    :END:
+Following is the complete list of all compiler variables can be assigned
+by user control syntax, variable type (boolean or string) and variable
+scope (MVAR or EVAR) are listed with variable name.
+
+*** Example
+    :PROPERTIES:
+    :CUSTOM_ID: example
+    :END:
+[[#lst:top wrapper][[lst:top wrapper]]] demonstrates user control syntax
+with code configuration.
+
+#+begin_example
+metahdl + portchk; /*\label{ln:portchk}*/
+
+/*\`{}\textcolor{purple}{if}*/ WIDTH > 64 /*\label{ln:chk width}*/
+metahdl ``width can not exceed 64!'';
+metahdl exit;
+/*\`{}\textcolor{purple}{endif}*/
+
+assign data[/*\`{}\textcolor{purple}{WIDTH}*/-1:0] = /*\`{}\textcolor{purple}{WIDTH}*/'d0;
+
+/*\`{}\textcolor{purple}{ifdef}*/ FPGA
+/*\`{}\textcolor{purple}{define}*/ target fpga
+/*\`{}\textcolor{purple}{else}*/
+/*\`{}\textcolor{purple}{define}*/ target asic
+/*\`{}\textcolor{purple}{endif}*/
+
+metahdl modname = top_/*\`{}\textcolor{purple}{target}*/; /*\label{ln:modname}*/
+metahdl outfile = top_/*\`{}\textcolor{purple}{target}*/; /*\label{ln:outfile}*/
+
+metahdl + exitonwarning; /*\label{ln:exitonwarning on}*/
+
+metahdl clock = clk_125M; 
+metahdl reset = pclk_rst_n; 
+ /*\label{ln:sec1 b}*/
+ff;
+  a_ff, a, 1'b0; 
+  b_ff[1:0], b, 1'b0;
+endff
+/*\label{ln:sec1 e}*/
+metahdl - exitonwarning; /*\label{ln:exitonwarning off}*/
+
+metahdl clock = clk_250M;
+metahdl reset = dclk_rst_n;
+/*\label{ln:sec2 b}*/
+ff; 
+  c_ff, c, 1'b0;
+  d_ff, d, 1'b0;
+endff
+
+ff; 
+  e_ff, e, 1'b0;
+  g_ff, g, 1'b0;
+endff /*\label{ln:sec2 e}*/
+#+end_example
+
+Line [[#ln:portchk][[ln:portchk]]] enables port validation in this
+module.
+
+Line [[#ln:chk width][[ln:chk width]]] checks value of macro =WIDTH=,
+forces compilation exit upon illegal values.
+
+Line [[#ln:modname][[ln:modname]]] and [[#ln:outfile][[ln:outfile]]]
+alter module name and output file name according to target device.
+
+Any warning between [[#ln:exitonwarning on][[ln:exitonwarning on]]] and
+[[#ln:exitonwarning off][[ln:exitonwarning off]]] makes compiler exit.
+To be more specific, width mismatch between =b_ff= and =b= is considered
+to be fatal error.
+
+Different clock and reset names are used for different code sections,
+section [[#ln:sec1 b][[ln:sec1 b]]]-[[#ln:sec1 e][[ln:sec1 e]]], section
+[[#ln:sec2 b][[ln:sec2 b]]]-[[#ln:sec2 e][[ln:sec2 e]]].
+
+* Compiler Usage
+  :PROPERTIES:
+  :CUSTOM_ID: compiler-usage
+  :END:
+** Command Line Options
+   :PROPERTIES:
+   :CUSTOM_ID: sec:command line opt
+   :END:
+command line captions are case sensitive, which means =-p= and =-P= are
+different.
+
+#+begin_center
+
+p.2p.7 =-I= & Specify single search path.\\
+=-P= & Specify a list of search paths in a file, one path per line. Line
+starts with "#" is comment line and is ignored by compiler.\\
+=-D= & Define macro just as used in GCC or VCS.\\
+=-C= & Enable or copying touched by compiler.\\
+=-F= & Enable fast dependency resolving mode.\\
+=-o= & Specify output directory.\\
+=-f= & Specify a list of files to be processed, one file per line. Line
+starts with "#" is comment line and is ignored by compiler.\\
+=–version= & Display version number and copyright.\\
+=-h= & Display help information.\\
+
+#+end_center
+
+All other text in command line and does not start with "-" are
+considered to be file names to be processed.
+
+* Appendix
+  :PROPERTIES:
+  :CUSTOM_ID: appendix
+  :END:
+** For Designers
+   :PROPERTIES:
+   :CUSTOM_ID: sec:for vperl
+   :END:
+1. =&Depend= is no longer needed since automatically resolves
+   dependency.
+
+2. =vpmake -depend= is not needed anymore, just give top level file and
+   search path.
+
+3. All =&Force= should be converted to standard declarations, including
+   2D array.
+
+4. =&ConnRule= and =&Connect= should be converted according to port
+   connect syntax.
+
+5. =&Instance= should be converted to instantiation syntax.
+
+6. =c-sky vperl_off= and =c-sky vperl_on= should be converted to
+   =rawcode= and =endrawcode=.
+
+7. File extension is "=.mhdl=", not "=.vp=".
+
+** Formal Syntax
+   :PROPERTIES:
+   :CUSTOM_ID: sec:bnf
+   :END:
+The formal syntax of MetaHDL is described using Backus-Naur Form (BNF).
+The conventions used are:
+
+- Keywords are in lower case red text.
+
+- Punctuation are in red text.
+
+- A vertical bar "\(|\)" separates alternatives.
+
+- UPPER case red text are tokens from lexer.
+
+--------------
+
+\\
+
+start \(::=\) *%*empty
+
+\(|\) start port_declaration
+
+\(|\) start force_port_declaration
+
+\(|\) start parameter_declaration
+
+\(|\) start constant_declaration
+
+\(|\) start variable_declaration
+
+\(|\) start assign_block
+
+\(|\) start combinational_block
+
+\(|\) start legacyff_block
+
+\(|\) start ff_block
+
+\(|\) start fsm_block
+
+\(|\) start inst_block
+
+\(|\) start rawcode_block
+
+\(|\) start metahdl_constrol
+
+\(|\) start generate_block
+
+constant \(::=\) *STRING*
+
+\(|\) *NUM*
+
+\(|\) *BIN_BASED_NUM*
+
+\(|\) *DEC_BASED_NUM*
+
+\(|\) *HEX_BASED_NUM*
+
+\(|\) *FLOAT*
+
+net_name \(::=\) *ID*
+
+net \(::=\) net_name *[* expression *:* expression *]*
+
+\(|\) net_name *[* expression *]*
+
+\(|\) net_name *[* expression *]* *[* expression *]*
+
+\(|\) net_name *[* expression *]* *[* expression *:* expression *]*
+
+\(|\) net_name *[* expression *\(+\)* *:* expression *]*
+
+\(|\) net_name *[* expression *\(-\)* *:* expression *]*
+
+\(|\) net_name
+
+net_lval \(::=\) net
+
+\(|\) **{** net_lvals **}**
+
+net_lvals \(::=\) net
+
+\(|\) net_lvals *,* net
+
+expression \(::=\) constant
+
+\(|\) net
+
+\(|\) concatenation
+
+\(|\) **$*clog2* *(* expressions *)*
+
+\(|\) net_name *(* expressions *)*
+
+\(|\) **{** expression concatenation **}**
+
+\(|\) *(* expression *)*
+
+\(|\) *\(|\)* expression
+
+\(|\) **&** expression
+
+\(|\) *^* expression
+
+\(|\) *~* expression
+
+\(|\) expression *\(|\)* expression
+
+\(|\) expression **&** expression
+
+\(|\) expression *^* expression
+
+\(|\) expression *\(+\)* expression
+
+\(|\) expression *\(-\)* expression
+
+\(|\) expression *** expression
+
+\(|\) expression */* expression
+
+\(|\) expression **%** expression
+
+\(|\) expression **** expression
+
+\(|\) expression *\(<\)\(<\)* expression
+
+\(|\) expression *\(>\)\(>\)* expression
+
+\(|\) expression *?* expression *:* expression
+
+\(|\) *!* expression
+
+\(|\) expression *\(|\)\(|\)* expression
+
+\(|\) expression **&&** expression
+
+\(|\) expression *\(<\)* expression
+
+\(|\) expression *\(>\)* expression
+
+\(|\) expression *==* expression
+
+\(|\) expression *!=* expression
+
+\(|\) expression *\(>\)=* expression
+
+\(|\) expression *\(<\)=* expression
+
+concatenation \(::=\) **{** expressions **}**
+
+expressions \(::=\) expression
+
+\(|\) expressions *,* expression
+
+statement \(::=\) balanced_stmt
+
+\(|\) unbalanced_stmt
+
+balanced_stmt \(::=\) *;*
+
+\(|\) *for* *(* net_lval *=* expression *;* expression *;* net_lval *=* expression *)* statement
+
+\(|\) *begin* *end*
+
+\(|\) net_lval *\(<\)=* optional_delay expression *;*
+
+\(|\) net_lval *=* expression *;*
+
+\(|\) *begin* statements *end*
+
+\(|\) *begin* *:* *ID* statements *end*
+
+\(|\) *if* *(* expression *)* balanced_stmt *else* balanced_stmt
+
+\(|\) case_statement
+
+\(|\) *goto* *ID* *;*
+
+optional_delay \(::=\) *%*empty
+
+\(|\) **#** *NUM*
+
+\(|\) **#** *FLOAT*
+
+unbalanced_stmt \(::=\) *if* *(* expression *)* statement
+
+\(|\) *if* *(* expression *)* balanced_stmt *else* unbalanced_stmt
+
+statements \(::=\) statement
+
+\(|\) statements statement
+
+case_statement \(::=\) case_type *(* expression *)* case_items *endcase*
+
+\(|\) case_type *(* expression *)* case_items *default* *:* statement *endcase*
+
+case_type \(::=\) *case*
+
+\(|\) *casez*
+
+\(|\) *unique* *case*
+
+\(|\) *unique* *casez*
+
+\(|\) *priority* *case*
+
+\(|\) *priority* *casez*
+
+case_items \(::=\) case_item
+
+\(|\) case_items case_item
+
+case_item \(::=\) expressions *:* statement
+
+force_port_declaration \(::=\) *force* port_declaration
+
+port_declaration \(::=\) port_direction net_names *;*
+
+\(|\) port_direction *[* expression *:* expression *]* net_names *;*
+
+\(|\) port_direction *[* expression *:* expression *]* *[* expression *:* expression *]* net_names *;*
+
+net_names \(::=\) net_name
+
+\(|\) net_names *,* net_name
+
+port_direction \(::=\) *input*
+
+\(|\) *output*
+
+\(|\) *inout*
+
+\(|\) *nonport*
+
+*$*@1 \(::=\) *%*empty
+
+parameter_declaration \(::=\) *parameter* parameter_assignments *;*
+
+*$*@2 \(::=\) *%*empty
+
+parameter_declaration \(::=\) *localparam* parameter_assignments *;*
+
+parameter_assignments \(::=\) parameter_assignment
+
+\(|\) parameter_assignments *,* parameter_assignment
+
+parameter_assignment \(::=\) *ID* *=* expression
+
+constant_declaration \(::=\) *const* variable_type net_name *=*
+expression *;*
+
+\(|\) *const* variable_type *[* expression *:* expression *]* net_name *=* expression *;*
+
+variable_declaration \(::=\) variable_type net_names *;*
+
+\(|\) variable_type *[* expression *:* expression *]* net_names *;*
+
+\(|\) variable_type net_names *[* expression *:* expression *]* *;*
+
+\(|\) variable_type *[* expression *:* expression *]* *[* expression *:* expression *]* net_names *;*
+
+\(|\) variable_type *[* expression *:* expression *]* net_names *[* expression *:* expression *]* *;*
+
+variable_type \(::=\) *wire*
+
+\(|\) *reg*
+
+\(|\) *logic*
+
+\(|\) *int*
+
+\(|\) *integer*
+
+assign_block \(::=\) *assign* net_lval *=* expression *;*
+
+always_keyword \(::=\) *always*
+
+\(|\) *always_ff*
+
+*$*@3 \(::=\) *%*empty
+
+legacyff_block \(::=\) always_keyword *@* *(* *posedge* net_name *or*
+*negedge* net_name *)* statement
+
+*$*@4 \(::=\) *%*empty
+
+legacyff_block \(::=\) always_keyword *@* *(* *posedge* net_name *)*
+statement
+
+combinational_block \(::=\) *always_comb* statement
+
+ff_block \(::=\) *ff* *ID* *;* ff_items *endff*
+
+\(|\) *ff* *ID* *,* *ID* *;* ff_items *endff*
+
+\(|\) *ff* *;* ff_items *endff*
+
+ff_items \(::=\) ff_item
+
+\(|\) ff_items ff_item
+
+ff_item \(::=\) net_lval *,* expression *,* expression *;*
+
+\(|\) net_lval *,* expression *;*
+
+fsm_keyword \(::=\) *fsm*
+
+\(|\) *fsm_nc*
+
+fsm_header \(::=\) fsm_keyword *ID* *;*
+
+\(|\) fsm_keyword *ID* *,* *ID* *,* *ID* *;*
+
+*$*@5 \(::=\) *%*empty
+
+fsm_block \(::=\) fsm_header statements fsm_items *endfsm*
+
+fsm_items \(::=\) fsm_item
+
+\(|\) fsm_items fsm_item
+
+*$*@6 \(::=\) *%*empty
+
+fsm_item \(::=\) *ID* *:* statement
+
+*$*@7 \(::=\) *%*empty
+
+inst_block \(::=\) *ID* parameter_rule instance_name connection_spec *;*
+
+instance_name \(::=\) *%*empty
+
+\(|\) *ID*
+
+parameter_rule \(::=\) *%*empty
+
+\(|\) **#** *(* parameter_override *)*
+
+parameter_override \(::=\) parameter_num_override
+
+\(|\) parameter_name_override
+
+parameter_num_override \(::=\) expression
+
+\(|\) parameter_num_override *,* expression
+
+parameter_name_override \(::=\) *.* *ID* *(* expression *)*
+
+\(|\) parameter_name_override *,* *.* *ID* *(* expression *)*
+
+connection_spec \(::=\) *%*empty
+
+\(|\) *(* connection_rules *)*
+
+connection_rules \(::=\) connection_rule
+
+\(|\) connection_rules *,* connection_rule
+
+connection_rule \(::=\) *.* net_name *(* expression *)*
+
+\(|\) *.* net_name *(* *)*
+
+\(|\) *STRING*
+
+\(|\) *\(+\)* *ID*
+
+\(|\) *ID* *\(+\)*
+
+generate_block \(::=\) *generate* generate_statements *endgenerate*
+
+generate_statements \(::=\) generate_statement
+
+\(|\) generate_statements generate_statement
+
+generate_statement \(::=\) generate_balanced_statement
+
+\(|\) generate_unbalanced_statement
+
+generate_balanced_statement \(::=\) assign_block
+
+\(|\) combinational_block
+
+\(|\) ff_block
+
+\(|\) legacyff_block
+
+\(|\) inst_block
+
+\(|\) *begin* *:* *ID* generate_statements *end*
+
+\(|\) *for* *(* net_lval *=* expression *;* expression *;* net_lval *=* expression *)* generate_statement
+
+\(|\) *if* *(* expression *)* generate_balanced_statement *else* generate_balanced_statement
+
+\(|\) *case* *(* expression *)* generate_case_items *endcase*
+
+generate_unbalanced_statement \(::=\) *if* *(* expression *)*
+generate_statement
+
+\(|\) *if* *(* expression *)* generate_balanced_statement *else* generate_unbalanced_statement
+
+generate_case_items \(::=\) generate_case_item
+
+\(|\) generate_case_items generate_case_item
+
+generate_case_item \(::=\) expressions *:* generate_statement
+
+\(|\) *default* *:* generate_statement
+
+rawcode_block \(::=\) *rawcode* verbtims *endrawcode*
+
+\(|\) *function* verbtims *endfunction*
+
+verbtims \(::=\) *VERBTIM*
+
+\(|\) verbtims *VERBTIM*
+
+metahdl_constrol \(::=\) *metahdl* *ID* *;*
+
+\(|\) *metahdl* *\(+\)* *ID* *;*
+
+\(|\) *metahdl* *\(-\)* *ID* *;*
+
+\(|\) *metahdl* *ID* *=* *NUM* *;*
+
+\(|\) *metahdl* *ID* *=* *ID* *;*
+
+\(|\) *metahdl* *message* verbtims *;*
+
+\(|\) *metahdl* *parse* verbtims *;*
+
+** Change Log
+   :PROPERTIES:
+   :CUSTOM_ID: change-log
+   :END:
+*** Revision 0.1
+    :PROPERTIES:
+    :CUSTOM_ID: sec:chg log 0.1
+    :END:
+1. Move location and application notes into [[#sec:intro][[sec:intro]]].
+
+2. Divide [[#sec:intro][[sec:intro]]] into sections.
+
+3. Add document link in sharepoint.
