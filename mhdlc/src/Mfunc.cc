@@ -932,6 +932,57 @@ DecomposeName(const string &name)
 //   return SvIV(retval);
 // }
 
+int FuncToUpper(int i) {return toupper(i);}
+int FuncToLower(int i) {return tolower(i);}
+
+string StrToUpper(const string &s) {
+    string result = s;
+    transform(result.begin(), result.end(), result.begin(), FuncToUpper);
+    return result;
+}
+
+string StrToLower(const string &s) {
+    string result = s;
+    transform(result.begin(), result.end(), result.begin(), FuncToLower);
+    return result;
+}
+
+string
+ConvertCase(const string &str) {
+    string s = str;
+    string result = "";
+
+    if (str.find('\\') == string::npos ) {
+        return str;
+    }
+
+    regex UpperSeq ("(\\\\U)([^ \\\\]+)");
+    regex LowerSeq ("(\\\\L)([^ \\\\]+)");
+
+    smatch m_upper, m_lower;
+
+    while (true) {
+        if (regex_search(s, m_upper, UpperSeq)) {
+            result += m_upper.prefix();
+            result += StrToUpper(m_upper[2]);
+            s = m_upper.suffix();
+        }
+        else if (regex_search(s, m_lower, LowerSeq)) {
+            result += m_lower.prefix();
+            result += StrToLower(m_lower[2]);
+            s = m_lower.suffix();
+        }
+        else {
+            break;
+        }
+    }
+
+    if (result == "")
+        result = str;
+
+    return result;
+}
+
 
 string
 ItoS(ulonglong num, int width, int base)

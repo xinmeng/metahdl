@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <typeinfo>
 #include <vector>
@@ -18,6 +19,8 @@
 #include <sstream>
 #include <iomanip>
 #include <regex>
+#include <algorithm>
+
 using namespace std;
 
 typedef struct {
@@ -80,8 +83,10 @@ inline ulonglong Power(const ulonglong &base, const ulonglong &exp)
   return (ulonglong) pow((float) base, (float) exp);
 }
 
-string regexp_substitute(const string&str, const string &pattern);
-int    regexp_match(const string &str, const string &pattern);
+// string regexp_substitute(const string&str, const string &pattern);
+// int    regexp_match(const string &str, const string &pattern);
+string ConvertCase(const string &str);
+
 
 string ItoS(ulonglong num, int width=-1, int base=2);
 ulonglong StoI(const string &str, int base=10);

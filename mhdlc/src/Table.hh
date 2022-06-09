@@ -79,7 +79,8 @@ public:
               tmp_symb->name = regex_replace(tmp_symb->name,
                                              conn_rule, tokens[2],
                                              regex_constants::match_not_null);
-	
+              tmp_symb->name = ConvertCase(tmp_symb->name);
+
               CExpression *exp;
               if (regex_match(tmp_symb->name, regex_empty_net) ) {
                   iter->second = NULL; // _connect_map[iter->first] = NULL;
