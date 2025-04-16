@@ -502,7 +502,7 @@ private:
 
 struct CCompareConnection 
 {
-  inline bool operator() (CSymbol* i, CSymbol* j) {
+  inline bool operator() (CSymbol* i, CSymbol* j) const {
     if ( strcmp(i->name.c_str(), j->name.c_str()) < 0 ) {
       return true;
     }

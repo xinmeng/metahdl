@@ -2,7 +2,7 @@
 %skeleton "lalr1.cc"
 %glr-parser
 %verbose
-%error-verbose
+%define parse.error verbose
 %debug
 %locations
 %initial-action
@@ -11,9 +11,9 @@
   @$.begin.filename = @$.end.filename = &svwrapper.filename;
 };
 %defines
-%define "parser_class_name" "svParser"
+%define api.parser.class {svParser}
  // %name-prefix="sv"
-%output="svparser.bison.cc"
+%output "svparser.bison.cc"
 
 
 %code requires {

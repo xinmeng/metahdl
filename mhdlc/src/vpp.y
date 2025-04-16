@@ -1,4 +1,4 @@
-%output = "vpp.bison.cc"
+%output "vpp.bison.cc"
 %defines
 
 %{
